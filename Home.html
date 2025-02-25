@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore</title>
+    <link rel="stylesheet" href="Home.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="nestedheader">
+                <a href="/Home.html">
+                    <img src="./public/img/homeIcon.png" height="50" width="50" alt="Home">
+                    <img src="./public/img/logoHeading.png" height="50" width="50" alt="logoHeading">
+                </a>
+
+                <form action="/books.html" class="search-bar">
+                    <input type="search" placeholder="Search for a Book">
+                </form>
+
+                <a href="/sellPage" class="sellButtonLink">
+                    <button class="sellButtonHome">Sell Your Book</button>
+                </a>
+
+                <div class="myAccCartDiv">
+                    <a href="/account" class="myaccount">
+                        <img src="./public/img/my_account.png" alt="Account">
+                        <div class="accountName">Account</div>
+                    </a>
+
+                    <a href="/cart" class="cart">
+                        <img src="./public/img/cart_icon.png" alt="Cart">
+                        <div class="cartName">Cart</div>
+                    </a>
+                </div>
+
+                <div class="ThreeLineBar">
+                    <img src="./public/img/3-line-menu-icon.png" alt="">
+                </div>
+            </div>
+        </header>
+
+        <div class="sideBar">
+            <br>
+            <div class="sideBarSell">
+                <a href="./sellPage" style="text-decoration: none; color: black;">Sell Book</a>
+            </div>
+            <hr>
+            <br>
+            <div class="sideBarAccount">
+                <a href="./account" style="text-decoration: none; color: black;"><img src="./public/img/my_account.png"  alt="">My Account</a>
+            </div>
+            <hr>
+            <br>
+            <div class="sideBarCart">
+                <a href="./cart" style="text-decoration: none; color: black;"><img src="./public/img/cart_icon.png" alt="" >Cart</a>
+            </div>
+        </div>
+
+
+        <div class="middle1">
+            <div class="subMiddle1">
+                <h2>Buy and Sell Old Books Online in India for Actual Money!</h2>
+                <br>
+                <h3>At Clankart you can buy second hand books and sell old books online at best prices. Selling used books online for cash made easy with Clankart!</h3>
+                <br><br>
+                <div class="buySellDiv">
+                    
+                    <div class="buyDiv">
+                        <a href="/buyPage">
+                            <img src="./public/img/1-bcg.jpg" alt="" class="imgg">
+                            <br>
+                            <button>Buy Books</button>
+                        </a>
+                    </div>
+                    
+                    <div class="sellDiv">
+                        <a href="/sellPage">
+                            <img src="./public/img/2-bcg.jpg" alt="" class="imgg">
+                            <br>
+                            <button>Sell Books</button>
+                        </a>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+  
+
+    <script src="Home.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+.container{
+    width: 100vw;
+    height: 100vh;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+/* Header */
+.header {
+    z-index: 1;
+    width: 100%;
+    background-color: white;
+    padding: 15px 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Flexbox Layout */
+.nestedheader {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* Logo */
+.logo img {
+    width: 50px;
+    height: 50px;
+}
+
+/* Search Bar */
+.search-bar {
+    flex: 1;
+    max-width: 300px;
+    margin: 0 20px;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 35px;
+    padding: 5px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-bar input:focus {
+    border-color: #007bff;
+}
+
+/* Sell Button */
+.sellButtonLink {
+    text-decoration: none;
+}
+
+.sellButtonHome {
+    padding: 10px 15px;
+    background-color: #ffc107;
+    border: 1px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+
+.sellButtonHome:hover {
+    background-color: #ffb300;
+}
+
+/* Account & Cart Section */
+.myAccCartDiv {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.myaccount, .cart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    transition: 0.3s;
+}
+
+.myaccount img, .cart img {
+    width: 40px;
+    height: 40px;
+}
+
+.myaccount:hover, .cart:hover {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+.ThreeLineBar{
+    display: none;
+}
+
+.sideBar{
+    display: none;
+    position: fixed;
+    right: 0px;
+    top: 0;
+    background-color: white;
+    border: 1px solid black;
+    width: 150px;
+    height: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    z-index: 2;
+
+    /* transition-property: all;
+    transition-duration: 0.3s;
+    transition-timing-function: linear; */
+    /* transition-delay: 0.5s; */
+}
+
+.sideBar a:hover{
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out;
+
+}
+
+.sideBar div:hover{
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.sideBar div{
+    padding-bottom: 3px;
+}
+.sideBar div a img{
+    height: 18px;
+    width: 18px;
+    margin-right: 6px;
+}
+
+
+.hidden{
+    display: none;
+}
+
+
+
+
+@media (max-width: 768px) {
+    img{
+        height: 30px;
+        width: 30px;
+    }
+    .ThreeLineBar{
+        display: inline;
+    }
+    
+
+    .myAccCartDiv, .sellButtonLink{
+        display: none;
+    }
+
+    .search-bar {
+        max-width: 250px;
+    }
+
+    .sellButtonHome {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+
+
+
+/* Body */
+/* middle 1 */
+
+.middle1{
+    position: relative;
+    top: 65px;
+    padding-bottom: 30px;
+    background-color: black;
+    color: white;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    /* background-image: url(./public/img/3-bcg.jpg); */
+}
+
+.subMiddle1{
+    margin-top: 30px;
+    margin-bottom: 20px;
+    max-width: 60%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.buySellDiv{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.buyDiv, .sellDiv{
+    width: 150px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: white;
+}
+.imgg{
+    height: 30px; 
+     width: px;
+}
+
