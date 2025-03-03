@@ -1,0 +1,482 @@
+
+* {
+    padding: 0;
+    margin: 0;
+    /* overflow-x: hidden; */
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    /* overflow-: hidden; */
+}
+
+button:hover{
+    cursor: pointer;
+}
+
+
+/* .container{
+    width: 100vw;
+    height: 100vh;
+} */
+
+body {
+    background-color: #f8f9fa;
+}
+
+/* Header */
+.header {
+    z-index: 1;
+    height: 120px;
+    width: 100%;
+    background-color: white;
+    padding: 15px 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    position:fixed;
+
+    top: 0;
+    left: 0;
+}
+
+/* Flexbox Layout */
+.nestedheader {
+    max-width: 1100px;
+    margin: auto;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* Logo */
+.logo img {
+    width: 50px;
+    height: 50px;
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex: 1;
+    max-width: 300px;
+    margin: 0 20px;
+}
+
+.search-bar button, .search-bar img{
+    background: none;
+    width: 30px;
+    height: 30px;
+    border: none;
+}
+
+.search-bar button:hover{
+    cursor: pointer;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 35px;
+    height: 40px;
+    font-size: 15px;
+    padding: 5px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-bar input:focus {
+    border-color: #007bff;
+}
+
+/* Sell Button */
+.sellButtonLink {
+    text-decoration: none;
+}
+
+.sellButtonHome {
+    padding: 10px 15px;
+    background-color: #ffc107;
+    border: 1px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+
+.sellButtonHome:hover {
+    background-color: #ffb300;
+}
+
+/* Account & Cart Section */
+.myAccCartDiv {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.myaccount, .cart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    transition: 0.3s;
+}
+
+.myaccount img, .cart img {
+    width: 40px;
+    height: 40px;
+}
+
+.myaccount:hover, .cart:hover {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+.ThreeLineBar{
+    display: none;
+}
+
+.sideBar{
+    height: 300px;
+    display: block;
+    position: fixed;
+    right: -150px;
+    top: 0;
+    background-color: white;
+    border: 1px solid black;
+    width: 150px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    z-index: 2;
+
+    transition: all 0.3s ease;
+}
+
+.sideBar a:hover{
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out;
+
+}
+
+.sideBar div:hover{
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.sideBar div{
+    padding-bottom: 3px;
+}
+.sideBar div a img{
+    height: 18px;
+    width: 18px;
+    margin-right: 6px;
+}
+
+
+.hidden{
+    display: none;
+}
+
+
+
+
+@media (max-width: 870px) {
+    img{
+        height: 30px;
+        width: 30px;
+    }
+    .ThreeLineBar{
+        display: inline;
+    }
+    .middle1{
+        margin-top: 65px !important;
+    }
+    .header{
+        height: 90px;
+    }
+
+    .myAccCartDiv, .sellButtonLink{
+        display: none;
+    }
+
+    .search-bar {
+        max-width: 250px;
+    }
+
+    .sellButtonHome {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+
+
+
+/* Body */
+/* middle 1 */
+
+.middle1{
+
+    margin-top: 120px;
+    width: 100%;
+    padding-bottom: 70px;
+    color: white;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-image: url(./public/img/10-bcg.jpg);
+    background-attachment: fixed;
+}
+
+html, body{
+    overflow-x: hidden;
+}
+
+.subMiddle1{
+    padding-top: 70px;
+    margin-bottom: 20px;
+    max-width: 60%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.subMiddle1 h2 {
+    font-size: 35px;
+    font-family: "Times New Roman", serif;
+}
+
+.subMiddle1 h3{
+    font-family: "Poppins", sans-serif;
+}
+
+.buySellDiv{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.buyDiv, .sellDiv{
+    border-radius: 18px;
+    width: 175px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.buyDiv:hover, .sellDiv:hover{
+    transform: scale(1.1);
+}
+
+.buyDiv button, .sellDiv button{
+    height: 30px;
+    width: 90px;
+}
+
+.buyDiv button:hover{
+    background-color: lightskyblue;
+}
+
+.sellDiv button:hover{
+    background-color: cadetblue;
+}
+
+.sellDiv{
+    background-color: lightcyan;
+}
+
+.sellDiv button, .buyDiv button{
+    padding: 3px 4px;
+    border-radius: 7px;
+    border: none;
+    background-color: lightyellow;
+}
+
+.buyDiv{
+    background-color: lightgray;
+}
+
+
+.imgg{
+    height: 75px; 
+    width: 90px;
+    background-color: none;
+}
+.imgg1{
+    height: 75px; 
+    width: 95px;
+    background-color: none;
+}
+
+
+/* Middle 2 */
+
+
+.middle2{
+    max-width: 1200px;
+    height: auto;
+    flex-direction: column;
+    display: flex;
+    row-gap: 10px;
+    justify-content: space-evenly;
+    font-size: large;
+    /* background-color: #007bff; */
+    margin: auto;
+    padding-bottom: 20px;
+    padding-top: 10px;
+}
+
+.middle2 p{
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.subMiddle2{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3%;
+    row-gap: 50px;
+    
+}
+
+.card{
+    width: 210px;
+    display: flex;
+    flex-direction: column;
+    height: 290px;
+    justify-content: center;
+    font-size: larger;
+    transition: all 0.3s ease;
+
+}
+.card img{
+    height: 200px !important;
+    width: 100% !important;
+}
+
+.card:hover{
+    transform: scale(1.1);
+}
+
+.card button{
+    width: 40%;
+    margin: auto;
+    height: 35px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    background-color: #0083ca;
+    transition: all 0.3s ease;
+}
+
+.card button:hover{
+    background-color: #286090;
+}
+
+.card .subMiddle2_BookName{
+    font-family: "Rubik", serif;
+  font-optical-sizing: auto;
+  /* font-weight: <weight>; */
+  font-style: normal;
+}
+
+.cardLink{
+    text-decoration: none;
+    color: black;
+}
+
+
+
+
+
+
+
+
+/* Footer */
+
+.footer {
+    background-color: #222;
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
+    margin: 10px;
+}
+
+.footer-section h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    text-decoration: none;
+    color: white;
+    transition: 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: #ffc107;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-icons img {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s ease;
+}
+
+.social-icons img:hover {
+    transform: scale(1.2);
+}
+
+.footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    font-size: 14px;
+}
+
+.footer .footer-section a img{
+    background: transparent;
+}
