@@ -25,7 +25,7 @@ body {
 /* Header */
 .header {
     z-index: 1;
-    height: 120px;
+    height: 80px;
     width: 100%;
     background-color: white;
     padding: 15px 0;
@@ -83,7 +83,7 @@ body {
     border: 1px solid #ccc;
     border-radius: 20px;
     outline: none;
-    transition: 0.3s;
+    transition: 0.25s;
 }
 
 .search-bar input:focus {
@@ -101,7 +101,7 @@ body {
     border: 1px solid black;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.25s;
     font-weight: bold;
 }
 
@@ -123,17 +123,17 @@ body {
     align-items: center;
     text-decoration: none;
     color: black;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 .myaccount img, .cart img {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
 }
 
 .myaccount:hover, .cart:hover {
     color: #007bff;
-    transform: scale(1.1);
+    transform: scale(1.03);
 }
 
 .ThreeLineBar{
@@ -155,17 +155,17 @@ body {
     padding-bottom: 5px;
     z-index: 2;
 
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .sideBar a:hover{
-    transform: scale(1.1);
-    transition: all 0.3s ease-in-out;
+    transform: scale(1.03);
+    transition: all 0.25s ease-in-out;
 
 }
 
 .sideBar div:hover{
-    transform: scale(1.1);
+    transform: scale(1.03);
     transition: all 0.2s;
 }
 
@@ -223,7 +223,7 @@ body {
 
 .middle1{
 
-    margin-top: 120px;
+    margin-top: 80px;
     width: 100%;
     padding-bottom: 70px;
     color: white;
@@ -272,11 +272,11 @@ html, body{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .buyDiv:hover, .sellDiv:hover{
-    transform: scale(1.1);
+    transform: scale(1.03);
 }
 
 .buyDiv button, .sellDiv button{
@@ -360,7 +360,7 @@ html, body{
     height: 290px;
     justify-content: center;
     font-size: larger;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 
 }
 .card img{
@@ -369,7 +369,7 @@ html, body{
 }
 
 .card:hover{
-    transform: scale(1.1);
+    transform: scale(1.03);
 }
 
 .card button{
@@ -380,7 +380,7 @@ html, body{
     border: none;
     color: white;
     background-color: #0083ca;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .card button:hover{
@@ -447,7 +447,7 @@ html, body{
 .footer-section ul li a {
     text-decoration: none;
     color: white;
-    transition: 0.3s;
+    transition: 0.25s;
 }
 
 .footer-section ul li a:hover {
@@ -461,9 +461,9 @@ html, body{
 }
 
 .social-icons img {
-    width: 30px;
-    height: 30px;
-    transition: transform 0.3s ease;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.25s ease;
 }
 
 .social-icons img:hover {
