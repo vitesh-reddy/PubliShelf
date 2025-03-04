@@ -1,4 +1,3 @@
-
 * {
     padding: 0;
     margin: 0;
@@ -8,7 +7,7 @@
     /* overflow-: hidden; */
 }
 
-button:hover{
+button:hover {
     cursor: pointer;
 }
 
@@ -30,7 +29,7 @@ body {
     background-color: white;
     padding: 15px 0;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    position:fixed;
+    position: fixed;
 
     top: 0;
     left: 0;
@@ -63,14 +62,15 @@ body {
     margin: 0 20px;
 }
 
-.search-bar button, .search-bar img{
+.search-bar button,
+.search-bar img {
     background: none;
     width: 30px;
     height: 30px;
     border: none;
 }
 
-.search-bar button:hover{
+.search-bar button:hover {
     cursor: pointer;
 }
 
@@ -117,7 +117,8 @@ body {
     gap: 20px;
 }
 
-.myaccount, .cart {
+.myaccount,
+.cart {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -126,21 +127,23 @@ body {
     transition: 0.2s;
 }
 
-.myaccount img, .cart img {
-    width: 30px;
-    height: 30px;
+.myaccount img,
+.cart img {
+    width: 25px;
+    height: 25px;
 }
 
-.myaccount:hover, .cart:hover {
+.myaccount:hover,
+.cart:hover {
     color: #007bff;
     transform: scale(1.03);
 }
 
-.ThreeLineBar{
+.ThreeLineBar {
     display: none;
 }
 
-.sideBar{
+.sideBar {
     height: 300px;
     display: block;
     position: fixed;
@@ -158,28 +161,29 @@ body {
     transition: all 0.25s ease;
 }
 
-.sideBar a:hover{
+.sideBar a:hover {
     transform: scale(1.03);
     transition: all 0.25s ease-in-out;
 
 }
 
-.sideBar div:hover{
+.sideBar div:hover {
     transform: scale(1.03);
     transition: all 0.2s;
 }
 
-.sideBar div{
+.sideBar div {
     padding-bottom: 3px;
 }
-.sideBar div a img{
+
+.sideBar div a img {
     height: 18px;
     width: 18px;
     margin-right: 6px;
 }
 
 
-.hidden{
+.hidden {
     display: none;
 }
 
@@ -187,21 +191,25 @@ body {
 
 
 @media (max-width: 870px) {
-    img{
+    img {
         height: 30px;
         width: 30px;
     }
-    .ThreeLineBar{
+
+    .ThreeLineBar {
         display: inline;
     }
-    .middle1{
+
+    .middle1 {
         margin-top: 65px !important;
     }
-    .header{
+
+    .header {
         height: 90px;
     }
 
-    .myAccCartDiv, .sellButtonLink{
+    .myAccCartDiv,
+    .sellButtonLink {
         display: none;
     }
 
@@ -221,7 +229,7 @@ body {
 /* Body */
 /* middle 1 */
 
-.middle1{
+.middle1 {
 
     margin-top: 80px;
     width: 100%;
@@ -237,11 +245,12 @@ body {
     background-attachment: fixed;
 }
 
-html, body{
+html,
+body {
     overflow-x: hidden;
 }
 
-.subMiddle1{
+.subMiddle1 {
     padding-top: 70px;
     margin-bottom: 20px;
     max-width: 60%;
@@ -255,17 +264,18 @@ html, body{
     font-family: "Times New Roman", serif;
 }
 
-.subMiddle1 h3{
+.subMiddle1 h3 {
     font-family: "Poppins", sans-serif;
 }
 
-.buySellDiv{
+.buySellDiv {
     display: flex;
     justify-content: center;
     gap: 30px;
 }
 
-.buyDiv, .sellDiv{
+.buyDiv,
+.sellDiv {
     border-radius: 18px;
     width: 175px;
     height: 150px;
@@ -275,46 +285,50 @@ html, body{
     transition: all 0.25s ease;
 }
 
-.buyDiv:hover, .sellDiv:hover{
+.buyDiv:hover,
+.sellDiv:hover {
     transform: scale(1.03);
 }
 
-.buyDiv button, .sellDiv button{
+.buyDiv button,
+.sellDiv button {
     height: 30px;
     width: 90px;
 }
 
-.buyDiv button:hover{
+.buyDiv button:hover {
     background-color: lightskyblue;
 }
 
-.sellDiv button:hover{
+.sellDiv button:hover {
     background-color: cadetblue;
 }
 
-.sellDiv{
+.sellDiv {
     background-color: lightcyan;
 }
 
-.sellDiv button, .buyDiv button{
+.sellDiv button,
+.buyDiv button {
     padding: 3px 4px;
     border-radius: 7px;
     border: none;
     background-color: lightyellow;
 }
 
-.buyDiv{
+.buyDiv {
     background-color: lightgray;
 }
 
 
-.imgg{
-    height: 75px; 
+.imgg {
+    height: 75px;
     width: 90px;
     background-color: none;
 }
-.imgg1{
-    height: 75px; 
+
+.imgg1 {
+    height: 75px;
     width: 95px;
     background-color: none;
 }
@@ -323,7 +337,7 @@ html, body{
 /* Middle 2 */
 
 
-.middle2{
+.middle2 {
     max-width: 1200px;
     height: auto;
     flex-direction: column;
@@ -337,23 +351,23 @@ html, body{
     padding-top: 10px;
 }
 
-.middle2 p{
+.middle2 p {
     padding-left: 20px;
     padding-top: 20px;
     padding-bottom: 20px;
 }
 
-.subMiddle2{
+.subMiddle2 {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 3%;
     row-gap: 50px;
-    
+
 }
 
-.card{
+.card {
     width: 210px;
     display: flex;
     flex-direction: column;
@@ -363,16 +377,17 @@ html, body{
     transition: all 0.25s ease;
 
 }
-.card img{
+
+.card img {
     height: 200px !important;
     width: 100% !important;
 }
 
-.card:hover{
+.card:hover {
     transform: scale(1.03);
 }
 
-.card button{
+.card button {
     width: 40%;
     margin: auto;
     height: 35px;
@@ -383,18 +398,18 @@ html, body{
     transition: all 0.25s ease;
 }
 
-.card button:hover{
+.card button:hover {
     background-color: #286090;
 }
 
-.card .subMiddle2_BookName{
+.card .subMiddle2_BookName {
     font-family: "Rubik", serif;
-  font-optical-sizing: auto;
-  /* font-weight: <weight>; */
-  font-style: normal;
+    font-optical-sizing: auto;
+    /* font-weight: <weight>; */
+    font-style: normal;
 }
 
-.cardLink{
+.cardLink {
     text-decoration: none;
     color: black;
 }
@@ -477,6 +492,6 @@ html, body{
     font-size: 14px;
 }
 
-.footer .footer-section a img{
+.footer .footer-section a img {
     background: transparent;
 }
