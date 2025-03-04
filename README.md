@@ -1,6 +1,6 @@
 # PubliShelf
 Online Interface for Book and Magazine Transactions with Antique Auctions
 
-git add .
-git commit -m "message"
-git push origin main
+git add . <br>
+git commit -m "message"<br>
+git push origin main<br>
