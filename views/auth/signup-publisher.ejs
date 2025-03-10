@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publisher Signup - PubliShelf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body class="bg-gray-50">
+    <div
+        class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-purple-50 to-white">
+        <div class="max-w-md w-full">
+            <!-- Logo -->
+            <div class="text-center mb-10">
+                <a href="/" class="inline-block">
+                    <span
+                        class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                </a>
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Create Publisher Account</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Already have an account?
+                    <a href="/auth/login" class="font-medium text-purple-600 hover:text-purple-500">Sign in</a>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="publishingHouse" class="block text-sm font-medium text-gray-700">Publishing House
+                        Name</label>
+                    <input type="text" id="publishingHouse" name="publishingHouse" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label for="businessEmail" class="block text-sm font-medium text-gray-700">Business Email</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input id="businessEmail" name="businessEmail" type="email" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="business@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Business Phone</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-phone text-gray-400"></i>
+                        </div>
+                        <input id="phone" name="phone" type="tel" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="+1 (555) 000-0000">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="website" class="block text-sm font-medium text-gray-700">Website (Optional)</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-globe text-gray-400"></i>
+                        </div>
+                        <input id="website" name="website" type="url" class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="https://example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="••••••••">
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-eye text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm
+                        Password</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="confirmPassword" name="confirmPassword" type="password" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" required
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer">
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
+                        I agree to the
+                        <a href="#" class="text-purple-600 hover:text-purple-500">Terms of Service</a>
+                        and
+                        <a href="#" class="text-purple-600 hover:text-purple-500">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:-translate-y-0.5">
+                    Create Publisher Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const togglePassword = document.querySelector('.fa-eye');
+
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.classList.toggle('fa-eye');
+                togglePassword.classList.toggle('fa-eye-slash');
+            });
+
+            // Form validation
+            const form = document.querySelector('form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                // Add your form submission logic here
+            });
+        });
+    </script>
+</body>
+
+</html>
