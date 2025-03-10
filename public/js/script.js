@@ -1,37 +1,37 @@
 // // Counter Animation
 document.addEventListener('DOMContentLoaded', () => {
-//     const counters = document.querySelectorAll('.counter');
-//     const speed = 200;
+    // const counters = document.querySelectorAll('.counter');
+    // const speed = 200;
 
-//     const animateCounter = (counter) => {
-//         const target = parseInt(counter.getAttribute('data-target'));
-//         let count = 0;
-//         const increment = target / speed;
+    // const animateCounter = (counter) => {
+    //     const target = parseInt(counter.getAttribute('data-target'));
+    //     let count = 0;
+    //     const increment = target / speed;
 
-//         const updateCount = () => {
-//             count += increment;
-//             if (count < target) {
-//                 counter.innerText = Math.ceil(count).toLocaleString();
-//                 setTimeout(updateCount, 1);
-//             } else {
-//                 counter.innerText = target.toLocaleString();
-//             }
-//         };
+    //     const updateCount = () => {
+    //         count += increment;
+    //         if (count < target) {
+    //             counter.innerText = Math.ceil(count).toLocaleString();
+    //             setTimeout(updateCount, 1);
+    //         } else {
+    //             counter.innerText = target.toLocaleString();
+    //         }
+    //     };
 
-//         updateCount();
-//     };
+    //     updateCount();
+    // };
 
-//     // Intersection Observer for counter animation
-//     const observer = new IntersectionObserver((entries) => {
-//         entries.forEach(entry => {
-//             if (entry.isIntersecting) {
-//                 animateCounter(entry.target);
-//                 observer.unobserve(entry.target);
-//             }
-//         });
-//     }, { threshold: 0.5 });
+    // // Intersection Observer for counter animation
+    // const observer = new IntersectionObserver((entries) => {
+    //     entries.forEach(entry => {
+    //         if (entry.isIntersecting) {
+    //             animateCounter(entry.target);
+    //             observer.unobserve(entry.target);
+    //         }
+    //     });
+    // }, { threshold: 0.5 });
 
-//     counters.forEach(counter => observer.observe(counter));
+    // counters.forEach(counter => observer.observe(counter));
 
 //     // Book Carousel Animation
 //     const carousels = ['topRatedCarousel', 'mostSoldCarousel', 'trendingCarousel'];

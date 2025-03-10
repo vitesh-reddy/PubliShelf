@@ -1,4 +1,4 @@
-export const mockBooks = {
+export const mockData = {
   topRated: [
     {
       id: 1,

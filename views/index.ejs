@@ -25,20 +25,20 @@
                     <div class="relative group">
                         <button
                             class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">Categories</button>
-                        <div
-                            class="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Young Adult</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Fantasy</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Sci-Fi</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Thrillers</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Romance</a>
-                        </div>
+                        <% console.log(styles); %>
+                            <div
+                                class="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                                <a href="#" class="<%= styles.categoryBtnStyle %>">Young Adult</a>
+                                <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Fantasy</a>
+                                <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Sci-Fi</a>
+                                <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Thrillers</a>
+                                <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Romance</a>
+                            </div>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">About</a>
-                    <a href="#" class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">FAQ</a>
-                    <a href="#" class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">Blog</a>
-                    <a href="/buyer/dashboard"
-                        class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">Bookstores</a>
+                    <a href="#" class="<%= styles.navBtnStyle %>">About</a>
+                    <a href="#" class="<%= styles.navBtnStyle %>">FAQ</a>
+                    <a href="#" class="<%= styles.navBtnStyle %>">Blog</a>
+                    <a href="/buyer/dashboard" class="<%= styles.navBtnStyle %>">Bookstores</a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="#" class="text-gray-700 hover:text-purple-600">
@@ -47,11 +47,9 @@
                     <a href="#" class="text-gray-700 hover:text-purple-600">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
-                    <button
-                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Sign
+                    <button class="<%= styles.purpleBtnStyle %>">Sign
                         In</button>
-                    <button
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Sign
+                    <button class="<%= styles.indigoBtnStyle %>">Sign
                         Up</button>
                 </div>
             </div>
@@ -70,11 +68,11 @@
                 </p>
                 <div class="flex justify-center space-x-4 animate-fade-in-delay-2">
                     <button
-                        class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform hover:scale-105">
+                        class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-transform hover:translate-y-[-4px]">
                         Start Reading
                     </button>
                     <button
-                        class="bg-white text-purple-600 px-8 py-3 rounded-lg border-2 border-purple-600 hover:bg-purple-50 transition-transform hover:scale-105">
+                        class="bg-white text-purple-600 px-8 py-3 rounded-lg border-2 border-purple-600 hover:bg-purple-50 transition-transform hover:translate-y-[-4px]">
                         Sell Your Books
                     </button>
                 </div>
