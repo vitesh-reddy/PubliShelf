@@ -34,9 +34,9 @@
                             <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Romance</a>
                         </div>
                     </div>
-                    <a href="#" class="<%= styles.navBtnStyle %>">About</a>
-                    <a href="#" class="<%= styles.navBtnStyle %>">FAQ</a>
-                    <a href="#" class="<%= styles.navBtnStyle %>">Blog</a>
+                    <a href="/about" class="<%= styles.navBtnStyle %>">About</a>
+                    <a href="/#faq-section" class="<%= styles.navBtnStyle %>">FAQ</a>
+                    <a href="/contact" class="<%= styles.navBtnStyle %>">Contact Us</a>
                     <a href="/buyer/dashboard" class="<%= styles.navBtnStyle %>">Bookstores</a>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -47,7 +47,8 @@
                         <i class="fas fa-shopping-cart"></i>
                     </a>
                     <button onclick="window.location.href='/auth/login'"
-                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join Now</button>
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join
+                        Now</button>
                 </div>
             </div>
         </div>
@@ -63,18 +64,20 @@
                 <p class="text-xl text-gray-600 mb-8 animate-fade-in-delay">
                     Join thousands of readers in the world's most vibrant book marketplace
                 </p>
+                <div class="h-7"></div>
                 <div class="flex justify-center space-x-4 animate-fade-in-delay-2">
                     <button onclick="window.location.href='/auth/login'"
-                        class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
-                        Start Reading
-                    </button>
-                    <button onclick="window.location.href='/auth/signup/publisher'"
-                        class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
-                        Sell Your Books
-                    </button>
-                </div>
-            </div>
+                    class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
+                    Start Reading
+                </button>
+                <button onclick="window.location.href='/auth/signup/publisher'"
+                class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
+                Sell Your Books
+            </button>
         </div>
+    </div>
+</div>
+<div class="h-3"></div>
     </section>
 
     <!-- Stats Section -->
@@ -204,7 +207,7 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="py-12 bg-white">
+    <section id="faq-section" class="py-12 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
             <div class="max-w-3xl mx-auto">
@@ -258,8 +261,8 @@
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="/about" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="/contact" class="text-gray-400 hover:text-white">Contact</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
                     </ul>

@@ -8,4 +8,6 @@ router.get("/dashboard", (req, res) =>
   res.render("buyer/dashboard", { books: mockData, styles: styles })
 );
 
+router.get("/signup", (req, res) => res.render("auth/signup-buyer"));
+
 export default router;
