@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-import { mockData } from "./public/mockData.js";
+import mockBuyerData from "./public/mockBuyerData.js";
 import buyerRouter from "./server/routes/buyerRoutes.js";
 import publisherRoutes from "./server/routes/publisherRoutes.js";
 import signupRouter from "./server/routes/signupRoutes.js";
@@ -19,7 +19,7 @@ app.use(express.static("public"));
 
 // Routes
 app.get("/", (req, res) => {
-  res.render("index", { books: mockData, styles: styles });
+  res.render("index", { books: mockBuyerData, styles: styles });
 });
 
 app.get("/auth/login", (req, res) => res.render("auth/login"));
