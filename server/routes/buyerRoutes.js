@@ -1,6 +1,6 @@
 import express from "express";
-import mockBuyerData from "../../public/mockBuyerData.js";
-import styles from "../../public/css/styles.js";
+import mockBuyerData from "../../public/mockData/mockBuyerData.js";
+import styles from "../../public/styles/styles.js";
 
 const router = express.Router();
 

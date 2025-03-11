@@ -1,5 +1,5 @@
 import express from "express";
-import mockPublisherData from "../../public/mockPublisherData.js";
+import mockPublisherData from "../../public/mockData/mockPublisherData.js";
 const router = express.Router();
 
 router.get("/dashboard", (req, res) =>
