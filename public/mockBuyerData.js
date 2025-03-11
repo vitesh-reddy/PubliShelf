@@ -1,4 +1,4 @@
-export const mockData = {
+const mockData = {
   topRated: [
     {
       id: 1,
@@ -35,7 +35,7 @@ export const mockData = {
       image:
         "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300",
       price: "$19.99",
-    }
+    },
   ],
   mostSold: [
     {
@@ -96,3 +96,4 @@ export const mockData = {
     },
   ],
 };
+export default mockData;

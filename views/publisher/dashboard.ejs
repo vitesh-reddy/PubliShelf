@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publisher Dashboard - PubliShelf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="fixed w-full bg-white shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="flex items-center space-x-2">
+                            <img src="https://ui-avatars.com/api/?name=Publisher" alt="Profile" class="w-8 h-8 rounded-full">
+                            <span class="text-gray-700">Publisher Name</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Total Sales</h3>
+                        <span class="text-purple-600">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900 mt-4"><%= sales.totalSales %></p>
+                    <p class="text-sm text-gray-500 mt-1">Books and antiques sold</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Total Revenue</h3>
+                        <span class="text-green-600">
+                            <i class="fas fa-dollar-sign text-xl"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900 mt-4">$<%= sales.totalRevenue.toLocaleString() %></p>
+                    <p class="text-sm text-gray-500 mt-1">Lifetime earnings</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <a href="/publisher/publish-book" class="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-purple-500 p-3 rounded-lg">
+                            <i class="fas fa-book text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">Publish New Book</h3>
+                            <p class="text-purple-200">List your book for sale</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/publisher/sell-antique" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-indigo-500 p-3 rounded-lg">
+                            <i class="fas fa-gavel text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">Sell Antique Item</h3>
+                            <p class="text-indigo-200">Start an auction</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Recent Sales -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">Recent Sales</h3>
+                </div>
+                <div class="divide-y">
+                    <% sales.recentSales.forEach(sale => { %>
+                        <div class="p-6 hover:bg-gray-50 transition-colors duration-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900"><%= sale.title %></h4>
+                                    <p class="text-sm text-gray-500">Sold to <%= sale.buyer %></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold text-gray-900"><%= sale.price %></p>
+                                    <p class="text-sm text-gray-500"><%= new Date(sale.soldAt).toLocaleDateString() %></p>
+                                </div>
+                            </div>
+                            <% if (sale.type === 'antique') { %>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mt-2">
+                                    Antique
+                                </span>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
