@@ -6,7 +6,7 @@ import mockBuyerData from "./public/mockData/mockBuyerData.js";
 import buyerRouter from "./server/routes/buyerRoutes.js";
 import publisherRoutes from "./server/routes/publisherRoutes.js";
 import signupRouter from "./server/routes/signupRoutes.js";
-import styles from "./public/styles/styles.js";
+import styles from "./public/css/styles.js";
 console.clear();
 
 dotenv.config();
