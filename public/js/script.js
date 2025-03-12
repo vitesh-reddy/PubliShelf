@@ -61,11 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
 //     }, 5000);
 
 //     // FAQ Accordion
-    const faqItems = document.querySelectorAll('.faq-item');
+    const faqItems = document.querySelectorAll('#faq-item');
     
     faqItems.forEach(item => {
         const button = item.querySelector('button');
-        const content = item.querySelector('.faq-content');
+        const content = item.querySelector('#faq-content');
         const icon = button.querySelector('i');
 
         button.addEventListener('click', () => {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Close all other FAQs
             faqItems.forEach(otherItem => {
                 if (otherItem !== item) {
-                    otherItem.querySelector('.faq-content').classList.add('hidden');
+                    otherItem.querySelector('#faq-content').classList.add('hidden');
                     otherItem.querySelector('i').classList.remove('fa-chevron-up');
                     otherItem.querySelector('i').classList.add('fa-chevron-down');
                 }

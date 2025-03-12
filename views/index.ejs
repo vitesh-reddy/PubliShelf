@@ -67,17 +67,17 @@
                 <div class="h-7"></div>
                 <div class="flex justify-center space-x-4 animate-fade-in-delay-2">
                     <button onclick="window.location.href='/auth/login'"
-                    class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
-                    Start Reading
-                </button>
-                <button onclick="window.location.href='/auth/signup/publisher'"
-                class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
-                Sell Your Books
-            </button>
+                        class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
+                        Start Reading
+                    </button>
+                    <button onclick="window.location.href='/auth/signup/publisher'"
+                        class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
+                        Sell Your Books
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div class="h-3"></div>
+        <div class="h-3"></div>
     </section>
 
     <!-- Stats Section -->
@@ -111,7 +111,7 @@
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <% books.topRated.forEach(book=> { %>
-                        <div class="book-card bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="<%= styles.bookCardStyle %>">
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
@@ -145,7 +145,7 @@
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <% books.mostSold.forEach(book=> { %>
-                        <div class="book-card bg-gray-50 rounded-lg shadow-md overflow-hidden">
+                        <div class="<%= styles.bookCardStyle %>">
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
@@ -178,7 +178,7 @@
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <% books.trending.forEach(book=> { %>
-                        <div class="book-card bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="<%= styles.bookCardStyle %>">
                             <div class="relative">
                                 <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                                 <div
@@ -212,35 +212,35 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
             <div class="max-w-3xl mx-auto">
                 <div class="space-y-4">
-                    <div class="faq-item">
+                    <div class="<%= styles.faqBtnStyle %>" id="faq-item">
                         <button
                             class="w-full flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
                             <span class="font-semibold">How do I sell my books?</span>
                             <i class="fas fa-chevron-down"></i>
                         </button>
-                        <div class="faq-content hidden p-4">
+                        <div class="<%= styles.faqContentStyle %>" id="faq-content">
                             <p class="text-gray-600">Sign up as a seller, list your books with details and photos, set
                                 your price, and start selling to our community of book lovers.</p>
                         </div>
                     </div>
-                    <div class="faq-item">
+                    <div class="<%= styles.faqBtnStyle %> " id="faq-item">
                         <button
                             class="w-full flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
                             <span class="font-semibold">What payment methods are accepted?</span>
                             <i class="fas fa-chevron-down"></i>
                         </button>
-                        <div class="faq-content hidden p-4">
+                        <div class="<%= styles.faqContentStyle %>" id="faq-content">
                             <p class="text-gray-600">We accept all major credit cards, PayPal, and various digital
                                 payment methods for your convenience.</p>
                         </div>
                     </div>
-                    <div class="faq-item">
+                    <div class="<%= styles.faqBtnStyle %> " id="faq-item">
                         <button
                             class="w-full flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
                             <span class="font-semibold">How does shipping work?</span>
                             <i class="fas fa-chevron-down"></i>
                         </button>
-                        <div class="faq-content hidden p-4">
+                        <div class="<%= styles.faqContentStyle %>" id="faq-content">
                             <p class="text-gray-600">Sellers handle shipping. Most items are shipped within 2-3 business
                                 days, and tracking information is provided once available.</p>
                         </div>
@@ -289,7 +289,7 @@
         </div>
     </footer>
 
-    <script src="/scripts/script.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 
 </html>

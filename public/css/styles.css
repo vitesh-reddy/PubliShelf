@@ -37,15 +37,6 @@
     opacity: 0;
 }
 
-/* Book Cards */
-.book-card {
-    transition: all 0.3s ease;
-}
-
-.book-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
 
 /* Book Carousel Animation */
 .book-carousel .book-card {
@@ -53,26 +44,13 @@
 }
 
 /* Stats Cards */
-.stat-card {
+/* .stat-card {
     transition: all 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
-}
-
-/* FAQ Accordion */
-.faq-item button {
-    transition: all 0.3s ease;
-}
-
-.faq-item button:hover {
-    background-color: #f3f4f6;
-}
-
-.faq-content {
-    transition: all 0.3s ease;
-}
+} */
 
 /* Smooth Scrolling */
 html {
