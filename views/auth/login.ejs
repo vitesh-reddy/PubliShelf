@@ -99,7 +99,7 @@
 
             <!-- Signup Options Modal -->
             <div id="signupModal"
-                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                class="scale-0 fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div
                     class="bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-300">
                     <div class="flex justify-between items-center mb-6">
@@ -164,18 +164,18 @@
             const togglePassword = document.querySelector('.fa-eye');
 
             showSignupOptions.addEventListener('click', () => {
-                signupModal.classList.remove('hidden');
+                signupModal.classList.remove('scale-0');
                 document.body.style.overflow = 'hidden';
             });
 
             closeModal.addEventListener('click', () => {
-                signupModal.classList.add('hidden');
+                signupModal.classList.add('scale-0');
                 document.body.style.overflow = 'auto';
             });
 
             signupModal.addEventListener('click', (e) => {
                 if (e.target === signupModal) {
-                    signupModal.classList.add('hidden');
+                    signupModal.classList.add('scale-0');
                     document.body.style.overflow = 'auto';
                 }
             });
