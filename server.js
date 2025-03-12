@@ -14,10 +14,11 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
+export const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
+
 
 // Routes
 app.get("/", (req, res) => res.render("index", { books: mockBuyerData, styles: styles }) );
@@ -31,3 +32,4 @@ app.get("/about", (req, res) => res.render("about", { styles: styles }));
 app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
+// app.listen(3000, '10.2.5.95' );
