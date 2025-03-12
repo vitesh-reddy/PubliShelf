@@ -31,70 +31,78 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="p-6 border-b">
-                    <h1 class="text-2xl font-bold text-gray-900">Sell Antique Item</h1>
-                    <p class="text-gray-500 mt-1">Create an auction for your antique item</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Sell Antique Book</h1>
+                    <p class="text-gray-500 mt-1">Create an auction for your antique book</p>
                 </div>
 
                 <form class="p-6 space-y-6 animate-fade-in">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Item Title</label>
-                        <input type="text" required
-                            class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">Book
+                                Title</label>
+                            <input type="text" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Author</label>
+                            <input type="text" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500">
+                        </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Description</label>
                         <textarea rows="4" required
-                            class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50"></textarea>
+                            class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Category</label>
-                            <select required style="background: none;"
-                                class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
-                                <option style="background: none;" value="">Select Category</option>
-                                <option style="background: none;">Rare Books</option>
-                                <option style="background: none;">First Editions</option>
-                                <option style="background: none;">Manuscripts</option>
-                                <option style="background: none;">Historical Documents</option>
-                                <option style="background: none;">Maps</option>
-                                <option style="background: none;">Art Books</option>
+                            <label class="block text-sm font-medium text-gray-700">Genre</label>
+                            <select required class="bg-white mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" disabled selected value="">Select Genre</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Fiction">Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Non-Fiction">Non-Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Mystery">Mystery</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Science Fiction">Science Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Romance">Romance</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Thriller">Thriller</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Condition</label>
-                            <select required style="background: none;"
-                                class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
-                                <option value="">Select Condition</option>
-                                <option>Mint</option>
-                                <option>Near Mint</option>
-                                <option>Excellent</option>
-                                <option>Very Good</option>
-                                <option>Good</option>
-                                <option>Fair</option>
+                            <select required class="bg-white mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" disabled selected value="">Select Condition</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Mint</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Near Mint</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Excellent</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Very Good</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Good</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" >Fair</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Starting Bid ($)</label>
+                            <label class="block text-sm font-medium text-gray-700 ">Starting Bid ($)</label>
                             <input type="number" step="0.01" required
-                                class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md outline-none focus:outline-purple-500">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Auction Start</label>
                             <input type="datetime-local" required
-                                class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md outline-none focus:outline-purple-500">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Auction End</label>
                             <input type="datetime-local" required
-                                class="mt-1 p-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50">
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md outline-none focus:outline-purple-500">
                         </div>
                     </div>
 
