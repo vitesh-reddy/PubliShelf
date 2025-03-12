@@ -110,8 +110,8 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Top Rated Books</h2>
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.topRated.forEach(book=> { %>
-                        <div class="<%= styles.bookCardStyle %>">
+                    <% books.topRated.forEach(book=> { %>                        
+                        <div class="<%= styles.bookCardStyle %>" onclick="window.location.href='/buyer/product-detail'">
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
