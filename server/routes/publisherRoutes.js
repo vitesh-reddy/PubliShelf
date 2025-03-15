@@ -13,7 +13,11 @@ router.get("/dashboard", (req, res) =>{
 }
 );
 router.get("/signup", (req, res) =>{
-    res.render("auth/signup-publisher")
+    if(req.isAuthenticated()){
+        res.redirect('/auth/login');
+        return;
+    }
+    res.render("auth/signup-publisher");
 });
 
 router.get("/publish-book", (req, res) => {
@@ -35,6 +39,7 @@ import { BooksDataArray, BuyerLoginData } from "../../public/MockData.js";
 
 
 router.post('/signup', (req, res) => {
+    
     const firstname = req.body.firstname;
     const lastname = req.body.lastname;
     const publishingHouse = req.body.publishingHouse;
@@ -61,7 +66,7 @@ router.post('/signup', (req, res) => {
 
 })
 
-router.post('/publish-book', (req, res) => {
+router.post('/publish-book',(req, res) => {
     const bookTitle = req.body.bookTitle;
     const author = req.body.author;
     const description = req.body.description;
@@ -69,7 +74,7 @@ router.post('/publish-book', (req, res) => {
     const price = req.body.price;
     const quantity = parseInt(req.body.quantity, 10);
     const image = req.body.image;
-
+    
     const copyFind = BooksDataArray.find((obj) => {
         if(bookTitle == obj.bookTitle && author == obj.author && description == obj.description && genre == obj.genre && price == obj.price && image == obj.image){
             return obj;

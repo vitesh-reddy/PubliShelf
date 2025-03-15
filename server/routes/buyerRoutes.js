@@ -13,12 +13,8 @@ router.use(bodyParser.urlencoded({extended:true}));
 
 
 router.get("/dashboard", (req, res) => {
-
-    // console.log(req.user.username);
     
   if(req.isAuthenticated()){
-    // const copy = BuyerLoginData.find((cp) => user == cp.username);
-    // Myname = copy.lastname;
     console.log(req.user);
     res.render("buyer/dashboard", { books: mockBuyerData, styles: styles, buyerName : req.user.firstname })
   }
@@ -26,25 +22,22 @@ router.get("/dashboard", (req, res) => {
 }
 );
 
-router.get("/signup", (req, res) => res.render("auth/signup-buyer"));
+router.get("/signup", (req, res) => {
+  if(req.isAuthenticated()){
+    res.redirect('/auth/login');
+    return;
+  }
+  res.render("auth/signup-buyer");
+});
+
  
-
-//zzz
-// router.get('/logout', (req, res) => {
-//   req.logout((err) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     res.redirect('/');
-//   })
-// });
-
-
-
-
 
 
 router.post('/signup', (req, res) => {
+  if(req.isAuthenticated()){
+      res.redirect('/auth/login');
+      return;
+  }
   const username = req.body.email;
   const password = req.body.password;
   const BuyerRegisterCopy = BuyerLoginData.find((Copy) => username == Copy.email);
@@ -53,11 +46,6 @@ router.post('/signup', (req, res) => {
     res.redirect('/auth/login');
   }
   else {
-    // bcrypt.hash(password, 10, (err, hash) => {
-      // if (err) {
-      //   console.log('Error while hashing : ', err);
-      // }
-      // else {
         const newRegister = {
           id: BuyerLoginData.length + 1,
           role: 'buyer',
@@ -70,17 +58,9 @@ router.post('/signup', (req, res) => {
         console.log(newRegister);
         console.log(BuyerLoginData);
         res.redirect('/auth/login');
-      // }
-    // })
   }
 });
 
-
-
-// router.post('/login', passport.authenticate('buyer-local', {
-//   successRedirect: '/buyerdashboard',
-//   failureRedirect: '/login'
-// }));
 
 
 router.get("/dashboard", (req, res) =>

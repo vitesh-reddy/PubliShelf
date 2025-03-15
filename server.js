@@ -37,7 +37,7 @@ app.use(passport.session());
 
 
 app.use(express.json());
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({extended : true, limit : '5mb'}));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));

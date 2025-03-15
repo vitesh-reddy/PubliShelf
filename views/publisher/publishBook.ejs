@@ -86,9 +86,9 @@
                             <div class="space-y-1 text-center">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl"></i>
                                 <div class="flex text-sm text-gray-600">
-                                    <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                                    <label for="imageFile" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                                         <span>Upload a file</span>
-                                        <input name="image" id="image" type="file" class="sr-only" accept="image/*">
+                                        <input name="imageFile" id="imageFile" type="file" class="sr-only" accept="image/*">
                                     </label>
                                     <p class="pl-1">or drag and drop</p>
                                 </div>
@@ -96,6 +96,9 @@
                             </div>
                         </div>
                     </div>
+
+                    
+                    <input type="text" name="image" id="image" class="h-0 w-0">
 
                     <div class="flex justify-end space-x-4">
                         <button type="button" onclick="window.location.href='/publisher/dashboard'" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
@@ -110,6 +113,20 @@
         </div>
     </div>
 
-    <script src="/js/script.js"></script>
+    <script>
+        
+        const f = document.querySelector('form');
+        const imageelement = document.getElementById('imageFile');
+        f.addEventListener('submit', async (event) =>{
+            event.preventDefault();
+            let reader = new FileReader();
+            reader.readAsDataURL(imageelement.files[0]);
+            reader.onload = (e) => {
+                document.getElementById('image').value = e.target.result; 
+                console.log(e.target.result);
+                f.submit();
+            }
+        });
+    </script>
 </body>
 </html>
