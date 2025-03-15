@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PubliShelf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="fixed w-full bg-white shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="/admin/dashboard" class="flex items-center">
+                        <span
+                            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                    </a>
+                </div>
+                <div class="">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button
+                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
+                        <a   href="#manage-publishers"> Manage Publishers </a>
+                    </button>
+                    <button
+                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
+                        <a   href="#manage-publishers"> Logout </a>
+                    </button>
+                    <div class="relative">
+                        <button class="flex items-center space-x-2">
+                            <img src="https://ui-avatars.com/api/?name=Admin" alt="Profile"
+                                class="w-8 h-8 rounded-full">
+                            <span class="text-gray-700">Admin Name</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 class="text-4xl font-bold text-purple-600 mb-8">Admin Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">User Activity</h2>
+                    <canvas id="userActivityChart"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Sales Analytics</h2>
+                    <canvas class="mt-20" id="salesAnalyticsChart"></canvas>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Auction Analytics</h2>
+                    <canvas class="mt-20" id="auctionAnalyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-50">
+        <!-- Main Content -->
+        <div id="manage-publishers" class="pt-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-4xl font-bold text-purple-600 mb-8">Manage Publishers</h1>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Publisher Name
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <% publishers.forEach(publisher=> { %>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    <%= publisher.name %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button
+                                            class="text-red-600 hover:text-red-900 transition-colors duration-200">Remove</button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <script>
+            // JavaScript to initialize charts
+            const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+            const salesAnalyticsCtx = document.getElementById('salesAnalyticsChart').getContext('2d');
+            const auctionAnalyticsCtx = document.getElementById('auctionAnalyticsChart').getContext('2d');
+
+            const userActivityChart = new Chart(userActivityCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Active', 'Inactive', 'Banned'],
+                    datasets: [{
+                        data: [300, 50, 100],
+                        backgroundColor: ['#9333ea', '#4f46e5', '#a855f7']
+                    }]
+                }
+            });
+
+            const salesAnalyticsChart = new Chart(salesAnalyticsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['January', 'February', 'March', 'April', 'May'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [65, 59, 80, 81, 56],
+                        backgroundColor: '#9333ea'
+                    }]
+                }
+            });
+
+            const auctionAnalyticsChart = new Chart(auctionAnalyticsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Auctions',
+                        data: [10, 20, 15, 21],
+                        backgroundColor: '#4f46e5',
+                        borderColor: '#4f46e5',
+                        fill: false
+                    }]
+                }
+            });
+        </script>
+</body>
+
+</html>
