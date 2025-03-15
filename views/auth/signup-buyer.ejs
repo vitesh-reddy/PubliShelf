@@ -28,6 +28,7 @@
             </div>
 
             <!-- Signup Form -->
+<<<<<<< HEAD
             <form action="/buyer/signup" method="POST">
                 <div class="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
                     <div class="grid grid-cols-2 gap-4">
@@ -123,6 +124,100 @@
                     </div>
                 </div>
             </form>
+=======
+            <div class="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input id="email" name="email" type="email" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="••••••••">
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-eye text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm
+                        Password</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="confirmPassword" name="confirmPassword" type="password" required class="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" required
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer">
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
+                        I agree to the
+                        <a href="#" class="text-purple-600 hover:text-purple-500">Terms of Service</a>
+                        and
+                        <a href="#" class="text-purple-600 hover:text-purple-500">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:-translate-y-0.5">
+                    Create Account
+                </button>
+
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or sign up with</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button
+                        class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
+                        <i class="fab fa-google text-red-500 mr-2"></i>
+                        Google
+                    </button>
+                    <button
+                        class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
+                        <i class="fab fa-apple text-black mr-2"></i>
+                        Apple
+                    </button>
+                </div>
+            </div>
+>>>>>>> 3dbf591fb5f3493eebab8f405f15486fc9e23601
         </div>
     </div>
 
@@ -140,6 +235,7 @@
             });
 
             // Simple password validation            
+<<<<<<< HEAD
             // const form = document.querySelector('form');
             // form.addEventListener('submit', (e) => {
             //     e.preventDefault();
@@ -149,6 +245,17 @@
             //     }
             //     // Add your form submission logic here
             // });
+=======
+            const form = document.querySelector('form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                // Add your form submission logic here
+            });
+>>>>>>> 3dbf591fb5f3493eebab8f405f15486fc9e23601
         });
     </script>
 </body>
