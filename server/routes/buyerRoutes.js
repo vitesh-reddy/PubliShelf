@@ -11,7 +11,7 @@ import { BuyerLoginData } from "../../public/MockData.js";
 const router = express.Router();
 router.use(bodyParser.urlencoded({extended:true}));
 
-<<<<<<< HEAD
+
 router.get("/dashboard", (req, res) => {
 
     // console.log(req.user.username);
@@ -83,12 +83,10 @@ router.post('/signup', (req, res) => {
 // }));
 
 
-=======
 router.get("/dashboard", (req, res) =>
   res.render("buyer/dashboard", { books: mockBuyerData, styles: styles })
 );
 
 router.get("/signup", (req, res) => res.render("auth/signup-buyer"));
->>>>>>> 3dbf591fb5f3493eebab8f405f15486fc9e23601
 
 export default router;

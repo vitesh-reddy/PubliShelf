@@ -1,6 +1,5 @@
 import express from "express";
 import mockPublisherData from "../../public/mockPublisherData.js";
-<<<<<<< HEAD
 
 const router = express.Router();
 
@@ -96,14 +95,5 @@ router.post('/publish-book', (req, res) => {
     console.log(BooksDataArray);
     res.redirect('/publisher/dashboard');
 })
-=======
-const router = express.Router();
-
-router.get("/dashboard", (req, res) =>
-  res.render("publisher/dashboard", { sales: mockPublisherData })
-);
-router.get("/publish-book", (req, res) => res.render("publisher/publishBook"));
-router.get("/sell-antique", (req, res) => res.render("publisher/sellAntique"));
->>>>>>> 3dbf591fb5f3493eebab8f405f15486fc9e23601
 
 export default router;
