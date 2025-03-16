@@ -8,7 +8,7 @@ import adminRoutes from "./server/routes/adminRoutes.js";
 import publisherRoutes from "./server/routes/publisherRoutes.js";
 import bodyParser from "body-parser";
 import session from "express-session";
-import bcrypt from "bcrypt";    
+import bcrypt from "bcrypt";
 import passport from "passport";
 import { Strategy } from "passport-local";
 import "./server/config/passportConfig.js";
@@ -41,8 +41,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use("/admin", adminRoutes);
-
-
 
 app.get("/", (req, res) => {
   res.render("index", { books: mockBuyerData, styles: styles });
@@ -95,7 +93,9 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.listen(PORT, () =>
-  console.log(`server is running at http://localhost:${PORT}`)
-);
-// app.listen(3000, '10.2.5.95' );
+// app.listen(PORT, () =>
+//   console.log(`server is running at http://localhost:${PORT}`)
+// );
+app.listen(3000, "10.2.5.95", () => {
+  console.log(`server is running at http://10.2.5.95:${PORT}`);
+});
