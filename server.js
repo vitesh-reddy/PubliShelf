@@ -8,7 +8,7 @@ import adminRoutes from "./server/routes/adminRoutes.js";
 import publisherRoutes from "./server/routes/publisherRoutes.js";
 import bodyParser from "body-parser";
 import session from "express-session";
-import bcrypt from "bcrypt";
+import bcrypt from "bcrypt";    
 import passport from "passport";
 import { Strategy } from "passport-local";
 import "./server/config/passportConfig.js";

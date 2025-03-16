@@ -29,6 +29,7 @@
             </div>
 
             <!-- Login Form -->
+       <form action="/auth/login" method="POST">
             <div class="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
                 <div class="space-y-4">
                     <div>
@@ -57,6 +58,8 @@
                             </button>
                         </div>
                     </div>
+                    <!--  -->
+                    <p id="PasswordIncorrectClass" style="color: red;"></p>
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -69,11 +72,11 @@
                     <a href="#" class="text-sm font-medium text-purple-600 hover:text-purple-500">Forgot password?</a>
                 </div>
 
-                <button type="submit"
+                <!--  -->
+                <button type="submit" id="SignInButtonInAuthLogin"
                     class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:-translate-y-0.5">
                     Sign in
                 </button>
-
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-gray-300"></div>
@@ -82,24 +85,26 @@
                         <span class="px-2 bg-white text-gray-500">Or continue with</span>
                     </div>
                 </div>
-
+                
                 <div class="grid grid-cols-2 gap-4">
                     <button
-                        class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
-                        <i class="fab fa-google text-red-500 mr-2"></i>
-                        Google
+                    class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
+                    <i class="fab fa-google text-red-500 mr-2"></i>
+                    Google
                     </button>
                     <button
-                        class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
-                        <i class="fab fa-apple text-black mr-2"></i>
-                        Apple
+                    class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
+                    <i class="fab fa-apple text-black mr-2"></i>
+                    Apple
                     </button>
                 </div>
             </div>
+        </form>
+
 
             <!-- Signup Options Modal -->
             <div id="signupModal"
-                class="scale-0 fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div
                     class="bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-300">
                     <div class="flex justify-between items-center mb-6">
@@ -109,7 +114,7 @@
                         </button>
                     </div>
                     <div class="space-y-4">
-                        <a href="/auth/signup/buyer"
+                        <a href="/buyer/signup"
                             class="block w-full p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <i class="fas fa-user-tag text-2xl text-purple-600 mr-4"></i>
@@ -119,7 +124,7 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="/auth/signup/publisher"
+                        <a href="/publisher/signup"
                             class="block w-full p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <i class="fas fa-book-open text-2xl text-purple-600 mr-4"></i>
@@ -129,7 +134,7 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="/auth/signup/admin"
+                        <a href="/admin/signup"
                             class="block w-full p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <i class="fas fa-user-shield text-2xl text-purple-600 mr-4"></i>
@@ -139,7 +144,7 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="/auth/signup/manager"
+                        <a href="/manager/signup"
                             class="block w-full p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
                             <div class="flex items-center">
                                 <i class="fas fa-chart-line text-2xl text-purple-600 mr-4"></i>
@@ -156,6 +161,45 @@
     </div>
 
     <script>
+        const signupbutton = document.getElementById('SignInButtonInAuthLogin');
+        const displayContent = document.getElementById('PasswordIncorrectClass');
+        
+        signupbutton.addEventListener('click', async (event)=> {
+            const myemail = document.getElementById('email').value;
+            const mypassword = document.getElementById('password').value;
+            event.preventDefault();
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body : JSON.stringify({email : myemail, password : mypassword}),
+                });
+                
+                if(response.status == 401){
+                    displayContent.innerHTML = '* incorrect password';
+                }
+                else if(response.status == 403){
+                    displayContent.innerHTML = '* User Not Found';
+                }
+                else if(response.status == 200){
+                    window.location.href = '/auth/login';
+                }
+                else{
+                    
+                }
+            }
+            catch (error) {
+                
+            }
+
+        });
+
+
+
+
         document.addEventListener('DOMContentLoaded', () => {
             const showSignupOptions = document.getElementById('showSignupOptions');
             const signupModal = document.getElementById('signupModal');
@@ -164,18 +208,18 @@
             const togglePassword = document.querySelector('.fa-eye');
 
             showSignupOptions.addEventListener('click', () => {
-                signupModal.classList.remove('scale-0');
+                signupModal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             });
 
             closeModal.addEventListener('click', () => {
-                signupModal.classList.add('scale-0');
+                signupModal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
             });
 
             signupModal.addEventListener('click', (e) => {
                 if (e.target === signupModal) {
-                    signupModal.classList.add('scale-0');
+                    signupModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
                 }
             });
