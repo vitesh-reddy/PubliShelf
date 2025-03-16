@@ -1,4 +1,4 @@
-const categoryBtnStyle = "block px-4 py-2 text-gray-700 hover:bg-purple-50";
+const categoryBtnStyle = "block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700";
 const navBtnStyle =
   "text-gray-700 hover:text-purple-600 transition-colors px-3 py-2";
 const purpleBtnStyle =

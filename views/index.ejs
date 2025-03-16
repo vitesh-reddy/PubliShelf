@@ -28,14 +28,14 @@
                         <div
                             class="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
                             <a href="#" class="<%= styles.categoryBtnStyle %>">Young Adult</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Fantasy</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Sci-Fi</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Thrillers</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>" hover:bg-purple-50">Romance</a>
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">Fantasy</a>
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">Sci-Fi</a>
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">Thrillers</a>
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">Romance</a>
                         </div>
                     </div>
-                    <a href="/about" class="<%= styles.navBtnStyle %>">About</a>
                     <a href="/#faq-section" class="<%= styles.navBtnStyle %>">FAQ</a>
+                    <a href="/about" class="<%= styles.navBtnStyle %>">About</a>
                     <a href="/contact" class="<%= styles.navBtnStyle %>">Contact Us</a>
                     <a href="/buyer/dashboard" class="<%= styles.navBtnStyle %>">Bookstores</a>
                 </div>
@@ -49,6 +49,19 @@
                     <button onclick="window.location.href='/auth/login'"
                         class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join
                         Now</button>
+                    <div class="relative group">
+                        <button class="md:hidden text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">==</button>
+                        <div
+                            class="absolute top-full right-1 w-32 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">Cart</a>
+                            <a href="#" class="<%= styles.categoryBtnStyle %>">WishList</a>
+                            <a href="/#faq-section" class="<%= styles.categoryBtnStyle %>">FAQ</a>
+                            <a href="/about" class="<%= styles.categoryBtnStyle %>">About</a>
+                            <a href="/contact" class="<%= styles.categoryBtnStyle %>">Contact Us</a>
+                            <a href="/buyer/dashboard" class="<%= styles.categoryBtnStyle %>">Bookstores</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -67,17 +80,17 @@
                 <div class="h-7"></div>
                 <div class="flex justify-center space-x-4 animate-fade-in-delay-2">
                     <button onclick="window.location.href='/auth/login'"
-                    class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
-                    Start Reading
-                </button>
-                <button onclick="window.location.href='/publisher/signup'"
-                class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
-                Sell Your Books
-            </button>
+                        class="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1">
+                        Start Reading
+                    </button>
+                    <button onclick="window.location.href='/publisher/signup'"
+                        class="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1">
+                        Sell Your Books
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div class="h-3"></div>
+        <div class="h-3"></div>
     </section>
 
     <!-- Stats Section -->
@@ -279,7 +292,8 @@
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
                     <form class="flex">
-                        <input type="email" placeholder="Enter your email" class="px-4 py-2 rounded-l-lg w-full focus:outline-none focus:outline-purple-500">
+                        <input type="email" placeholder="Enter your email"
+                            class="px-4 py-2 rounded-l-lg w-full focus:outline-none focus:outline-purple-500">
                         <button class="bg-purple-600 px-4 py-2 rounded-r-lg hover:bg-purple-700">
                             Subscribe
                         </button>

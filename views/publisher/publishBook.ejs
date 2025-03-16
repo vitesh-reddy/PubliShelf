@@ -121,7 +121,7 @@
             let reader = new FileReader();
             reader.readAsDataURL(imageelement.files[0]);
             reader.onload = (e) => {
-                document.getElementById('image').value = e.target.result; 
+                document.getElementById('image').value = e.target.result;                 
                 f.submit();
             }
         });
