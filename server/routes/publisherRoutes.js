@@ -87,6 +87,7 @@ router.post("/publish-book", (req, res) => {
 
   if (!copyFind) {
     const BookObject = {
+      id: BooksDataArray.length + 1,
       bookTitle: bookTitle,
       author: author,
       description: description,
@@ -94,6 +95,7 @@ router.post("/publish-book", (req, res) => {
       price: price,
       quantity: quantity,
       image: image,
+      rating: 4,
     };
     BooksDataArray.push(BookObject);
   } else {
