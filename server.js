@@ -13,6 +13,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import "./server/config/passportConfig.js";
 import styles from "./public/css/styles.js";
+import db from "./public/database/db.js";
 console.clear();
 
 dotenv.config();
@@ -45,9 +46,24 @@ app.use("/admin", adminRoutes);
 
 // mockBuyerData
 
+// app.get("/", (req, res) => {
+//   res.render("index", { books: BooksDataArray, styles: styles });
+// });
+
 app.get("/", (req, res) => {
-  res.render("index", { books: BooksDataArray, styles: styles });
+  db.all("SELECT * FROM books", [], (err, books) => {
+      if (err) {
+          console.error("Error fetching books:", err.message);
+          return res.status(500).send("Internal Server Error");
+      }
+      books.reverse();
+      res.render("index", { newlyBooks : books, books : mockBuyerData,  styles: styles });
+  });
 });
+
+
+
+
 
 app.get("/auth/login", (req, res) => {
   if (req.isAuthenticated()) {
@@ -58,11 +74,6 @@ app.get("/auth/login", (req, res) => {
   } else res.render("auth/login");
 });
 
-app.get("/", (req, res) => {
-  res.render("index", { books: mockBuyerData, styles: styles });
-});
-
-app.get("/auth/login", (req, res) => res.render("auth/login"));
 
 app.use("/buyer", buyerRouter);
 app.use("/publisher", publisherRoutes);
