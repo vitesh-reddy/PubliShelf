@@ -57,13 +57,10 @@ app.get("/", (req, res) => {
           return res.status(500).send("Internal Server Error");
       }
       books.reverse();
-      res.render("index", { newlyBooks : books, books : mockBuyerData,  styles: styles });
+      const temp = books.slice(0, 8);
+      res.render("index", { newlyBooks : temp, books : mockBuyerData,  styles: styles });
   });
 });
-
-
-
-
 
 app.get("/auth/login", (req, res) => {
   if (req.isAuthenticated()) {

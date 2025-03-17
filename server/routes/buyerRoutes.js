@@ -1,6 +1,7 @@
 import express from "express";
 import styles from "../../public/css/styles.js";
 import mockCart from "../../public/mockData/mockCart.js";
+import db from "../../public/database/db.js";
 import mockWishlist from "../../public/mockData/mockWishlist.js";
 import mockBuyerData from "../../public/mockData/mockBuyerData.js";
 import {
@@ -16,14 +17,29 @@ const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get("/dashboard", (req, res) => {
+  if (req.isAuthenticated()){
+      db.all("SELECT * FROM books", [], (err, books) => {
+        if (err) {
+            console.error("Error fetching books:", err.message);
+            return res.status(500).send("Internal Server Error");
+        }
+        books.reverse();
+        const temp = books.slice(0, 8);
+        res.render("buyer/dashboard", { newlyBooks : temp, books : mockBuyerData,  styles: styles, buyerName: req.user.firstname, });
+      });
+  }
+  else res.redirect("/auth/login");
+});
+
+router.get("/profile", (req, res) => {     
+
+router.get("/auction-item-detail", (req, res) => {
   if (req.isAuthenticated())
-    res.render("buyer/dashboard", {
-      books: mockBuyerData,
-      styles: styles,
+    res.render("buyer/auction-item-detail", {
       buyerName: req.user.firstname,
     });
   else res.redirect("/auth/login");
-});
+ });
 
 router.get("/auction-page", (req, res) => {
   if (req.isAuthenticated())

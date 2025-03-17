@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Book Details - The Silent Patient</title>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--primary-purple: #8a4af3;
+			--dark-indigo: #6b48ff;
+			--light-grey: #f5f5f5;
+			--shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+			--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			--gradient: linear-gradient(135deg, var(--primary-purple), var(--dark-indigo));
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Poppins', sans-serif;
+		}
+
+		body {
+			background: #fafafa;
+			color: #333;
+			line-height: 1.6;
+			padding: 20px;
+			overflow-x: hidden;
+		}
+
+		.container {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
+
+		.book-details-card {
+			background: #fff;
+			border-radius: 16px;
+			box-shadow: var(--shadow);
+			padding: 30px;
+			display: grid;
+			grid-template-columns: 1fr 2fr;
+			gap: 30px;
+			margin-bottom: 40px;
+			border: 1px solid rgba(138, 74, 243, 0.1);
+			position: relative;
+			animation: slideIn 0.5s ease-out;
+		}
+
+		.book-details-card::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			background: var(--gradient);
+			opacity: 0.8;
+		}
+
+		.book-image {
+			width: 100%;
+			max-width: 350px;
+			height: 450px;
+			object-fit: cover;
+			border-radius: 12px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			transition: var(--transition);
+		}
+
+		.book-image:hover {
+			transform: scale(1.02);
+		}
+
+		.book-content h1 {
+			color: var(--primary-purple);
+			font-size: 28px;
+			margin-bottom: 15px;
+		}
+
+		.book-content .author {
+			color: #666;
+			font-size: 16px;
+			margin-bottom: 20px;
+		}
+
+		.timer {
+			font-size: 18px;
+			color: #fff;
+			font-weight: 600;
+			background: var(--gradient);
+			padding: 10px 20px;
+			border-radius: 20px;
+			display: inline-block;
+			margin-bottom: 20px;
+			box-shadow: 0 2px 4px rgba(138, 74, 243, 0.2);
+		}
+
+		.book-info {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 15px;
+			margin-bottom: 20px;
+			padding: 15px;
+			background: var(--light-grey);
+			border-radius: 8px;
+		}
+
+		.book-info p {
+			font-size: 14px;
+		}
+
+		.book-info p strong {
+			color: var(--dark-indigo);
+		}
+
+		.description {
+			margin-bottom: 20px;
+			font-size: 15px;
+			line-height: 1.8;
+		}
+
+		.bid-info {
+			margin-bottom: 20px;
+			padding: 15px;
+			background: rgba(138, 74, 243, 0.05);
+			border-radius: 8px;
+			border-left: 3px solid var(--primary-purple);
+		}
+
+		.bid-info p {
+			font-size: 14px;
+		}
+
+		.bid-info span {
+			color: var(--primary-purple);
+			font-weight: 600;
+			font-size: 16px;
+		}
+
+		.seller-info {
+			margin-bottom: 20px;
+			padding: 15px;
+			background: rgba(138, 74, 243, 0.05);
+			border-radius: 8px;
+			border-left: 3px solid var(--primary-purple);
+			font-size: 14px;
+		}
+
+		.seller-info strong {
+			color: var(--dark-indigo);
+		}
+
+		.action-buttons {
+			display: flex;
+			gap: 15px;
+			flex-wrap: wrap;
+		}
+
+		.btn {
+			flex: 1;
+			padding: 14px;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: var(--transition);
+			font-weight: 600;
+			font-size: 14px;
+			text-transform: uppercase;
+			text-align: center;
+			min-width: 120px;
+		}
+
+		.register-btn {
+			background: var(--gradient);
+			color: white;
+		}
+
+		.register-btn:hover,
+		.notify-btn:hover {
+			filter: brightness(1.1);
+			transform: translateY(-2px);
+		}
+
+		.notify-btn {
+			background: #eee;
+			color: #666;
+		}
+
+		.registered {
+			background: #28a745;
+			cursor: default;
+		}
+
+		.registered:hover {
+			filter: none;
+			transform: none;
+		}
+
+		.section-title {
+			color: var(--dark-indigo);
+			font-size: 24px;
+			font-weight: 600;
+			margin-bottom: 20px;
+			position: relative;
+			padding-bottom: 10px;
+		}
+
+		.section-title::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 60px;
+			height: 4px;
+			background: var(--gradient);
+			border-radius: 2px;
+		}
+
+		.related-books,
+		.recommended-books {
+			background: #fff;
+			border-radius: 16px;
+			box-shadow: var(--shadow);
+			padding: 25px;
+			margin-bottom: 30px;
+			border: 1px solid rgba(138, 74, 243, 0.1);
+		}
+
+		.book-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 20px;
+		}
+
+		.book-item {
+			text-align: center;
+			padding: 15px;
+			background: var(--light-grey);
+			border-radius: 10px;
+			transition: var(--transition);
+		}
+
+		.book-item:hover {
+			transform: translateY(-5px);
+			box-shadow: var(--shadow);
+		}
+
+		.book-item img {
+			width: 120px;
+			height: 160px;
+			object-fit: cover;
+			border-radius: 6px;
+			margin-bottom: 10px;
+		}
+
+		.book-item p {
+			font-size: 14px;
+			color: var(--primary-purple);
+		}
+
+		.book-item .author {
+			font-size: 12px;
+			color: #666;
+		}
+
+		@keyframes slideIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@media (max-width: 1024px) {
+			.book-details-card {
+				grid-template-columns: 1fr 1fr;
+			}
+		}
+
+		@media (max-width: 768px) {
+			.book-details-card {
+				grid-template-columns: 1fr;
+			}
+
+			.book-image {
+				margin: 0 auto;
+			}
+
+			.book-info {
+				grid-template-columns: 1fr;
+			}
+
+			.action-buttons {
+				flex-direction: column;
+			}
+
+			.btn {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="book-details-card">
+			<img src="https://images-na.ssl-images-amazon.com/images/I/51k2g+1roFL.SX331_BO1,204,203,200.jpg" alt="The Silent Patient" class="book-image">
+			<div class="book-content">
+				<h1>The Silent Patient</h1>
+				<p class="author">by Alex Michaelides</p>
+				<div class="timer" data-time="March 20, 2025 10:00:00 PDT">Loading...</div>
+				<div class="book-info">
+					<p><strong>Genre:</strong> Thriller</p>
+					<p><strong>Condition:</strong> First Edition, Excellent</p>
+					<p><strong>Publication Year:</strong> 2019</p>
+					<p><strong>Language:</strong> English</p>
+					<p><strong>Pages:</strong> 336</p>
+					<p><strong>ISBN:</strong> 978-1250301697</p>
+				</div>
+				<div class="description">
+					<p>Alicia Berenson’s life is seemingly perfect. A famous painter married to an in-demand fashion
+						photographer, she lives in a grand house with big windows overlooking a park in one of London’s
+						most desirable areas. One evening her husband Gabriel returns home late from a fashion shoot,
+						and Alicia shoots him five times in the face, and then never speaks another word.</p>
+				</div>
+				<div class="bid-info">
+					<p>Starting Bid: <span>₹1090</span></p>
+				</div>
+				<div class="seller-info">
+					<p><strong>Seller:</strong> John Doe</p>
+					<p><strong>Address:</strong> 123 Vintage Lane, Booksville, CA 90210</p>
+					<p><strong>Contact:</strong> john.doe@email.com</p>
+				</div>
+				<div class="action-buttons">
+					<button class="btn register-btn" onclick="register(this)">Register to Bid</button>
+					<button class="btn notify-btn" onclick="notifyMe(this)">Notify Me</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="related-books">
+			<h2 class="section-title">Similar Books</h2>
+			<div class="book-grid">
+				<div class="book-item">
+					<img src="https://m.media-amazon.com/images/I/71Q1tPupKjL.AC_UY218.jpg" alt="The Patient">
+					<p>The Patient</p>
+					<p class="author">Jasper DeWitt</p>
+				</div>
+				<div class="book-item">
+					<img src="https://m.media-amazon.com/images/I/81eI0E8dM8L.AC_UY218.jpg" alt="The Girl on the Train">
+					<p>The Girl on the Train</p>
+					<p class="author">Paula Hawkins</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="recommended-books">
+			<h2 class="section-title">Books You Might Like</h2>
+			<div class="book-grid">
+				<div class="book-item">
+					<img src="https://m.media-amazon.com/images/I/81YOuOGFCJL.AC_UY218.jpg" alt="1984">
+					<p>1984</p>
+					<p class="author">George Orwell</p>
+				</div>
+				<div class="book-item">
+					<img src="https://m.media-amazon.com/images/I/71aFt4+OTOL.AC_UY218.jpg" alt="The Alchemist">
+					<p>The Alchemist</p>
+					<p class="author">Paulo Coelho</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Auction timer
+        const timerElement = document.querySelector('.timer');
+        const auctionTime = new Date(timerElement.getAttribute('data-time')).getTime();
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = auctionTime - now;
+
+            if (distance < 0) {
+                timerElement.textContent = 'Auction Started!';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Register button functionality
+        function register(button) {
+            if (!button.classList.contains('registered')) {
+                button.textContent = 'Registered';
+                button.classList.add('registered');
+                alert('You are now registered to bid on this item!');
+            }
+        }
+
+        // Notify me functionality
+        function notifyMe(button) {
+            button.textContent = 'Notified';
+            button.disabled = true;
+            alert('You will be notified when the auction starts!');
+        }
+	</script>
+</body>
+
+</html>
