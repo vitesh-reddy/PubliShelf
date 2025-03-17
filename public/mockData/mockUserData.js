@@ -21,7 +21,7 @@ export const BuyerLoginData = [
     firstname: "Akash",
     lastname: "Varma",
     housename: "myHouse",
-    email: "pub1gmail.com",
+    email: "pub1@gmail.com",
     password: "1234",
   },
 ];
