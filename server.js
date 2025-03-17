@@ -93,9 +93,9 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// app.listen(PORT, () =>
-//   console.log(`server is running at http://localhost:${PORT}`)
-// );
-app.listen(3000, "10.2.5.95", () => {
-  console.log(`server is running at http://10.2.5.95:${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`server is running at http://localhost:${PORT}`)
+);
+// app.listen(3000, "10.2.5.95", () => {
+//   console.log(`server is running at http://10.2.5.95:${PORT}`);
+// });

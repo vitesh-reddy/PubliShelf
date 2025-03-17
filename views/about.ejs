@@ -5,129 +5,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - PubliShelf</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="../css/about.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 
-<body class="bg-gray-50 font-sans">
+<body>
     <!-- Navbar -->
-    <nav class="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center">
-                        <span
-                            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
-                    </a>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <div class="relative group">
-                        <button
-                            class="text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">Categories</button>
-                        <div
-                            class="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                            <a href="#" class="<%= styles.categoryBtnStyle %>">Young Adult</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>">Fantasy</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>">Sci-Fi</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>">Thrillers</a>
-                            <a href="#" class="<%= styles.categoryBtnStyle %>">Romance</a>
-                        </div>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <a href="/" class="navbar-logo">PubliShelf</a>
+            </div>
+            <div class="navbar-links">
+                <div class="navbar-dropdown">
+                    <button class="navbar-dropdown-btn">Categories</button>
+                    <div class="navbar-dropdown-content">
+                        <a href="#">Young Adult</a>
+                        <a href="#">Fantasy</a>
+                        <a href="#">Sci-Fi</a>
+                        <a href="#">Thrillers</a>
+                        <a href="#">Romance</a>
                     </div>
-                    <a href="/about" class="<%= styles.navBtnStyle %>">About</a>
-                    <a href="/contact" class="<%= styles.navBtnStyle %>">Contact</a>
-                    <a href="#" class="<%= styles.navBtnStyle %>">FAQ</a>
-                    <a href="/buyer/dashboard" class="<%= styles.navBtnStyle %>">Bookstores</a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
-                        <i class="far fa-heart"></i>
-                    </a>
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
-                    <button onclick="window.location.href='/auth/login'"
-                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join
-                        Now</button>
-                </div>
+                <a href="/about" class="navbar-link">About</a>
+                <a href="/contact" class="navbar-link">Contact</a>
+                <a href="../#faq-section" class="navbar-link">FAQ</a>
+                <a href="/buyer/dashboard" class="navbar-link">Bookstores</a>
+            </div>
+            <div class="navbar-actions">
+                <a href="#" class="navbar-icon"><i class="far fa-heart"></i></a>
+                <a href="#" class="navbar-icon"><i class="fas fa-shopping-cart"></i></a>
+                <button onclick="window.location.href='/auth/login'" class="navbar-join-btn">Join Now</button>
             </div>
         </div>
     </nav>
 
     <!-- About Section -->
-    <section class="pt-40 pb-12 bg-gradient-to-b from-purple-50 to-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-5xl font-bold text-gray-900 mb-6 animate-fade-in">
-                    About Us
-                </h1>
-                <p class="text-xl text-gray-600 mb-8 animate-fade-in-delay">
+    <section class="about-section animate-fade-in">
+        <div class="about-container">
+            <div class="about-header">
+                <h1 class="about-title">About Us</h1>
+                <p class="about-subtitle">
                     Discover the story behind PubliShelf and our mission to connect readers and authors worldwide.
                 </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-                <div class="bg-white rounded-lg shadow-md p-8 animate-fade-in">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
-                    <p class="text-gray-600 mb-4">
+            <div class="about-content">
+                <div class="about-card">
+                    <h2 class="about-card-title">Our Mission</h2>
+                    <p class="about-card-text">
                         At PubliShelf, we believe in the power of books to transform lives. Our mission is to create a
                         vibrant marketplace where readers can discover new books and authors can reach a global
                         audience.
                     </p>
-                    <p class="text-gray-600">
+                    <p class="about-card-text">
                         We are committed to providing a seamless experience for both buyers and sellers, ensuring that
                         every transaction is smooth and enjoyable.
                     </p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-8 animate-fade-in-delay">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Team</h2>
-                    <p class="text-gray-600 mb-4">
+                <div class="about-card">
+                    <h2 class="about-card-title">Our Team</h2>
+                    <p class="about-card-text">
                         Our team is made up of passionate book lovers and tech enthusiasts who are dedicated to making
                         PubliShelf the best place to buy and sell books online.
                     </p>
-                    <p class="text-gray-600">
-                        From our customer support team to our developers, everyone at PubliShelf is committed to
-                        providing you with the best possible experience.
-                    </p>
+                </div>
+            </div>
+
+            <!-- Team Members Section -->
+            <div class="team-section">
+                <h2 class="team-title">Meet Our Team</h2>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <img src="https://source.unsplash.com/150x150/?portrait,man" alt="Team Member 1"
+                            class="team-member-img">
+                        <h3 class="team-member-name">Akash Varma</h3>
+                        <p class="team-member-role">Frontend Developer</p>
+                        <p class="team-member-desc">Handles the design and functionality of Forms and Authentication.
+                        </p>
+                    </div>
+
+                    <div class="team-card">
+                        <img src="https://source.unsplash.com/150x150/?portrait,woman,smile" alt="Team Member 5"
+                            class="team-member-img">
+                        <h3 class="team-member-name">Ch Vinayak</h3>
+                        <p class="team-member-role">Frontend Manager</p>
+                        <p class="team-member-desc">Drives user engagement and promotional campaigns.</p>
+                    </div>
+
+                    <div class="team-card">
+                        <img src="https://source.unsplash.com/150x150/?portrait,man,glasses" alt="Team Member 3"
+                            class="team-member-img">
+                        <h3 class="team-member-name">KL Vitesh Reddy</h3>
+                        <p class="team-member-role">Frontend Developer</p>
+                        <p class="team-member-desc">Focuses on creating intuitive and visually appealing pages.</p>
+                    </div>
+
+                    <div class="team-card">
+                        <img src="https://source.unsplash.com/150x150/?portrait,woman" alt="Team Member 2"
+                            class="team-member-img">
+                        <h3 class="team-member-name">Rithish Reddy</h3>
+                        <p class="team-member-role">Backend Developer</p>
+                        <p class="team-member-desc">Manages server-side logic and database integration.</p>
+                    </div>
+
+                    <div class="team-card">
+                        <img src="https://source.unsplash.com/150x150/?portrait,man,beard" alt="Team Member 4"
+                            class="team-member-img">
+                        <h3 class="team-member-name">Vishnu Vardhan</h3>
+                        <p class="team-member-role">Frontend Manager</p>
+                        <p class="team-member-desc">Oversees the creation and management of website content.</p>
+                    </div>
+
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4">PubliShelf</h3>
-                    <p class="text-gray-400">Your gateway to endless literary discoveries.</p>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-title">PubliShelf</h3>
+                <p class="footer-text">Your gateway to endless literary discoveries.</p>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-subtitle">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="/about" class="footer-link">About Us</a></li>
+                    <li><a href="/contact" class="footer-link">Contact</a></li>
+                    <li><a href="#" class="footer-link">Terms of Service</a></li>
+                    <li><a href="#" class="footer-link">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-subtitle">Connect</h4>
+                <div class="footer-social">
+                    <a href="#" class="footer-social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="footer-social-icon"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="footer-social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="footer-social-icon"><i class="fab fa-linkedin"></i></a>
                 </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="/about" class="text-gray-400 hover:text-white">About Us</a></li>
-                        <li><a href="/contact" class="text-gray-400 hover:text-white">Contact</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Connect</h4>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
-                    <form class="flex">
-                        <input type="email" placeholder="Enter your email" class="px-4 py-2 rounded-l-lg w-full">
-                        <button class="bg-purple-600 px-4 py-2 rounded-r-lg hover:bg-purple-700">
-                            Subscribe
-                        </button>
-                    </form>
-                </div>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-subtitle">Newsletter</h4>
+                <form class="footer-newsletter">
+                    <input type="email" placeholder="Enter your email" class="footer-newsletter-input">
+                    <button class="footer-newsletter-btn">Subscribe</button>
+                </form>
             </div>
         </div>
     </footer>

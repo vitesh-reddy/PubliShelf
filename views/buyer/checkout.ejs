@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - PubliShelf</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <a href="/" class="navbar-logo">
+                    <span>PubliShelf</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="buy-now-container">
+            <!-- Checkout Heading -->
+            <h1 class="checkout-heading">Checkout</h1>
+
+            <!-- Shipping Address Section -->
+            <div class="form-section animate-fade-in">
+                <h2>Shipping Address</h2>
+                <div class="saved-addresses" id="savedAddresses">
+                    <div class="address-option">
+                        <input type="radio" name="address" id="address1" checked>
+                        <label for="address1">
+                            <strong>Donald Trump</strong><br>
+                            WhiteHouse , 123 Main St, Apt 4B, Washington DC, 62704<br>
+                            Phone: +91 98765 43210
+                        </label>
+                    </div>
+                    <div class="address-option">
+                        <input type="radio" name="address" id="address2">
+                        <label for="address2">
+                            <strong>Balayya Babu</strong><br>
+                            456 Elm St, Suite 10,Telangana, HYD, 10001<br>
+                            Phone: +91 87654 32109
+                        </label>
+                    </div>
+                    <button class="add-address-btn" onclick="toggleAddressForm()">+ Add New Address</button>
+                </div>
+
+                <!-- New Address Form (Hidden by Default) -->
+                <div class="new-address-form" id="newAddressForm">
+                    <h3>Add New Address</h3>
+                    <form id="addressForm" onsubmit="saveAddress(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="fullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="phoneNumber" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <textarea rows="3" id="address" required></textarea>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>City</label>
+                                <input type="text" id="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label>State</label>
+                                <input type="text" id="state" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Postal Code</label>
+                                <input type="text" id="postalCode" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="cancel-btn" onclick="toggleAddressForm()">Cancel</button>
+                            <button type="submit" class="submit-btn">Save Address</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Information Section -->
+            <div class="form-section animate-fade-in-delay">
+                <h2>Payment Method</h2>
+                <div class="payment-options">
+                    <div class="payment-option" onclick="togglePaymentForm('card')">
+                        <input type="radio" name="payment" id="creditCard">
+                        <label for="creditCard">
+                            <img src="https://logos-world.net/wp-content/uploads/2020/04/Visa-Logo.png" alt="Visa"
+                                class="bank-logo">
+                            <img src="https://logos-world.net/wp-content/uploads/2020/07/Mastercard-Logo.png"
+                                alt="MasterCard" class="bank-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Rupay_Logo.svg/1200px-Rupay_Logo.svg.png"
+                                alt="Rupay" class="bank-logo">
+                            Credit/Debit Card
+                        </label>
+                    </div>
+                    <div class="payment-form" id="cardForm">
+                        <h3>Enter Card Details</h3>
+                        <form id="cardDetailsForm" onsubmit="saveCardDetails(event)">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" id="cardNumber" required>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Expiration Date</label>
+                                    <input type="text" id="expiryDate" placeholder="MM/YY" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>CVV</label>
+                                    <input type="text" id="cvv" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="submit-btn">Save Card</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="payment-option" onclick="togglePaymentForm('upi')">
+                        <input type="radio" name="payment" id="upi">
+                        <label for="upi">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png"
+                                alt="UPI" class="bank-logo">
+                            UPI
+                        </label>
+                    </div>
+                    <div class="payment-form" id="upiForm">
+                        <h3>Enter UPI ID</h3>
+                        <form id="upiDetailsForm" onsubmit="saveUpiDetails(event)">
+                            <div class="form-group">
+                                <label>UPI ID</label>
+                                <input type="text" id="upiId" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="submit-btn">Save UPI</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="payment-option" onclick="togglePaymentForm('cod')">
+                        <input type="radio" name="payment" id="cod">
+                        <label for="cod">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Cash on Delivery
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="order-summary animate-fade-in-delay-2">
+                <h2>Order Summary</h2>
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span>₹1,299.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span>₹49.00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total</span>
+                    <span>₹1,348.00</span>
+                </div>
+                <button type="submit" class="submit-btn">Place Your Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Address Form
+        function toggleAddressForm() {
+            const form = document.getElementById('newAddressForm');
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Save New Address
+        function saveAddress(event) {
+            event.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const postalCode = document.getElementById('postalCode').value;
+
+            const addressContainer = document.getElementById('savedAddresses');
+            const newAddress = document.createElement('div');
+            newAddress.className = 'address-option';
+            newAddress.innerHTML = `
+                <input type="radio" name="address" id="address${addressContainer.children.length}">
+                <label for="address${addressContainer.children.length}">
+                    <strong>${fullName}</strong><br>
+                    ${address}, ${city}, ${state}, ${postalCode}<br>
+                    Phone: ${phoneNumber}
+                </label>
+            `;
+            addressContainer.insertBefore(newAddress, addressContainer.lastElementChild);
+            toggleAddressForm();
+        }
+
+        // Toggle Payment Form
+        function togglePaymentForm(type) {
+            const cardForm = document.getElementById('cardForm');
+            const upiForm = document.getElementById('upiForm');
+            if (type === 'card') {
+                cardForm.style.display = cardForm.style.display === 'block' ? 'none' : 'block';
+                upiForm.style.display = 'none';
+            } else if (type === 'upi') {
+                upiForm.style.display = upiForm.style.display === 'block' ? 'none' : 'block';
+                cardForm.style.display = 'none';
+            } else {
+                cardForm.style.display = 'none';
+                upiForm.style.display = 'none';
+            }
+        }
+
+        // Save Card Details
+        function saveCardDetails(event) {
+            event.preventDefault();
+            alert('Card details saved!');
+        }
+
+        // Save UPI Details
+        function saveUpiDetails(event) {
+            event.preventDefault();
+            alert('UPI details saved!');
+        }
+    </script>
+</body>
+
+</html>

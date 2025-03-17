@@ -25,6 +25,13 @@ router.get("/dashboard", (req, res) => {
   else res.redirect("/auth/login");
 });
 
+router.get("/checkout", (req, res) => {
+  if (req.isAuthenticated())
+    res.render("buyer/checkout", {
+      buyerName: req.user.firstname,
+    });
+  else res.redirect("/auth/login");
+});
 router.get("/signup", (req, res) => {
   if (req.isAuthenticated()) {
     res.redirect("/auth/login");
