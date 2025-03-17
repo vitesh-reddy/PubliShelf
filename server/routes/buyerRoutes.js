@@ -25,6 +25,14 @@ router.get("/dashboard", (req, res) => {
   else res.redirect("/auth/login");
 });
 
+router.get("/auction-page", (req, res) => {
+  if (req.isAuthenticated())
+    res.render("buyer/auction-page", {
+      buyerName: req.user.firstname,
+    });
+  else res.redirect("/auth/login");
+});
+
 router.get("/checkout", (req, res) => {
   if (req.isAuthenticated())
     res.render("buyer/checkout", {
@@ -66,7 +74,20 @@ router.post("/signup", (req, res) => {
   }
 });
 
-router.get("/product-detail", (req, res) => res.render("buyer/product-detail"));
+router.get("/product-detail/:id1", (req, res) => {
+  if (req.isAuthenticated()) {
+    const bookId = req.params.id1;
+    const book = BooksDataArray.find((book) => book.id == bookId);
+    if (book == undefined) {
+      res.send("Book not found");
+      return;
+    }
+    res.render("buyer/product-detail", {
+      book: book,
+      name: req.user.firstname,
+    });
+  } else res.redirect("/auth/login");
+});
 
 router.get("/cart", (req, res) => {
   const calculateOrderSummary = (cart) => {

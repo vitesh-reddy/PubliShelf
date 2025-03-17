@@ -37,7 +37,7 @@
                     <a href="/#faq-section" class="<%= styles.navBtnStyle %>">FAQ</a>
                     <a href="/about" class="<%= styles.navBtnStyle %>">About</a>
                     <a href="/contact" class="<%= styles.navBtnStyle %>">Contact Us</a>
-                    <a href="/buyer/dashboard" class="<%= styles.navBtnStyle %>">Bookstores</a>
+                    <a href="/auth/login" class="<%= styles.navBtnStyle %>">Bookstores</a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="#" class="text-gray-700 hover:text-purple-600 scale-0 md:scale-100">
@@ -50,9 +50,7 @@
                         class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join
                         Now</button>
                     <div class="relative group">
-                        <button class="md:hidden text-gray-700 hover:text-purple-600 transition-colors px-3 py-2"><img
-                                class="h-5 w-5" src="https://img.icons8.com/?size=100&id=3096&format=png&color=000000"
-                                alt="="></button>
+                        <button class="md:hidden text-gray-700 hover:text-purple-600 transition-colors px-3 py-2"><img class="h-5 w-5" src="https://img.icons8.com/?size=100&id=3096&format=png&color=000000" alt="="></button>
                         <div
                             class="absolute top-full right-1 w-32 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
                             <a href="#" class="<%= styles.categoryBtnStyle %>">Cart</a>
@@ -60,7 +58,7 @@
                             <a href="/#faq-section" class="<%= styles.categoryBtnStyle %>">FAQ</a>
                             <a href="/about" class="<%= styles.categoryBtnStyle %>">About</a>
                             <a href="/contact" class="<%= styles.categoryBtnStyle %>">Contact Us</a>
-                            <a href="/buyer/dashboard" class="<%= styles.categoryBtnStyle %>">Bookstores</a>
+                            <a href="/auth/login" class="<%= styles.categoryBtnStyle %>">Bookstores</a>
                         </div>
                     </div>
 
@@ -95,7 +93,7 @@
         <div class="h-3"></div>
 
     </section>
-    <!-- Stats Section -->
+        <!-- Stats Section -->
     <section class="py-12 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-4 gap-8 text-center">
@@ -118,7 +116,6 @@
             </div>
         </div>
     </section>
-
     <!-- About PubliShelf Section -->
     <section class="py-16 bg-white animate-fade-in-delay-2">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -222,27 +219,24 @@
     <!-- Featured Books Sections -->
     <section class="py-12 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8">Top Rated Books</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">Newly Added Books</h2>
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.topRated.forEach(book=> { %>
-                        <div class="<%= styles.bookCardStyle %>" onclick="window.location.href='/buyer/product-detail'">
-                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
+                    <% newlyBooks.forEach(book=> { %>
+                        <div class="<%= styles.bookCardStyle %>">
+                            <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
-                                    <%= book.title %>
+                                    <%= book.bookTitle %>
                                 </h3>
                                 <p class="text-gray-600 text-sm mb-2">by <%= book.author %>
                                 </p>
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center">
-                                        <span class="text-yellow-400">★</span>
-                                        <span class="ml-1 text-sm">
-                                            <%= book.rating %>
-                                        </span>
+                                        
                                     </div>
                                     <span class="font-bold text-purple-600 text-sm">
-                                        <%= book.price %>
+                                        ₹<%= book.price %>
                                     </span>
                                 </div>
                             </div>
@@ -275,7 +269,7 @@
                                         </span>
                                     </div>
                                     <span class="font-bold text-purple-600 text-sm">
-                                        <%= book.price %>
+                                        ₹<%= book.price %>
                                     </span>
                                 </div>
                             </div>
@@ -310,7 +304,7 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-purple-600 text-sm">Trending</span>
                                     <span class="font-bold text-purple-600 text-sm">
-                                        <%= book.price %>
+                                        ₹<%= book.price %>
                                     </span>
                                 </div>
                             </div>

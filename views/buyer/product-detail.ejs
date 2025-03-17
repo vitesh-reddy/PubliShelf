@@ -37,9 +37,9 @@
                     </a>
                     <div class="relative">
                         <button class="flex items-center space-x-2">
-                            <img src="https://ui-avatars.com/api/?name=John+Doe" alt="Profile"
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000" class="w-6 h-6" alt="Profile"
                                 class="w-8 h-8 rounded-full">
-                            <span class="text-gray-700">John Doe</span>
+                            <span class="text-gray-700"><%= name %></span>
                         </button>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
             <nav class="flex mb-8" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
-                        <a href="/" class="text-gray-700 hover:text-purple-600">
+                        <a href="/buyer/dashboard" class="text-gray-700 hover:text-purple-600">
                             <i class="fas fa-home mr-2"></i>
                             Home
                         </a>
@@ -62,13 +62,7 @@
                     <li>
                         <div class="flex items-center">
                             <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                            <a href="/category/fiction" class="text-gray-700 hover:text-purple-600">Fiction</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                            <span class="text-gray-500">The Midnight Library</span>
+                            <span class="text-gray-500"><%= book.bookTitle %></span>
                         </div>
                     </li>
                 </ol>
@@ -80,74 +74,45 @@
                     <!-- Image Section -->
                     <div class="space-y-4">
                         <div class="aspect-w-3 aspect-h-4 rounded-lg overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"
+                            <img src="<%= book.image %>"
                                 alt="The Midnight Library"
                                 class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
                         </div>
-                        <div class="grid grid-cols-4 gap-4">
-                            <button class="rounded-lg overflow-hidden border-2 border-purple-600">
-                                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Thumbnail 1" class="w-full h-24 object-cover">
-                            </button>
-                            <button
-                                class="rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-600">
-                                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Thumbnail 2" class="w-full h-24 object-cover">
-                            </button>
-                            <button
-                                class="rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-600">
-                                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Thumbnail 3" class="w-full h-24 object-cover">
-                            </button>
-                            <button
-                                class="rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-600">
-                                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Thumbnail 4" class="w-full h-24 object-cover">
-                            </button>
-                        </div>
+                        <!--  -->
                     </div>
 
                     <!-- Product Info -->
                     <div class="space-y-6">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">The Midnight Library</h1>
-                            <p class="text-lg text-gray-600 mt-2">by Matt Haig</p>
+                            <h1 class="text-3xl font-bold text-gray-900"><%= book.bookTitle %></h1>
+                            <p class="text-lg text-gray-600 mt-2"><%= book.author %></p>
+                            <p class="text-gray-600">Genre : <%= book.genre %></p>
                         </div>
 
-                        <div class="flex items-center space-x-4">
-                            <div class="flex items-center">
-                                <div class="flex text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="ml-2 text-gray-600">4.5 (2.1k reviews)</span>
-                            </div>
-                            <span class="text-gray-300">|</span>
-                            <span class="text-green-600">In Stock (23 copies)</span>
+                        <div class="flex items-center">
+                            <span class="ml-2 text-gray-600">4.5 (2.1k reviews)</span>
+                            <span class="text-green-600">In Stock (<%=book.quantity%>)</span>
+                            <br>
                         </div>
 
                         <div class="border-t border-b py-4">
                             <div class="flex items-baseline">
-                                <span class="text-4xl font-bold text-gray-900">$19.99</span>
-                                <span class="ml-2 text-lg text-gray-500 line-through">$24.99</span>
-                                <span class="ml-2 text-green-600">20% OFF</span>
+                                <span class="text-4xl font-bold text-gray-900">₹<%= book.price %></span>
                             </div>
-                            <p class="text-sm text-gray-500 mt-1">Free shipping on orders over $35</p>
                         </div>
 
                         <div class="space-y-4">
                             <div class="flex items-center space-x-4">
                                 <div class="flex items-center border rounded-lg">
+                                    
                                     <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                        <i class="fas fa-minus"></i>
+                                         <br>
                                     </button>
                                     <input type="number" value="1" min="1" max="23"
-                                        class="w-16 text-center border-x focus:outline-none focus:ring-0">
+                                        class="text-center text-2xl focus:outline-none 
+                                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                     <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                        <i class="fas fa-plus"></i>
+                                         <br>
                                     </button>
                                 </div>
                                 <button
@@ -172,55 +137,15 @@
                         <div class="space-y-4">
                             <h3 class="text-lg font-semibold">Description</h3>
                             <p class="text-gray-600">
-                                Between life and death there is a library, and within that library, the shelves go on
-                                forever. Every book provides a chance to try another life you could have lived. To see
-                                how things would be if you had made other choices... Would you have done anything
-                                different, if you had the chance to undo your regrets?
+                                <%= book.description %>
                             </p>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <p class="text-gray-600">Publisher: <span class="text-gray-900">Viking</span></p>
-                                    <p class="text-gray-600">Language: <span class="text-gray-900">English</span></p>
-                                    <p class="text-gray-600">Pages: <span class="text-gray-900">304</span></p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-600">ISBN-13: <span class="text-gray-900">9780525559474</span>
-                                    </p>
-                                    <p class="text-gray-600">Publication Date: <span class="text-gray-900">Sept 29,
-                                            2020</span></p>
-                                    <p class="text-gray-600">Genre: <span class="text-gray-900">Fiction</span></p>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
 
-                <!-- Publisher Info -->
-                <div class="border-t">
-                    <div class="p-8">
-                        <h3 class="text-xl font-semibold mb-4">About the Publisher</h3>
-                        <div class="flex items-start space-x-4">
-                            <img src="https://ui-avatars.com/api/?name=Viking+Press&size=128" alt="Viking Press"
-                                class="w-16 h-16 rounded-lg">
-                            <div>
-                                <h4 class="text-lg font-semibold">Viking Press</h4>
-                                <p class="text-gray-600 mt-1">Founded in 1925, Viking Press is known for publishing
-                                    groundbreaking fiction and non-fiction by some of the world's most influential
-                                    authors.</p>
-                                <div class="flex items-center space-x-4 mt-2">
-                                    <div class="flex items-center text-gray-600">
-                                        <i class="fas fa-book mr-2"></i>
-                                        <span>1.2k Books Published</span>
-                                    </div>
-                                    <div class="flex items-center text-gray-600">
-                                        <i class="fas fa-star mr-2"></i>
-                                        <span>4.8 Publisher Rating</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
+                
             </div>
 
             <!-- Reviews Section -->
@@ -273,8 +198,8 @@
                 </div>
             </div>
 
-            <!-- Similar Books -->
-            <div class="mt-12">
+             <!-- Similar Books -->
+             <div class="mt-12">
                 <h3 class="text-2xl font-bold mb-6">You May Also Like</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="book-card">
