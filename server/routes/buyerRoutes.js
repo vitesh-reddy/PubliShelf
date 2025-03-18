@@ -16,52 +16,69 @@ import "../config/passportConfig.js";
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.get("/dashboard", (req, res) => {
-  if (req.isAuthenticated()){
-      db.all("SELECT * FROM books", [], (err, books) => {
-        if (err) {
-            console.error("Error fetching books:", err.message);
-            return res.status(500).send("Internal Server Error");
-        }
-        books.reverse();
-        const temp = books.slice(0, 8);
-        res.render("buyer/dashboard", { newlyBooks : temp, books : mockBuyerData,  styles: styles, buyerName: req.user.firstname, });
-      });
-  }
-  else res.redirect("/auth/login");
+const checkAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  res.redirect("/auth/login");
+};
+
+router.get("/dashboard", checkAuthenticated, (req, res) => {
+  db.all("SELECT * FROM books", [], (err, books) => {
+    if (err) {
+      console.error("Error fetching books:", err.message);
+      return res.status(500).send("Internal Server Error");
+    }
+    books.reverse();
+    const temp = books.slice(0, 8);
+    res.render("buyer/dashboard", {
+      newlyBooks: temp,
+      books: mockBuyerData,
+      styles: styles,
+      buyerName: req.user.firstname,
+    });
+  });
 });
 
-router.get("/profile", (req, res) => {     
-
-router.get("/auction-item-detail", (req, res) => {
-  if (req.isAuthenticated())
-    res.render("buyer/auction-item-detail", {
+router.get("/search-page", checkAuthenticated, (req, res) => {
+  db.all("SELECT * FROM books", [], (err, books) => {
+    if (err) {
+      console.error("Error fetching books:", err.message);
+      return res.status(500).send("Internal Server Error");
+    }
+    const temp = books.slice(0, 8);
+    res.render("buyer/search-page", {
+      newlyBooks: temp,
+      books: mockBuyerData,
       buyerName: req.user.firstname,
+      styles: styles,
     });
-  else res.redirect("/auth/login");
- });
-
-router.get("/auction-page", (req, res) => {
-  if (req.isAuthenticated())
-    res.render("buyer/auction-page", {
-      buyerName: req.user.firstname,
-    });
-  else res.redirect("/auth/login");
+  });
 });
 
-router.get("/checkout", (req, res) => {
-  if (req.isAuthenticated())
-    res.render("buyer/checkout", {
-      buyerName: req.user.firstname,
-    });
-  else res.redirect("/auth/login");
+router.get("/profile", checkAuthenticated, (req, res) => {
+  res.render("buyer/profile", {
+    user: req.user,
+  });
+});
+
+router.get("/auction-page", checkAuthenticated, (req, res) => {
+  res.render("buyer/auction-page", {
+    buyerName: req.user.firstname,
+  });
+});
+
+router.get("/auction-item-detail", checkAuthenticated, (req, res) => {
+  res.render("buyer/auction-item-detail", {
+    buyerName: req.user.firstname,
+  });
+});
+
+router.get("/checkout", checkAuthenticated, (req, res) => {
+  res.render("buyer/checkout", {
+    buyerName: req.user.firstname,
+  });
 });
 router.get("/signup", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.redirect("/auth/login");
-    return;
-  }
-  res.render("auth/signup-buyer");
+  res.render("auth/signup-buyer", { styles: styles });
 });
 
 router.post("/signup", (req, res) => {
@@ -90,26 +107,31 @@ router.post("/signup", (req, res) => {
   }
 });
 
-router.get("/product-detail/:id1", (req, res) => {
-  if (req.isAuthenticated()) {
-    const bookId = req.params.id1;
-    const book = BooksDataArray.find((book) => book.id == bookId);
-    if (book == undefined) {
-      res.send("Book not found");
-      return;
+router.get("/product-detail/:id1", checkAuthenticated, (req, res) => {
+  const bookId = req.params.id1;
+  db.get("SELECT * FROM books WHERE id = ?", [bookId], (err, book) => {
+    if (err) {
+      console.error("Error fetching book:", err.message);
+      return res.status(500).send("Internal Server Error");
     }
+
+    if (!book) return res.send("Book not found");
+
     res.render("buyer/product-detail", {
       book: book,
       name: req.user.firstname,
+      buyerName: req.user.firstname,
+      styles: styles,
     });
-  } else res.redirect("/auth/login");
+  });
 });
-
-router.get("/cart", (req, res) => {
+router.get("/cart", checkAuthenticated, (req, res) => {
   const calculateOrderSummary = (cart) => {
-    const subtotal = cart.reduce((sum, item) => {
-      return sum + parseFloat(item.price.replace("$", "")) * item.quantity;
-    }, 0);
+    const subtotal = cart.reduce(
+      (sum, item) =>
+        sum + parseFloat(item.price.replace("₹", "")) * item.quantity,
+      0
+    );
 
     const shipping = subtotal >= 35 ? 0 : 5.99;
     const tax = subtotal * 0.08; // 8% tax
@@ -120,9 +142,11 @@ router.get("/cart", (req, res) => {
   const orderSummary = calculateOrderSummary(mockCart);
 
   res.render("buyer/cart", {
+    buyerName: req.user.firstname,
     cart: mockCart,
     wishlist: mockWishlist,
     ...orderSummary,
+    styles: styles,
   });
 });
 
@@ -151,47 +175,6 @@ router.post("/signup", (req, res) => {
     BuyerLoginData.push(copyy);
     res.redirect("/auth/login");
   }
-});
-
-router.post("/publish-book", (req, res) => {
-  const bookTitle = req.body.bookTitle;
-  const author = req.body.author;
-  const description = req.body.description;
-  const genre = req.body.genre;
-  const price = req.body.price;
-  const quantity = parseInt(req.body.quantity, 10);
-  const image = req.body.image;
-
-  const copyFind = BooksDataArray.find((obj) => {
-    if (
-      bookTitle == obj.bookTitle &&
-      author == obj.author &&
-      description == obj.description &&
-      genre == obj.genre &&
-      price == obj.price &&
-      image == obj.image
-    ) {
-      return obj;
-    }
-  });
-
-  if (!copyFind) {
-    const BookObject = {
-      bookTitle: bookTitle,
-      author: author,
-      description: description,
-      genre: genre,
-      price: price,
-      quantity: quantity,
-      image: image,
-    };
-    BooksDataArray.push(BookObject);
-  } else {
-    copyFind.quantity = parseInt(copyFind.quantity, 10) + quantity;
-  }
-
-  console.log(BooksDataArray);
-  res.redirect("/publisher/dashboard");
 });
 
 export default router;

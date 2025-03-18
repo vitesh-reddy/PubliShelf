@@ -6,7 +6,7 @@ const mockCart = [
     rating: 4.8,
     image:
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300",
-    price: "$19.99",
+    price: "₹499.00",
     quantity: 1,
   },
   {
@@ -16,8 +16,8 @@ const mockCart = [
     rating: 4.9,
     image:
       "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=300",
-    price: "$24.99",
-    quantity: 2,
+    price: "799.00",
+    quantity: 1,
   },
 ];
 

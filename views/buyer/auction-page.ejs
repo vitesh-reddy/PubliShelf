@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Auction - PubliShelf</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+	<link rel="stylesheet" href="../css/auction-page.css">
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav class="navbar">
+		<div class="navbar-container">
+			<div class="navbar-brand">
+				<a href="/" class="navbar-logo">PubliShelf</a>
+			</div>
+			<div class="navbar-links">
+				<a href="/buyer/dashboard" class="nav-link">Home</a>
+				<a href="/auction" class="nav-link">Auction</a>
+				<a href="/buyer/dashboard" class="nav-link">Bookstores</a>
+				<a href="/about" class="nav-link">About</a>
+				<a href="/contact" class="nav-link">Contact</a>
+			</div>
+			<div class="navbar-actions">
+				<div class="profile-dropdown">
+					<button class="profile-btn" onclick="window.location.href='/buyer/profile'">
+                        <i class="fas fa-user"></i>
+                    </button>
+					<div class="dropdown-content" id="profileMenu">
+						<a href="/profile">Profile</a>
+						<a href="/logout">Logout</a>
+					</div>
+				</div>
+				<button class="menu-btn" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+			</div>
+		</div>
+		<!-- Mobile Menu -->
+		<div class="mobile-menu" id="mobileMenu">
+			<a href="/" class="nav-link">Home</a>
+			<a href="/auction" class="nav-link">Auction</a>
+			<a href="/buyer/dashboard" class="nav-link">Bookstores</a>
+			<a href="/about" class="nav-link">About</a>
+			<a href="/contact" class="nav-link">Contact</a>
+		</div>
+	</nav>
+
+	<!-- Main Content -->
+	<div class="main-content">
+		<div class="auction-container">
+			<!-- Search and Filter Bar -->
+			<div class="search-filter-bar">
+				<input type="text" placeholder="Search antique books..." id="searchInput" oninput="filterBooks()">
+				<button class="clear-btn" id="clearBtn" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+				<select id="sortBy" onchange="sortBooks()">
+                    <option value="default">Sort By</option>
+                    <option value="price-low-to-high">Price: Low to High</option>
+                    <option value="price-high-to-low">Price: High to Low</option>
+                    <option value="ending-soon">Ending Soon</option>
+                </select>
+			</div>
+
+			<!-- List of Antique Books -->
+			<div class="auction-list" id="auctionList">
+				<!-- Book 1 -->
+				<div class="auction-item" data-price="500" data-end-time="2023-12-31T23:59:59">
+					<img src="https://via.placeholder.com/150" alt="The Great Gatsby">
+					<div class="auction-details">
+						<h3>The Great Gatsby</h3>
+						<p>Author: F. Scott Fitzgerald</p>
+						<p>Condition: Excellent</p>
+						<p>Starting Bid: ₹500</p>
+						<div class="auction-actions">
+							<button class="register-btn" onclick="registerForAuction(this)">Register</button>
+							<button class="notify-btn" onclick="notifyMe(this)">Notify Me</button>
+							<button class="bookmark-btn" onclick="bookmarkItem(this)"><i class="far fa-bookmark"></i></button>
+							<button class="view-btn" onclick="window.location.href='/buyer/auction-item-detail'">View Auction</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Book 2 -->
+				<div class="auction-item" data-price="300" data-end-time="2023-11-15T23:59:59">
+					<img src="https://via.placeholder.com/150" alt="Pride and Prejudice">
+					<div class="auction-details">
+						<h3>Pride and Prejudice</h3>
+						<p>Author: Jane Austen</p>
+						<p>Condition: Good</p>
+						<p>Starting Bid: ₹300</p>
+						<div class="auction-actions">
+							<button class="register-btn" onclick="registerForAuction(this)">Register</button>
+							<button class="notify-btn" onclick="notifyMe(this)">Notify Me</button>
+							<button class="bookmark-btn" onclick="bookmarkItem(this)"><i class="far fa-bookmark"></i></button>
+							<button class="view-btn" onclick="window.location.href='/auction/item'">View Auction</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Book 3 -->
+				<div class="auction-item" data-price="800" data-end-time="2023-12-25T23:59:59">
+					<img src="https://via.placeholder.com/150" alt="1984">
+					<div class="auction-details">
+						<h3>1984</h3>
+						<p>Author: George Orwell</p>
+						<p>Condition: Very Good</p>
+						<p>Starting Bid: ₹800</p>
+						<div class="auction-actions">
+							<button class="register-btn" onclick="registerForAuction(this)">Register</button>
+							<button class="notify-btn" onclick="notifyMe(this)">Notify Me</button>
+							<button class="bookmark-btn" onclick="bookmarkItem(this)"><i class="far fa-bookmark"></i></button>
+							<button class="view-btn" onclick="window.location.href='/auction/item'">View Auction</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Add more books here -->
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Function to toggle the mobile menu
+	    function toggleMenu() {
+	        const mobileMenu = document.getElementById('mobileMenu');
+	        mobileMenu.classList.toggle('open');
+	    }
+	
+	    // Function to toggle the profile dropdown menu
+	    function toggleProfileMenu() {
+	        const profileMenu = document.getElementById('profileMenu');
+	        profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+	    }
+	
+	    // Close the dropdown if the user clicks outside of it
+	    window.onclick = function(event) {
+	        if (!event.target.matches('.profile-btn')) {
+	            const dropdowns = document.getElementsByClassName("dropdown-content");
+	            for (let i = 0; i < dropdowns.length; i++) {
+	                const openDropdown = dropdowns[i];
+	                if (openDropdown.style.display === 'block') {
+	                    openDropdown.style.display = 'none';
+	                }
+	            }
+	        }
+	    }
+	</script>
+</body>
+
+</html>

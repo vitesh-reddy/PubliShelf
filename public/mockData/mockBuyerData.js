@@ -53,7 +53,7 @@ const mockData = {
       author: "Alex Michaelides",
       sales: "450K+",
       image:
-        "https://images.unsplash.com/photo-1543497415-75c0a27177bf?auto=format&fit=crop&q=80&w=300",
+        "https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg",
       price: "16.99",
     },
     {
@@ -91,7 +91,7 @@ const mockData = {
       author: "Rick Rubin",
       trending: "#3",
       image:
-        "https://images.unsplash.com/photo-1543497415-75c0a27177bf?auto=format&fit=crop&q=80&w=300",
+        "https://m.media-amazon.com/images/I/918EkrTDaRL._AC_UF1000,1000_QL80_.jpg",
       price: "20.99",
     },
   ],

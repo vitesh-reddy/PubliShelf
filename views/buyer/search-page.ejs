@@ -21,29 +21,52 @@
                             class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
                     </a>
                 </div>
-                <div class="flex items-center space-x-8">
+                <div class="flex items-center md:space-x-8 relative">
                     <div class="relative">
                         <input type="text" placeholder="Search books..."
-                            class="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button class="absolute right-3 top-2.5 text-gray-400">
+                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <button onclick="window.location.href='/buyer/search-page'"
+                            class="absolute right-3 top-2.5 text-gray-400">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
+                    <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
-                    <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600">
+                    <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
-                    
-                    <button onclick="window.location.href='/logout'" class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">logout</button>
-                    
-                    <div class="relative">
-                        <button class="flex items-center space-x-2">
-                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000" alt="Profile"
-                                class="w-5 h-5 rounded-full">
-                            <span class="text-gray-700"><%= buyerName  %></span>
+
+                    <button onclick="window.location.href='/buyer/auction-page'"
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300  hidden md:block">Enter
+                        Auction</button>
+
+                    <div class="relative group">
+                        <button class="scale-0 md:scale-100 flex items-center space-x-2"
+                            onclick="window.location.href='/buyer/profile'">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full">
+                            <span class="text-gray-700">
+                                <%= buyerName %>
+                            </span>
                         </button>
+                        <div
+                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="/buyer/profile" class="<%= styles.categoryBtnStyle %>">Your Profile</a>
+                            <a href="/buyer/auction-page" class="<%= styles.categoryBtnStyle %>">Enter Auction</a>
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <button class="md:hidden flex items-center space-x-2">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full"></button>
+                        <div
+                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="/buyer/profile" class="<%= styles.categoryBtnStyle %>">Your Profile</a>
+                            <a href="/buyer/cart/#wishlist-section" class="<%= styles.categoryBtnStyle %>">WishList</a>
+                            <a href="/buyer/cart" class="<%= styles.categoryBtnStyle %>">Cart</a>
+                            <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,12 +128,13 @@
 
             <!-- Books Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <% books.topRated.concat(books.mostSold, books.trending).forEach(book=> { %>
-                    <div class="transition-all duration-300 ease hover:-translate-y-[5px] hover:shadow-lg bg-white rounded-lg shadow-md overflow-hidden">
-                        <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
+                <% newlyBooks.concat(books.mostSold, books.trending).forEach(book=> { %>
+                    <div onclick="window.location.href='/buyer/product-detail/<%= book.id %>'"
+                        class="transition-all duration-300 ease hover:-translate-y-[5px] hover:shadow-lg bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
                         <div class="p-4">
                             <h3 class="text-lg font-semibold mb-1">
-                                <%= book.title %>
+                                <%= book.bookTitle %>
                             </h3>
                             <p class="text-gray-600 text-sm mb-2">by <%= book.author %>
                             </p>

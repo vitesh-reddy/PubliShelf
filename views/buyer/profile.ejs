@@ -364,7 +364,7 @@
 		<div class="profile-card">
 			<div class="profile-header">
 				<div class="profile-pic"></div>
-				<h2>Rithish Reddy</h2>
+				<h2><%= user.firstname + " " + user.lastname %> </h2>
 				<p style="color: #666; font-size: 14px;">Member since March 2025</p>
 			</div>
 
@@ -386,32 +386,32 @@
 			<div class="profile-details">
 				<div class="detail-row">
 					<span class="attribute">First Name:</span>
-					<span class="value">Rithish</span>
+					<span class="value"><%= user.firstname %> </span>
 				</div>
 				<div class="detail-row">
 					<span class="attribute">Last Name:</span>
-					<span class="value">Reddy</span>
+					<span class="value"><%= user.lastname %></span>
 				</div>
 				<div class="detail-row">
 					<span class="attribute">Email:</span>
-					<span class="value">hello@gmail.com</span>
+					<span class="value"><%= user.email %></span>
 				</div>
 				<div class="detail-row">
 					<span class="attribute">Role:</span>
-					<span class="value">buyer</span>
+					<span class="value"><%= user.role %></span>
 				</div>
 			</div>
 
 			<div class="action-buttons">
 				<button class="btn edit-btn">Edit Profile</button>
-				<button class="btn logout-btn">Logout</button>
+				<button class="btn logout-btn" onclick="window.location.href='/logout'">Logout</button>
 			</div>
 		</div>
 
 		<div class="orders-section">
 			<h3 class="section-title">Your Orders</h3>
 			<div class="order-card">
-				<img src="https://images-na.ssl-images-amazon.com/images/I/51k2g+1roFL.SX331_BO1,204,203,200.jpg" alt="Book" class="book-image">
+				<img src="https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg" alt="Book" class="book-image">
 				<div class="order-details">
 					<h4>The Silent Patient</h4>
 					<p><strong>Author:</strong> Alex Michaelides</p>
@@ -426,7 +426,7 @@
 			</div>
 
 			<div class="order-card">
-				<img src="https://m.media-amazon.com/images/I/81FxtWdphnL.AC_UY218.jpg" alt="Book" class="book-image">
+				<img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1555447414i/44767458.jpg" alt="Book" class="book-image">
 				<div class="order-details">
 					<h4>Dune</h4>
 					<p><strong>Author:</strong> Frank Herbert</p>
@@ -459,7 +459,7 @@
 				<h3 class="section-title">Your Wishlist</h3>
 				<div class="wishlist-grid">
 					<div class="wishlist-item">
-						<img src="https://m.media-amazon.com/images/I/81ls8LLUNJL.AC_UY218.jpg" alt="Book">
+						<img src="https://m.media-amazon.com/images/I/713jIoMO3UL._SL1500_.jpg" alt="Book">
 						<p>Sapiens</p>
 						<p style="color: #666; font-size: 12px;">Yuval Noah Harari</p>
 					</div>

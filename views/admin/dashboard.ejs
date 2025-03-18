@@ -24,14 +24,14 @@
                 </div>
                 <div class="">
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-4 scale-0 md:scale-100">
                     <button
-                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
-                        <a   href="#manage-publishers"> Manage Publishers </a>
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
+                        <a href="#manage-publishers"> Manage Publishers </a>
                     </button>
                     <button
-                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
-                        <a   href="#manage-publishers"> Logout </a>
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
+                        <a href="/logout"> Logout </a>
                     </button>
                     <div class="relative">
                         <button class="flex items-center space-x-2">
@@ -39,6 +39,15 @@
                                 class="w-8 h-8 rounded-full">
                             <span class="text-gray-700">Admin Name</span>
                         </button>
+                    </div>
+                </div>
+                <div class="relative group md:hidden">
+                    <button class="md:hidden w-auto h-auto"><img src="https://ui-avatars.com/api/?name=Admin"
+                            alt="Profile" class="w-8 h-8 rounded-full"></button>
+                    <div
+                        class="absolute top-full right-1 w-32 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                        <a href="#manage-publishers" class="<%= styles.categoryBtnStyle %>"> Manage Publishers</a>
+                        <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,39 +9,64 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="fixed w-full bg-white shadow-sm z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="flex items-center">
-                        <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                    <a href="/buyer/dashboard" class="flex items-center">
+                        <span
+                            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
                     </a>
                 </div>
-                <div class="flex items-center space-x-8">
+                <div class="flex items-center md:space-x-8 relative">
                     <div class="relative">
-                        <input type="text" placeholder="Search books..." class="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button class="absolute right-3 top-2.5 text-gray-400">
+                        <input type="text" placeholder="Search books..."
+                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <button onclick="window.location.href='/buyer/search-page'"
+                            class="absolute right-3 top-2.5 text-gray-400">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
+                    <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
-                    <a href="#" class="text-purple-600">
+                    <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
+
+                    <button onclick="window.location.href='/logout'"
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300  hidden md:block">logout</button>
+
                     <div class="relative">
-                        <button class="flex items-center space-x-2">
-                            <img src="https://ui-avatars.com/api/?name=John+Doe" alt="Profile" class="w-8 h-8 rounded-full">
-                            <span class="text-gray-700">John Doe</span>
+                        <button class="scale-0 md:scale-100 flex items-center space-x-2"
+                            onclick="window.location.href='/buyer/profile'">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full">
+                            <span class="text-gray-700">
+                                <%= buyerName %>
+                            </span>
                         </button>
+                    </div>
+                    <div class="relative group">
+                        <button class="md:hidden flex items-center space-x-2">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full"></button>
+                        <div
+                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="/buyer/profile" class="<%= styles.categoryBtnStyle %>">Your Profile</a>
+                            <a href="/buyer/cart/#wishlist-section" class="<%= styles.categoryBtnStyle %>">WishList</a>
+                            <a href="/buyer/cart" class="<%= styles.categoryBtnStyle %>">Cart</a>
+                            <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
+
 
     <!-- Main Content -->
     <div class="pt-16">
@@ -53,82 +79,99 @@
                             <h2 class="text-2xl font-bold text-gray-900">Shopping Cart</h2>
                             <p class="text-gray-500 mt-1">You have <%= cart.length %> items in your cart</p>
                         </div>
-                        
+
                         <div class="divide-y">
-                            <% cart.forEach(item => { %>
+                            <% cart.forEach(item=> { %>
                                 <div class="p-6 flex items-center space-x-4">
-                                    <img src="<%= item.image %>" alt="<%= item.title %>" class="w-24 h-32 object-cover rounded-lg">
+                                    <img src="<%= item.image %>" alt="<%= item.title %>"
+                                        class="w-24 h-32 object-cover rounded-lg">
                                     <div class="flex-1">
-                                        <h3 class="text-lg font-semibold text-gray-900"><%= item.title %></h3>
-                                        <p class="text-gray-600">by <%= item.author %></p>
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            <%= item.title %>
+                                        </h3>
+                                        <p class="text-gray-600">by <%= item.author %>
+                                        </p>
                                         <div class="flex items-center mt-2">
                                             <div class="flex text-yellow-400">
-                                                <% for(let i = 0; i < Math.floor(item.rating); i++) { %>
+                                                <% for(let i=0; i < Math.floor(item.rating); i++) { %>
                                                     <i class="fas fa-star"></i>
-                                                <% } %>
-                                                <% if(item.rating % 1 !== 0) { %>
-                                                    <i class="fas fa-star-half-alt"></i>
-                                                <% } %>
+                                                    <% } %>
+                                                        <% if(item.rating % 1 !==0) { %>
+                                                            <i class="fas fa-star-half-alt"></i>
+                                                            <% } %>
                                             </div>
-                                            <span class="ml-2 text-gray-600"><%= item.rating %></span>
+                                            <span class="ml-2 text-gray-600">
+                                                <%= item.rating %>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-4">
                                         <div class="flex items-center border rounded-lg">
-                                            <button class="px-3 py-1 text-gray-600 hover:text-purple-600">
+                                            <button id="minus" class="px-3 py-1 text-gray-600 hover:text-purple-600">
                                                 <i class="fas fa-minus"></i>
                                             </button>
-                                            <input type="number" value="<%= item.quantity %>" min="1" 
+                                            <input id="quantity" type="number" value="<%= item.quantity %>" min="1"
                                                 class="w-12 text-center border-x focus:outline-none focus:ring-0">
-                                            <button class="px-3 py-1 text-gray-600 hover:text-purple-600">
+                                            <button id="minus" class="px-3 py-1 text-gray-600 hover:text-purple-600">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-lg font-bold text-gray-900"><%= item.price %></p>
+                                            <p class="text-lg font-bold text-gray-900">
+                                                <%= item.price %>
+                                            </p>
                                             <button class="text-red-500 hover:text-red-600 text-sm">Remove</button>
                                         </div>
                                     </div>
                                 </div>
-                            <% }); %>
+                                <% }); %>
                         </div>
                     </div>
 
                     <!-- Wishlist Section -->
-                    <div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div id="wishlist-section" class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
                         <div class="p-6 border-b">
                             <h2 class="text-2xl font-bold text-gray-900">Wishlist</h2>
                             <p class="text-gray-500 mt-1">You have <%= wishlist.length %> items in your wishlist</p>
                         </div>
-                        
+
                         <div class="divide-y">
-                            <% wishlist.forEach(item => { %>
+                            <% wishlist.forEach(item=> { %>
                                 <div class="p-6 flex items-center space-x-4">
-                                    <img src="<%= item.image %>" alt="<%= item.title %>" class="w-24 h-32 object-cover rounded-lg">
+                                    <img src="<%= item.image %>" alt="<%= item.title %>"
+                                        class="w-24 h-32 object-cover rounded-lg">
                                     <div class="flex-1">
-                                        <h3 class="text-lg font-semibold text-gray-900"><%= item.title %></h3>
-                                        <p class="text-gray-600">by <%= item.author %></p>
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            <%= item.title %>
+                                        </h3>
+                                        <p class="text-gray-600">by <%= item.author %>
+                                        </p>
                                         <div class="flex items-center mt-2">
                                             <div class="flex text-yellow-400">
-                                                <% for(let i = 0; i < Math.floor(item.rating); i++) { %>
+                                                <% for(let i=0; i < Math.floor(item.rating); i++) { %>
                                                     <i class="fas fa-star"></i>
-                                                <% } %>
-                                                <% if(item.rating % 1 !== 0) { %>
-                                                    <i class="fas fa-star-half-alt"></i>
-                                                <% } %>
+                                                    <% } %>
+                                                        <% if(item.rating % 1 !==0) { %>
+                                                            <i class="fas fa-star-half-alt"></i>
+                                                            <% } %>
                                             </div>
-                                            <span class="ml-2 text-gray-600"><%= item.rating %></span>
+                                            <span class="ml-2 text-gray-600">
+                                                <%= item.rating %>
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="text-right space-y-2">
-                                        <p class="text-lg font-bold text-gray-900"><%= item.price %></p>
-                                        <button class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                        <p class="text-lg font-bold text-gray-900">
+                                            <%= item.price %>
+                                        </p>
+                                        <button
+                                            class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
                                             Add to Cart
                                         </button>
                                         <button class="text-red-500 hover:text-red-600 text-sm">Remove</button>
                                     </div>
                                 </div>
-                            <% }); %>
+                                <% }); %>
                         </div>
                     </div>
                 </div>
@@ -142,40 +185,30 @@
                         <div class="p-6 space-y-4">
                             <div class="flex justify-between text-gray-600">
                                 <span>Subtotal (<%= cart.length %> items)</span>
-                                <span>$<%= subtotal.toFixed(2) %></span>
+                                <span>₹<%= subtotal.toFixed(2) %></span>
                             </div>
                             <div class="flex justify-between text-gray-600">
                                 <span>Shipping</span>
-                                <span>$<%= shipping.toFixed(2) %></span>
+                                <span>₹<%= shipping.toFixed(2) %></span>
                             </div>
                             <div class="flex justify-between text-gray-600">
                                 <span>Tax</span>
-                                <span>$<%= tax.toFixed(2) %></span>
+                                <span>₹<%= tax.toFixed(2) %></span>
                             </div>
                             <div class="pt-4 border-t">
                                 <div class="flex justify-between text-lg font-bold">
                                     <span>Total</span>
-                                    <span>$<%= total.toFixed(2) %></span>
-                                </div>
-                            </div>
-                            
-                            <!-- Coupon Input -->
-                            <div class="pt-4">
-                                <div class="relative">
-                                    <input type="text" placeholder="Enter coupon code" 
-                                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
-                                    <button class="absolute right-2 top-2 text-purple-600 hover:text-purple-700">
-                                        Apply
-                                    </button>
+                                    <span>₹<%= total.toFixed(2) %></span>
                                 </div>
                             </div>
 
-                            <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                            <button onclick="window.location.href='/buyer/checkout'"
+                                class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
                                 Proceed to Checkout
                             </button>
 
                             <div class="text-center text-sm text-gray-500">
-                                <p>Free shipping on orders over $35</p>
+                                <p>Free shipping on orders over ₹35</p>
                                 <p class="mt-1">Expected delivery: 3-5 business days</p>
                             </div>
                         </div>
@@ -184,7 +217,7 @@
             </div>
         </div>
     </div>
-
     <script src="/js/script.js"></script>
 </body>
+
 </html>

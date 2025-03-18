@@ -64,10 +64,9 @@ router.post("/signup", (req, res) => {
   }
 });
 
-
-
 router.post("/publish-book", (req, res) => {
-  const { bookTitle, author, description, genre, price, quantity, image } = req.body;
+  const { bookTitle, author, description, genre, price, quantity, image } =
+    req.body;
   const parsedQuantity = parseInt(quantity, 10);
 
   db.get(
@@ -83,14 +82,27 @@ router.post("/publish-book", (req, res) => {
         // Insert new book
         const insertQuery = `INSERT INTO books (bookTitle, author, description, genre, price, quantity, image, rating) 
                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-        db.run(insertQuery, [bookTitle, author, description, genre, price, parsedQuantity, image, 4], (err) => {
-          if (err) {
-            console.error("Error inserting book:", err.message);
-            return res.status(500).send("Failed to publish book.");
+        db.run(
+          insertQuery,
+          [
+            bookTitle,
+            author,
+            description,
+            genre,
+            price,
+            parsedQuantity,
+            image,
+            4,
+          ],
+          (err) => {
+            if (err) {
+              console.error("Error inserting book:", err.message);
+              return res.status(500).send("Failed to publish book.");
+            }
+            console.log("New book published:", bookTitle);
+            res.redirect("/publisher/dashboard");
           }
-          console.log("New book published:", bookTitle);
-          res.redirect("/publisher/dashboard");
-        });
+        );
       } else {
         // Update quantity if book exists
         const newQuantity = existingBook.quantity + parsedQuantity;
@@ -102,7 +114,9 @@ router.post("/publish-book", (req, res) => {
               console.error("Error updating book quantity:", err.message);
               return res.status(500).send("Failed to update book quantity.");
             }
-            console.log(`Updated quantity for book: ${bookTitle} (New quantity: ${newQuantity})`);
+            console.log(
+              `Updated quantity for book: ${bookTitle} (New quantity: ${newQuantity})`
+            );
             res.redirect("/publisher/dashboard");
           }
         );
@@ -110,50 +124,4 @@ router.post("/publish-book", (req, res) => {
     }
   );
 });
-
-
-
-// router.post("/publish-book", (req, res) => {
-//   const bookTitle = req.body.bookTitle;
-//   const author = req.body.author;
-//   const description = req.body.description;
-//   const genre = req.body.genre;
-//   const price = req.body.price;
-//   const quantity = parseInt(req.body.quantity, 10);
-//   const image = req.body.image;
-
-//   const copyFind = BooksDataArray.find((obj) => {
-//     if (
-//       bookTitle == obj.bookTitle &&
-//       author == obj.author &&
-//       description == obj.description &&
-//       genre == obj.genre &&
-//       price == obj.price &&
-//       image == obj.image
-//     ) {
-//       return obj;
-//     }
-//   });
-
-//   if (!copyFind) {
-//     const BookObject = {
-//       id: BooksDataArray.length + 1,
-//       bookTitle: bookTitle,
-//       author: author,
-//       description: description,
-//       genre: genre,
-//       price: price,
-//       quantity: quantity,
-//       image: image,
-//       rating: 4,
-//     };
-//     BooksDataArray.push(BookObject);
-//   } else {
-//     copyFind.quantity = parseInt(copyFind.quantity, 10) + quantity;
-//   }
-
-//   console.log(BooksDataArray);
-//   res.redirect("/publisher/dashboard");
-// });
-
 export default router;

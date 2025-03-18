@@ -34,7 +34,7 @@ db.serialize(() => {
 
 // Mock Data
 const mockBooks = [
-    { bookTitle: "ZZ", author: "Evado", description: "hi", genre: "Thriller", price: 1090, quantity: 11, image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80", rating: 5 },
+    { bookTitle: "Aathma Katha", author: "Vitesh Reddy", description: "A chilling thriller that delves into the dark corners of the mind. Follow the protagonist as they navigate a world filled with secrets, betrayals, and a shadowy past that refuses to stay buried. Each chapter pulls you deeper into a web of suspense, leaving you guessing until the very end.", genre: "Thriller", price: 1090, quantity: 11, image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80", rating: 5 },
     { bookTitle: "Mystic Shadows", author: "Liam Carter", description: "A mysterious thriller with unexpected twists.", genre: "Mystery", price: 850, quantity: 7, image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800&q=80", rating: 4.5 },
     { bookTitle: "Beyond the Stars", author: "Sophia Allen", description: "A sci-fi adventure exploring the unknown universe.", genre: "Science Fiction", price: 1200, quantity: 15, image: "https://images.unsplash.com/photo-1514894780887-121968d00567?w=800&q=80", rating: 4.8 },
     { bookTitle: "The Art of Life", author: "Michael Johnson", description: "A deep dive into the philosophy of happiness.", genre: "Self-Help", price: 650, quantity: 20, image: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=800&q=80", rating: 4.2 },

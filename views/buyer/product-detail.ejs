@@ -16,31 +16,51 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="flex items-center">
+                    <a href="/buyer/dashboard" class="flex items-center">
                         <span
                             class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
                     </a>
                 </div>
-                <div class="flex items-center space-x-8">
+                <div class="flex items-center md:space-x-8 relative">
                     <div class="relative">
                         <input type="text" placeholder="Search books..."
-                            class="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button class="absolute right-3 top-2.5 text-gray-400">
+                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <button onclick="window.location.href='/buyer/search-page'"
+                            class="absolute right-3 top-2.5 text-gray-400">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
+                    <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
-                    <a href="#" class="text-gray-700 hover:text-purple-600">
+                    <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
+
+                    <button onclick="window.location.href='/logout'"
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300  hidden md:block">logout</button>
+
                     <div class="relative">
-                        <button class="flex items-center space-x-2">
-                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000" class="w-6 h-6" alt="Profile"
-                                class="w-8 h-8 rounded-full">
-                            <span class="text-gray-700"><%= name %></span>
+                        <button class="scale-0 md:scale-100 flex items-center space-x-2"
+                            onclick="window.location.href='/buyer/profile'">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full">
+                            <span class="text-gray-700">
+                                <%= buyerName %>
+                            </span>
                         </button>
+                    </div>
+                    <div class="relative group">
+                        <button class="md:hidden flex items-center space-x-2">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full"></button>
+                        <div
+                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="/buyer/profile" class="<%= styles.categoryBtnStyle %>">Your Profile</a>
+                            <a href="/buyer/cart/#wishlist-section" class="<%= styles.categoryBtnStyle %>">WishList</a>
+                            <a href="/buyer/cart" class="<%= styles.categoryBtnStyle %>">Cart</a>
+                            <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,7 +82,9 @@
                     <li>
                         <div class="flex items-center">
                             <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                            <span class="text-gray-500"><%= book.bookTitle %></span>
+                            <span class="text-gray-500">
+                                <%= book.bookTitle %>
+                            </span>
                         </div>
                     </li>
                 </ol>
@@ -74,8 +96,7 @@
                     <!-- Image Section -->
                     <div class="space-y-4">
                         <div class="aspect-w-3 aspect-h-4 rounded-lg overflow-hidden">
-                            <img src="<%= book.image %>"
-                                alt="The Midnight Library"
+                            <img src="<%= book.image %>" alt="The Midnight Library"
                                 class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
                         </div>
                         <!--  -->
@@ -84,9 +105,14 @@
                     <!-- Product Info -->
                     <div class="space-y-6">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900"><%= book.bookTitle %></h1>
-                            <p class="text-lg text-gray-600 mt-2"><%= book.author %></p>
-                            <p class="text-gray-600">Genre : <%= book.genre %></p>
+                            <h1 class="text-3xl font-bold text-gray-900">
+                                <%= book.bookTitle %>
+                            </h1>
+                            <p class="text-lg text-gray-600 mt-2">
+                                <%= book.author %>
+                            </p>
+                            <p class="text-gray-600">Genre : <%= book.genre %>
+                            </p>
                         </div>
 
                         <div class="flex items-center">
@@ -104,15 +130,15 @@
                         <div class="space-y-4">
                             <div class="flex items-center space-x-4">
                                 <div class="flex items-center border rounded-lg">
-                                    
+
                                     <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                         <br>
+                                        <br>
                                     </button>
                                     <input type="number" value="1" min="1" max="23"
                                         class="text-center text-2xl focus:outline-none 
                                         [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                     <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                         <br>
+                                        <br>
                                     </button>
                                 </div>
                                 <button
@@ -139,13 +165,13 @@
                             <p class="text-gray-600">
                                 <%= book.description %>
                             </p>
-                            
+
                         </div>
                     </div>
                 </div>
 
-                
-                
+
+
             </div>
 
             <!-- Reviews Section -->
@@ -198,8 +224,8 @@
                 </div>
             </div>
 
-             <!-- Similar Books -->
-             <div class="mt-12">
+            <!-- Similar Books -->
+            <div class="mt-12">
                 <h3 class="text-2xl font-bold mb-6">You May Also Like</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="book-card">
