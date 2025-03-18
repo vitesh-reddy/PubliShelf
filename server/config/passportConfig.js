@@ -1,10 +1,6 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import session from "express-session";
-import bcrypt from "bcrypt";
-
 import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
-import { BooksDataArray } from "../../public/mockData/MockUserData.js";
 
 passport.use(
   "local",

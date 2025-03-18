@@ -44,12 +44,6 @@ app.use(express.static("public"));
 app.use("/admin", adminRoutes);
 
 
-// mockBuyerData
-
-// app.get("/", (req, res) => {
-//   res.render("index", { books: BooksDataArray, styles: styles });
-// });
-
 app.get("/", (req, res) => {
   db.all("SELECT * FROM books", [], (err, books) => {
       if (err) {

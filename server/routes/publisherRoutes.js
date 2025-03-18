@@ -1,5 +1,6 @@
 import express from "express";
 import mockPublisherData from "../../public/mockData/mockPublisherData.js";
+import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
 import db from "../../public/database/db.js";
 
 const router = express.Router();
@@ -32,10 +33,6 @@ router.get("/sell-antique", (req, res) => {
   } else res.redirect("/auth/login");
 });
 
-import {
-  BooksDataArray,
-  BuyerLoginData,
-} from "../../public/mockData/MockUserData.js";
 
 router.post("/signup", (req, res) => {
   const firstname = req.body.firstname;
@@ -79,7 +76,6 @@ router.post("/publish-book", (req, res) => {
       }
 
       if (!existingBook) {
-        // Insert new book
         const insertQuery = `INSERT INTO books (bookTitle, author, description, genre, price, quantity, image, rating) 
                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         db.run(
@@ -104,7 +100,6 @@ router.post("/publish-book", (req, res) => {
           }
         );
       } else {
-        // Update quantity if book exists
         const newQuantity = existingBook.quantity + parsedQuantity;
         db.run(
           "UPDATE books SET quantity = ? WHERE id = ?",

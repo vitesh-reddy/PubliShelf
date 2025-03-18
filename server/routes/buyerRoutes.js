@@ -4,12 +4,8 @@ import mockCart from "../../public/mockData/mockCart.js";
 import db from "../../public/database/db.js";
 import mockWishlist from "../../public/mockData/mockWishlist.js";
 import mockBuyerData from "../../public/mockData/mockBuyerData.js";
-import {
-  BooksDataArray,
-  BuyerLoginData,
-} from "../../public/mockData/MockUserData.js";
+import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
 import bodyParser from "body-parser";
-import passport from "passport";
 import "../../server.js";
 import "../config/passportConfig.js";
 
@@ -77,6 +73,7 @@ router.get("/checkout", checkAuthenticated, (req, res) => {
     buyerName: req.user.firstname,
   });
 });
+
 router.get("/signup", (req, res) => {
   res.render("auth/signup-buyer", { styles: styles });
 });
@@ -91,9 +88,8 @@ router.post("/signup", (req, res) => {
   const BuyerRegisterCopy = BuyerLoginData.find(
     (Copy) => username == Copy.email
   );
-  if (BuyerRegisterCopy != undefined) {
-    res.redirect("/auth/login");
-  } else {
+  if (BuyerRegisterCopy != undefined) res.redirect("/auth/login");
+  else {
     const newRegister = {
       id: BuyerLoginData.length + 1,
       role: "buyer",
@@ -148,33 +144,6 @@ router.get("/cart", checkAuthenticated, (req, res) => {
     ...orderSummary,
     styles: styles,
   });
-});
-
-router.post("/signup", (req, res) => {
-  const firstname = req.body.firstname;
-  const lastname = req.body.lastname;
-  const publishingHouse = req.body.publishingHouse;
-  const businessEmail = req.body.businessEmail;
-  const password = req.body.password;
-  const BuyerRegisterCopy = BuyerLoginData.find(
-    (Copy) => businessEmail == Copy.email
-  );
-
-  if (BuyerRegisterCopy != undefined) {
-    res.redirect("/auth/login");
-  } else {
-    const copyy = {
-      id: BuyerLoginData.length + 1,
-      role: "publisher",
-      firstname: firstname,
-      lastname: lastname,
-      housename: publishingHouse,
-      email: businessEmail,
-      password: password,
-    };
-    BuyerLoginData.push(copyy);
-    res.redirect("/auth/login");
-  }
 });
 
 export default router;

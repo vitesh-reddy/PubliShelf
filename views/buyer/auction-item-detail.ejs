@@ -313,7 +313,8 @@
 <body>
 	<div class="container">
 		<div class="book-details-card">
-			<img src="https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg" alt="The Silent Patient" class="book-image">
+			<img src="https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg" alt="The Silent Patient"
+				class="book-image">
 			<div class="book-content">
 				<h1>The Silent Patient</h1>
 				<p class="author">by Alex Michaelides</p>
@@ -356,7 +357,8 @@
 					<p class="author">Jasper DeWitt</p>
 				</div>
 				<div class="book-item">
-					<img src="https://m.media-amazon.com/images/M/MV5BZTg4MGViYTMtYTFkMC00YzVlLWExZDItOTM4NTUwMjc2NTE2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="The Girl on the Train">
+					<img src="https://m.media-amazon.com/images/M/MV5BZTg4MGViYTMtYTFkMC00YzVlLWExZDItOTM4NTUwMjc2NTE2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+						alt="The Girl on the Train">
 					<p>The Girl on the Train</p>
 					<p class="author">Paula Hawkins</p>
 				</div>
@@ -382,44 +384,26 @@
 
 	<script>
 		// Auction timer
-        const timerElement = document.querySelector('.timer');
-        const auctionTime = new Date(timerElement.getAttribute('data-time')).getTime();
+		const timerElement = document.querySelector('.timer');
 
-        function updateTimer() {
-            const now = new Date().getTime();
-            const distance = auctionTime - now;
+		timerElement.textContent = `Starts in 2 Days`;
 
-            if (distance < 0) {
-                timerElement.textContent = 'Auction Started!';
-                return;
-            }
 
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+		// Register button functionality
+		function register(button) {
+			if (!button.classList.contains('registered')) {
+				button.textContent = 'Registered';
+				button.classList.add('registered');
+				alert('You are now registered to bid on this item!');
+			}
+		}
 
-            timerElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-
-        // Register button functionality
-        function register(button) {
-            if (!button.classList.contains('registered')) {
-                button.textContent = 'Registered';
-                button.classList.add('registered');
-                alert('You are now registered to bid on this item!');
-            }
-        }
-
-        // Notify me functionality
-        function notifyMe(button) {
-            button.textContent = 'Notified';
-            button.disabled = true;
-            alert('You will be notified when the auction starts!');
-        }
+		// Notify me functionality
+		function notifyMe(button) {
+			button.textContent = 'Notified';
+			button.disabled = true;
+			alert('You will be notified when the auction starts!');
+		}
 	</script>
 </body>
 
