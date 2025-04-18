@@ -233,7 +233,7 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Most Sold Books</h2>
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.mostSold.forEach(book=> { %>
+                    <% books.forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>">
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
@@ -266,7 +266,7 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Trending Now</h2>
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.trending.forEach(book=> { %>
+                    <% books.forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>">
                             <div class="relative">
                                 <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">

@@ -13,7 +13,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import "./config/passportConfig.js";
 import styles from "./public/css/styles.js";
-import db from "./public/database/db.js";
+import { BooksDataArray } from "./public/mockData/MockUserData.js";
 console.clear();
 
 dotenv.config();
@@ -33,7 +33,7 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
+app.use(passport.initialize()); 
 app.use(passport.session());
 
 app.use(express.json());
@@ -43,16 +43,11 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use("/admin", adminRoutes);
 
-
 app.get("/", (req, res) => {
-  db.all("SELECT * FROM books", [], (err, books) => {
-      if (err) {
-          console.error("Error fetching books:", err.message);
-          return res.status(500).send("Internal Server Error");
-      }
-      books.reverse();
-      const temp = books.slice(0, 8);
-      res.render("index", { newlyBooks : temp, books : mockBuyerData,  styles: styles });
+  res.render("index", {
+    newlyBooks: BooksDataArray,
+    books: BooksDataArray,
+    styles: styles,
   });
 });
 
@@ -65,7 +60,6 @@ app.get("/auth/login", (req, res) => {
   } else res.render("auth/login");
 });
 
-
 app.use("/buyer", buyerRouter);
 app.use("/publisher", publisherRoutes);
 app.get("/about", (req, res) => res.render("about", { styles: styles }));
@@ -73,8 +67,7 @@ app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
 app.post("/auth/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
-    if (err) 
-      return next(err);
+    if (err) return next(err);
     if (!user) {
       if (info.message == "user not found")
         return res.status(403).json({ key: "user not found" });

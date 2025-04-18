@@ -1,10 +1,12 @@
 import express from "express";
 import styles from "../public/css/styles.js";
 import mockCart from "../public/mockData/mockCart.js";
-import db from "../public/database/db.js";
 import mockWishlist from "../public/mockData/mockWishlist.js";
 import mockBuyerData from "../public/mockData/mockBuyerData.js";
-import { BuyerLoginData } from "../public/mockData/MockUserData.js";
+import {
+  BooksDataArray,
+  BuyerLoginData,
+} from "../public/mockData/MockUserData.js";
 import bodyParser from "body-parser";
 import "../server.js";
 import "../config/passportConfig.js";
@@ -18,35 +20,20 @@ const checkAuthenticated = (req, res, next) => {
 };
 
 router.get("/dashboard", checkAuthenticated, (req, res) => {
-  db.all("SELECT * FROM books", [], (err, books) => {
-    if (err) {
-      console.error("Error fetching books:", err.message);
-      return res.status(500).send("Internal Server Error");
-    }
-    books.reverse();
-    const temp = books.slice(0, 8);
-    res.render("buyer/dashboard", {
-      newlyBooks: temp,
-      books: mockBuyerData,
-      styles: styles,
-      buyerName: req.user.firstname,
-    });
+  res.render("buyer/dashboard", {
+    newlyBooks: BooksDataArray,
+    books: BooksDataArray,
+    styles: styles,
+    buyerName: req.user.firstname,
   });
 });
 
 router.get("/search-page", checkAuthenticated, (req, res) => {
-  db.all("SELECT * FROM books", [], (err, books) => {
-    if (err) {
-      console.error("Error fetching books:", err.message);
-      return res.status(500).send("Internal Server Error");
-    }
-    const temp = books.slice(0, 8);
-    res.render("buyer/search-page", {
-      newlyBooks: temp,
-      books: mockBuyerData,
-      buyerName: req.user.firstname,
-      styles: styles,
-    });
+  res.render("buyer/search-page", {
+    newlyBooks: BooksDataArray,
+    books: BooksDataArray,
+    buyerName: req.user.firstname,
+    styles: styles,
   });
 });
 
@@ -105,20 +92,11 @@ router.post("/signup", (req, res) => {
 
 router.get("/product-detail/:id1", checkAuthenticated, (req, res) => {
   const bookId = req.params.id1;
-  db.get("SELECT * FROM books WHERE id = ?", [bookId], (err, book) => {
-    if (err) {
-      console.error("Error fetching book:", err.message);
-      return res.status(500).send("Internal Server Error");
-    }
-
-    if (!book) return res.send("Book not found");
-
-    res.render("buyer/product-detail", {
-      book: book,
-      name: req.user.firstname,
-      buyerName: req.user.firstname,
-      styles: styles,
-    });
+  res.render("buyer/product-detail", {
+    book: BooksDataArray,
+    name: req.user.firstname,
+    buyerName: req.user.firstname,
+    styles: styles,
   });
 });
 router.get("/cart", checkAuthenticated, (req, res) => {
