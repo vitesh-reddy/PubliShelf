@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
+import { BuyerLoginData } from "../public/mockData/MockUserData.js";
 
 passport.use(
   "local",

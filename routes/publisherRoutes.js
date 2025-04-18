@@ -1,7 +1,7 @@
 import express from "express";
-import mockPublisherData from "../../public/mockData/mockPublisherData.js";
-import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
-import db from "../../public/database/db.js";
+import mockPublisherData from "../public/mockData/mockPublisherData.js";
+import { BuyerLoginData } from "../public/mockData/MockUserData.js";
+import db from "../public/database/db.js";
 
 const router = express.Router();
 

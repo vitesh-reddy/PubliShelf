@@ -1,12 +1,12 @@
 import express from "express";
-import styles from "../../public/css/styles.js";
-import mockCart from "../../public/mockData/mockCart.js";
-import db from "../../public/database/db.js";
-import mockWishlist from "../../public/mockData/mockWishlist.js";
-import mockBuyerData from "../../public/mockData/mockBuyerData.js";
-import { BuyerLoginData } from "../../public/mockData/MockUserData.js";
+import styles from "../public/css/styles.js";
+import mockCart from "../public/mockData/mockCart.js";
+import db from "../public/database/db.js";
+import mockWishlist from "../public/mockData/mockWishlist.js";
+import mockBuyerData from "../public/mockData/mockBuyerData.js";
+import { BuyerLoginData } from "../public/mockData/MockUserData.js";
 import bodyParser from "body-parser";
-import "../../server.js";
+import "../server.js";
 import "../config/passportConfig.js";
 
 const router = express.Router();

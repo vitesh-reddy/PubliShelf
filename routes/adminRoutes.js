@@ -1,5 +1,5 @@
 import express from "express";
-import styles from "../../public/css/styles.js";
+import styles from "../public/css/styles.js";
 const publishers = [
   { name: "Publisher 1" },
   { name: "Publisher 2" },
