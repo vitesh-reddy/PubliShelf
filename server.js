@@ -14,6 +14,8 @@ import { Strategy } from "passport-local";
 import "./config/passportConfig.js";
 import styles from "./public/css/styles.js";
 import { BooksDataArray } from "./public/mockData/MockUserData.js";
+import connectDB from "./config/db.js";
+import { loginGetController, loginPostController } from "./controllers/authController.js";
 console.clear();
 
 dotenv.config();
@@ -21,6 +23,8 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/";
+connectDB(MONGODB_URI);
 
 app.use(
   session({
@@ -33,7 +37,7 @@ app.use(
   })
 );
 
-app.use(passport.initialize()); 
+app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.json());
@@ -51,37 +55,14 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/auth/login", (req, res) => {
-  if (req.isAuthenticated()) {
-    if (req.user.role == "buyer") res.redirect("/buyer/dashboard");
-    else if (req.user.role == "publisher") res.redirect("/publisher/dashboard");
-    else if (req.user.role == "admin") res.redirect("/admin/dashboard");
-    else res.redirect("/manager/dashboard");
-  } else res.render("auth/login");
-});
 
 app.use("/buyer", buyerRouter);
 app.use("/publisher", publisherRoutes);
 app.get("/about", (req, res) => res.render("about", { styles: styles }));
 app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
-app.post("/auth/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) return next(err);
-    if (!user) {
-      if (info.message == "user not found")
-        return res.status(403).json({ key: "user not found" });
-      else if (info.message == "incorrect password")
-        return res.status(401).json({ key: "incorrect password" });
-    }
-
-    req.logIn(user, (loginErr) => {
-      if (loginErr) return next(loginErr);
-      res.redirect("/buyer/dashboard");
-      return res.status(200);
-    });
-  })(req, res, next);
-});
+app.get("/auth/login", loginGetController);
+app.post("/auth/login", loginPostController);
 
 app.get("/logout", (req, res) => {
   req.logout((err) => {
