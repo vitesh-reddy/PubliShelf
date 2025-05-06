@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publisher Signup - PubliShelf</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
     <style>
         /* Base styles */
         :root {
@@ -321,7 +319,7 @@
             </div>
 
             <!-- Signup Form -->
-            <form action="/publisher/signup" method="POST" class="signup-form">
+            <form id="signupForm" class="signup-form">
                 <div class="form-container">
                     <div class="name-fields">
                         <div class="form-group">
@@ -344,7 +342,7 @@
                         <div class="input-icon-wrapper">
                             <i class="fas fa-envelope"></i>
                             <input id="businessEmail" name="businessEmail" type="email" required
-                                placeholder="business@example.com" required>
+                                placeholder="business@example.com">
                         </div>
                     </div>
 
@@ -370,39 +368,68 @@
                         </label>
                     </div>
 
+                    <p id="errorMessage" style="color: red;"></p>
+
                     <button type="submit" class="submit-button">
                         Create Publisher Account
                     </button>
-
-                    <div class="divider">
-                        <span>Or sign up with</span>
-                    </div>
-
-                    <div class="social-buttons">
-                        <button type="button" class="social-button">
-                            <i class="fab fa-google"></i>
-                            Google
-                        </button>
-                        <button type="button" class="social-button">
-                            <i class="fab fa-apple"></i>
-                            Apple
-                        </button>
-                    </div>
                 </div>
             </form>
         </div>
     </div>
-    <script> function TogglePasswordFun() {
+
+    <script>
+        function TogglePasswordFun() {
             const pass = document.getElementById('password');
             if (pass.type == 'password') {
                 pass.type = 'text';
-            }
-            else {
+            } else {
                 pass.type = 'password';
             }
-        }</script>
+        }
 
-    <script src="/js/signup.js"></script>
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+            const publishingHouse = document.getElementById('publishingHouse').value;
+            const email = document.getElementById('businessEmail').value;
+            const password = document.getElementById('password').value;
+            const terms = document.getElementById('terms').checked;
+
+            // Validate inputs
+            if (!firstname || !lastname || !publishingHouse || !email || !password) {
+                errorMessage.textContent = "All fields are required.";
+                return;
+            }
+
+            try {
+                const response = await fetch('/publisher/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ firstname, lastname, publishingHouse, email, password }),
+                });
+
+
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.href = '/auth/login'; // Redirect to login page
+                } else {
+                    const errorData = await response.json();
+                    errorMessage.textContent = errorData.message || "An unexpected error occurred.";
+                }
+            } catch (error) {
+                console.error("Error during signup:", error);
+                errorMessage.textContent = "An error occurred. Please try again later.";
+            }
+        });
+    </script>
 </body>
 
 </html>

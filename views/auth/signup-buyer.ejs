@@ -323,7 +323,7 @@
             </div>
 
             <!-- Signup Form -->
-            <form action="/buyer/signup" method="POST" class="signup-form">
+            <form id="signupForm" class="signup-form">
                 <div class="form-container">
                     <div class="name-fields">
                         <div class="form-group">
@@ -365,8 +365,9 @@
                             <a href="#" class="link">Privacy Policy</a>
                         </label>
                     </div>
+                    <p id="errorMessage" style="color: red;"></p>
 
-                    <button type="submit" class="submit-button">
+                    <button type="submit" id="signupButton" class="submit-button">
                         Create Account
                     </button>
 
@@ -398,6 +399,46 @@
                 pass.type = 'password';
             }
         }
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const signupButton = document.getElementById('signupButton');
+
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const terms = document.getElementById('terms').checked;
+
+            if (!terms) {
+                errorMessage.textContent = "You must agree to the Terms of Service and Privacy Policy.";
+                return;
+            }
+
+            try {
+                const response = await fetch('/buyer/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ firstname, lastname, email, password }),
+                });
+
+
+                if (response.ok)
+                    window.location.href = '/auth/login'; // Redirect to login page
+                else {
+                    const errorData = await response.json();
+                    errorMessage.textContent = errorData.message || "An unexpected error occurred.";
+                }
+            } catch (error) {
+                console.error("Error during signup:", error);
+                errorMessage.textContent = "An error occurred. Please try again later.";
+            }
+        });
+
         // document.addEventListener('DOMContentLoaded', () => {
         //     const passwordInput = document.getElementById('password');
         //     const togglePasswordButton = document.querySelector('.toggle-password i');

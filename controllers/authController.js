@@ -1,26 +1,69 @@
+import { verifyToken } from "../utils/jwt.js";
+import { loginUser } from "../services/authService.js";
+
 export const loginGetController = (req, res) => {
-  if (req.isAuthenticated()) {
-    if (req.user.role == "buyer") res.redirect("/buyer/dashboard");
-    else if (req.user.role == "publisher") res.redirect("/publisher/dashboard");
-    else if (req.user.role == "admin") res.redirect("/admin/dashboard");
-    else res.redirect("/manager/dashboard");
-  } else res.render("auth/login");
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = verifyToken(token);
+
+      // Redirect logged-in users to their respective dashboards
+      if (decoded.role === "buyer") return res.redirect("/buyer/dashboard");
+      else if (decoded.role === "publisher")
+        return res.redirect("/publisher/dashboard");
+      else if (decoded.role === "admin")
+        return res.redirect("/admin/dashboard");
+      else return res.redirect("/manager/dashboard");
+    } catch (error) {
+      // If token is invalid, proceed to login
+      return res.render("auth/login");
+    }
+  } else {
+    // If no token is provided, render the login page
+    return res.render("auth/login");
+  }
 };
 
-export const loginPostController = (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) return next(err);
-    if (!user) {
-      if (info.message == "user not found")
-        return res.status(403).json({ key: "user not found" });
-      else if (info.message == "incorrect password")
-        return res.status(401).json({ key: "incorrect password" });
-    }
+export const loginPostController = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const { token, user, code } = await loginUser(email, password);
 
-    req.logIn(user, (loginErr) => {
-      if (loginErr) return next(loginErr);
-      res.redirect("/buyer/dashboard");
-      return res.status(200);
+    if (code === 403) 
+      return res.status(403).json({ message: "User not found" });
+    else if (code === 401)    
+      return res.status(401).json({ message: "Invalid password" });
+    
+
+    if (!token) return res.status(401).json({ message: "Invalid credentials" });
+    console.log(user.role);    
+
+    // Set the token in an HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Prevent JavaScript access to the cookie
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: "strict", // Prevent CSRF attacks
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-  })(req, res, next);
+    
+    console.log("User role from loginPostController:", user.role)
+    return res.status(200).json({
+      ok: true,
+      message: "Login successful",
+      token,
+      user,
+    });
+
+    // Redirect based on user role
+    if (user.role === "buyer") {
+      console.log("buyer bolthey");
+      return res.redirect("/buyer/dashboard");
+    } else if (user.role === "publisher")
+      return res.redirect("/publisher/dashboard");
+    else if (user.role === "admin") return res.redirect("/admin/dashboard");
+  } catch (error) {
+    res.status(500).json({ message: "Error logging in", error });
+  }
 };
