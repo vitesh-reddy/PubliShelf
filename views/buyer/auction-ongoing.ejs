@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auction Item - PubliShelf</title>
+    <title>Ongoing Auction - PubliShelf</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -92,19 +92,48 @@
                 </ol>
             </nav>
 
-            <!-- Auction Item Details -->
+            <!-- Auction Ongoing Details -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                    <!-- Image Section -->
+                    <!-- Image and Document Section -->
                     <div class="space-y-4">
                         <div class="relative rounded-lg overflow-hidden">
                             <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600"
                                 alt="Pride and Prejudice"
                                 class="w-full h-96 object-cover transform transition-transform duration-500 hover:scale-105">
+                            <span
+                                class="absolute top-3 left-3 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse">Live</span>
+                        </div>
+                        <!-- Document Carousel -->
+                        <div class="relative">
+                            <div id="document-carousel"
+                                class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth space-x-3">
+                                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4ebf0c?auto=format&fit=crop&q=80&w=150"
+                                    alt="Document 1"
+                                    class="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity">
+                                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=150"
+                                    alt="Document 2"
+                                    class="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity">
+                                <img src="https://images.unsplash.com/photo-1541963463532-d68292c669b9?auto=format&fit=crop&q=80&w=150"
+                                    alt="Document 3"
+                                    class="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity">
+                                <img src="https://images.unsplash.com/photo-1543497415-75c0a27177bf?auto=format&fit=crop&q=80&w=150"
+                                    alt="Document 4"
+                                    class="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity">
+                                <img src="https://images.unsplash.com/photo-1531988042231-d39a9cc12a9a?auto=format&fit=crop&q=80&w=150"
+                                    alt="Document 5"
+                                    class="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity">
+                            </div>
+                            <button id="carousel-prev"
+                                class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-1.5 rounded-full hover:bg-opacity-75"><i
+                                    class="fas fa-chevron-left text-sm"></i></button>
+                            <button id="carousel-next"
+                                class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-1.5 rounded-full hover:bg-opacity-75"><i
+                                    class="fas fa-chevron-right text-sm"></i></button>
                         </div>
                     </div>
 
-                    <!-- Item Info -->
+                    <!-- Auction Info -->
                     <div class="space-y-5">
                         <div>
                             <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Pride and Prejudice</h1>
@@ -119,10 +148,23 @@
                                     class="font-semibold"></span></span>
                         </div>
 
+                        <!-- Auction Progress Bar -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-gray-600 text-sm">
+                                <span>Time Remaining</span>
+                                <span id="progress-percent">50%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                <div id="progress-bar"
+                                    class="bg-purple-600 h-1.5 rounded-full transition-all duration-500"
+                                    style="width: 50%"></div>
+                            </div>
+                        </div>
+
                         <div class="border-t border-b py-3">
                             <div class="flex items-baseline space-x-4">
                                 <div>
-                                    <span class="text-3xl font-bold text-gray-900">₹7500</span>
+                                    <span class="text-3xl font-bold text-gray-900" id="current-bid">₹7500</span>
                                     <p class="text-gray-600 text-xs">Current Bid</p>
                                 </div>
                                 <div>
@@ -132,18 +174,100 @@
                             </div>
                         </div>
 
+                        <!-- Bid Input Form -->
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <label for="bid-amount" class="text-gray-600 text-sm">Your Bid (₹)</label>
+                                <input type="number" id="bid-amount" min="7600" placeholder="Enter bid (min ₹7600)"
+                                    class="w-full px-3 py-2 mt-1 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    required>
+                                <span class="absolute right-2 top-8 text-gray-400 cursor-pointer"
+                                    title="Bid must be at least ₹7600"><i class="fas fa-info-circle text-xs"></i></span>
+                            </div>
+                            <!-- Bid Increment Slider -->
+                            <div>
+                                <label for="bid-increment" class="text-gray-600 text-sm">Quick Bid Increment</label>
+                                <input type="range" id="bid-increment" min="100" max="500" step="100" value="100"
+                                    class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-1">
+                                <div class="flex justify-between text-gray-600 text-xs">
+                                    <span>₹100</span>
+                                    <span>₹500</span>
+                                </div>
+                            </div>
+                            <button id="enter-bid"
+                                class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2 text-sm">
+                                <i class="fas fa-gavel"></i>
+                                <span>Place Bid</span>
+                            </button>
+                            <p id="error-message" class="text-red-600 text-xs hidden">Bid must be at least ₹7600
+                                (minimum ₹100 increment)</p>
+                        </div>
+
                         <div class="space-y-2">
                             <h3 class="text-base font-semibold">Description</h3>
                             <p class="text-gray-600 text-sm">A rare first edition of Jane Austen's classic novel, Pride
                                 and Prejudice, in near mint condition. This copy includes original illustrations and
                                 authentication documents, verified by Literary Archives.</p>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <button onclick="window.location.href='/buyer/auction/1/ongoing'"
-                            class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2 text-sm">
-                            <i class="fas fa-gavel"></i>
-                            <span>Join Auction</span>
-                        </button>
+            <!-- Bidding History Section -->
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-4">Bidding History</h3>
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div id="bidding-history" class="space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2 bg-purple-100 rounded-md px-3">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=John+Doe" alt="John Doe"
+                                    class="w-8 h-8 rounded-full">
+                                <div>
+                                    <p class="font-semibold text-sm">John Doe <span class="text-purple-600 text-xs">(Top
+                                            Bidder)</span></p>
+                                    <p class="text-gray-500 text-xs">May 06, 2025, 14:30</p>
+                                </div>
+                            </div>
+                            <p class="font-bold text-purple-600 text-sm">₹7500</p>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=Sarah+Smith" alt="Sarah Smith"
+                                    class="w-8 h-8 rounded-full">
+                                <div>
+                                    <p class="font-semibold text-sm">Sarah Smith</p>
+                                    <p class="text-gray-500 text-xs">May 06, 2025, 14:15</p>
+                                </div>
+                            </div>
+                            <p class="font-bold text-purple-600 text-sm">₹7200</p>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=Michael+Chen" alt="Michael Chen"
+                                    class="w-8 h-8 rounded-full">
+                                <div>
+                                    <p class="font-semibold text-sm">Michael Chen</p>
+                                    <p class="text-gray-500 text-xs">May 06, 2025, 14:00</p>
+                                </div>
+                            </div>
+                            <p class="font-bold text-purple-600 text-sm">₹7000</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bid Confirmation Modal -->
+            <div id="bid-modal"
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-lg p-5 w-full max-w-sm transform transition-all duration-200">
+                    <h3 class="text-lg font-bold text-gray-900">Confirm Bid</h3>
+                    <p class="text-gray-600 text-sm mt-2">Place a bid of <span id="modal-bid-amount"
+                            class="font-bold text-purple-600"></span> for Pride and Prejudice?</p>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button id="modal-cancel"
+                            class="px-3 py-1.5 text-gray-600 border rounded-md hover:bg-gray-100 text-sm">Cancel</button>
+                        <button id="modal-confirm"
+                            class="px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm">Confirm</button>
                     </div>
                 </div>
             </div>
@@ -288,23 +412,152 @@
 
     <script>
         // Mock auction data
+        const auctionStart = new Date('2025-05-05T10:00:00Z');
         const auctionEnd = new Date('2025-05-07T23:59:59Z');
+        let currentBid = 7500;
+        const minIncrement = 100;
+        const buyerId = 'mock_buyer_id'; // Replace with actual buyer ID from session
+        const auctionId = '1';
+        const buyerName = 'Buyer Name'; // Replace with actual buyer name from session
 
-        // Update countdown timer
+        // Update countdown and progress bar
         function updateCountdown() {
             const now = new Date();
-            const element = document.getElementById('countdown');
+            const countdownElement = document.getElementById('countdown');
+            const bidButton = document.getElementById('enter-bid');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+
             if (now < auctionEnd) {
                 const diff = auctionEnd - now;
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                element.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                const totalDuration = auctionEnd - auctionStart;
+                const elapsed = now - auctionStart;
+                const progress = Math.min((elapsed / totalDuration) * 100, 100);
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${Math.round(progress)}%`;
             } else {
-                element.textContent = 'Auction Ended';
+                countdownElement.textContent = 'Auction Ended';
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                bidButton.disabled = true;
+                bidButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                bidButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+                bidButton.textContent = 'Auction Ended';
             }
         }
+
+        // Format date for display
+        function formatDate(date) {
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        }
+
+        // Add new bid to history
+        function addBidToHistory(bidderName, amount, time, isTopBidder) {
+            const historyDiv = document.getElementById('bidding-history');
+            const bidEntry = document.createElement('div');
+            bidEntry.className = `flex items-center justify-between border-b pb-2 ${isTopBidder ? 'bg-purple-100 rounded-md px-3' : ''} animate-fade-in`;
+            bidEntry.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(bidderName)}" alt="${bidderName}" class="w-8 h-8 rounded-full">
+                    <div>
+                        <p class="font-semibold text-sm">${bidderName} ${isTopBidder ? '<span class="text-purple-600 text-xs">(Top Bidder)</span>' : ''}</p>
+                        <p class="text-gray-500 text-xs">${time}</p>
+                    </div>
+                </div>
+                <p class="font-bold text-purple-600 text-sm">₹${amount}</p>
+            `;
+            historyDiv.insertBefore(bidEntry, historyDiv.firstChild);
+        }
+
+        // Document carousel
+        const carousel = document.getElementById('document-carousel');
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        prevBtn.addEventListener('click', () => {
+            carousel.scrollBy({ left: -100, behavior: 'smooth' });
+        });
+        nextBtn.addEventListener('click', () => {
+            carousel.scrollBy({ left: 100, behavior: 'smooth' });
+        });
+
+        // Bid increment slider
+        const bidInput = document.getElementById('bid-amount');
+        const incrementSlider = document.getElementById('bid-increment');
+        incrementSlider.addEventListener('input', () => {
+            bidInput.value = currentBid + parseInt(incrementSlider.value);
+        });
+
+        // Bid modal handling
+        const bidModal = document.getElementById('bid-modal');
+        const modalBidAmount = document.getElementById('modal-bid-amount');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalCancel = document.getElementById('modal-cancel');
+        const enterBidBtn = document.getElementById('enter-bid');
+        const errorMessage = document.getElementById('error-message');
+
+        enterBidBtn.addEventListener('click', () => {
+            const bidAmount = parseInt(bidInput.value);
+            if (isNaN(bidAmount) || bidAmount < currentBid + minIncrement) {
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            errorMessage.classList.add('hidden');
+            modalBidAmount.textContent = `₹${bidAmount}`;
+            bidModal.classList.remove('hidden');
+        });
+
+        modalCancel.addEventListener('click', () => {
+            bidModal.classList.add('hidden');
+        });
+
+        modalConfirm.addEventListener('click', async () => {
+            const bidAmount = parseInt(bidInput.value);
+            bidModal.classList.add('hidden');
+
+            try {
+                const response = await fetch(`/api/auctions/${auctionId}/bid`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bidAmount, bidder: buyerId }),
+                });
+
+                if (!response.ok) throw new Error('Bid submission failed');
+
+                const data = await response.json();
+                currentBid = bidAmount;
+                document.getElementById('current-bid').textContent = `₹${currentBid}`;
+                bidInput.min = currentBid + minIncrement;
+                bidInput.placeholder = `Enter bid (min ₹${currentBid + minIncrement})`;
+                bidInput.value = '';
+                incrementSlider.value = minIncrement;
+
+                // Update bidding history
+                const bidTime = formatDate(new Date());
+                const historyDiv = document.getElementById('bidding-history');
+                historyDiv.innerHTML = '';
+                addBidToHistory(buyerName, bidAmount, bidTime, true);
+                [
+                    { name: 'Sarah Smith', amount: 7200, time: 'May 06, 2025, 14:15' },
+                    { name: 'Michael Chen', amount: 7000, time: 'May 06, 2025, 14:00' },
+                ].forEach(bid => addBidToHistory(bid.name, bid.amount, bid.time, false));
+            } catch (error) {
+                console.error('Error submitting bid:', error);
+                errorMessage.textContent = 'Failed to submit bid. Please try again.';
+                errorMessage.classList.remove('hidden');
+            }
+        });
 
         // Terms and Conditions and Privacy Policy modal handling
         const tncModal = document.getElementById('tnc-modal');
@@ -333,3 +586,37 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
     </script>
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #9333ea;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #9333ea;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>

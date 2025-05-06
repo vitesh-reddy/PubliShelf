@@ -1,27 +1,32 @@
-import Book from "./models/Book.js";
-import Buyer from "./models/Buyer.js";
+import Book from "../models/Book.js";
 
-const addReview = async (bookId, buyerId, rating, comment) => {
-  const book = await Book.findById(bookId);
-  if (!book) throw new Error("Book not found");
+export const addReview = async (req, res) => {
+  const { bookId, rating, comment } = req.body;
 
-  const review = {
-    buyer: buyerId,
-    rating,
-    comment,
-  };
+  try {
+    const book = await Book.findById(bookId);
 
-  book.reviews.push(review);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
 
-  // Update the average rating
-  const totalRatings = book.reviews.reduce(
-    (sum, review) => sum + review.rating,
-    0
-  );
-  book.rating = totalRatings / book.reviews.length;
+    const review = {
+      buyer: req.user.id,
+      rating,
+      comment,
+      createdAt: new Date(),
+    };
 
-  await book.save();
-  console.log("Review added successfully");
+    book.reviews.push(review);
+
+    // Update the average rating
+    const totalRatings = book.reviews.reduce((sum, review) => sum + review.rating, 0);
+    book.rating = totalRatings / book.reviews.length;
+
+    await book.save();
+
+    res.status(201).json({ message: "Review added successfully", review });
+  } catch (error) {
+    res.status(500).json({ message: "Error adding review", error });
+  }
 };
-
-export { addReview };
