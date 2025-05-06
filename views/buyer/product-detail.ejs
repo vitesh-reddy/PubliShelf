@@ -116,8 +116,10 @@
                         </div>
 
                         <div class="flex items-center">
-                            <span class="ml-2 text-gray-600">4.5 (2.1k reviews)</span>
-                            <span class="text-green-600">In Stock (<%=book.quantity%>)</span>
+                            <span class="ml-2 text-gray-600">
+                                <%= book.rating %> (<%= book.reviews.length %>)
+                            </span>
+                            <span class="text-green-600"> In Stock (<%=book.quantity%>)</span>
                             <br>
                         </div>
 
@@ -178,49 +180,41 @@
             <div class="mt-8">
                 <h3 class="text-2xl font-bold mb-6">Customer Reviews</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <div class="flex items-start space-x-4">
-                            <img src="https://ui-avatars.com/api/?name=Sarah+Johnson" alt="Sarah Johnson"
-                                class="w-12 h-12 rounded-full">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-semibold">Sarah Johnson</h4>
-                                    <span class="text-gray-500">2 days ago</span>
+                    <% if (book.reviews.length> 0) { %>
+                        <% book.reviews.forEach(review=> { %>
+                            <div class="bg-white p-6 rounded-xl shadow-lg">
+                                <div class="flex items-start space-x-4">
+                                    <!-- Display buyer's avatar -->
+                                    <img src="https://ui-avatars.com/api/?name=<%= review.buyer.firstname %>+<%= review.buyer.lastname %>"
+                                        alt="<%= review.buyer.firstname %>" class="w-12 h-12 rounded-full">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="font-semibold">
+                                                <%= review.buyer.firstname %>
+                                                    <%= review.buyer.lastname %>
+                                            </h4>
+                                            <span class="text-gray-500">
+                                                <%= new Date(review.createdAt).toLocaleDateString() %>
+                                            </span>
+                                        </div>
+                                        <div class="flex text-yellow-400 my-1">
+                                            <% for (let i=0; i < review.rating; i++) { %>
+                                                <i class="fas fa-star"></i>
+                                                <% } %>
+                                                    <% for (let i=review.rating; i < 5; i++) { %>
+                                                        <i class="far fa-star"></i>
+                                                        <% } %>
+                                        </div>
+                                        <p class="text-gray-600">
+                                            <%= review.comment %>
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="flex text-yellow-400 my-1">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <p class="text-gray-600">Absolutely loved this book! The concept is fascinating and the
-                                    writing is beautiful. Couldn't put it down!</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <div class="flex items-start space-x-4">
-                            <img src="https://ui-avatars.com/api/?name=Michael+Chen" alt="Michael Chen"
-                                class="w-12 h-12 rounded-full">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-semibold">Michael Chen</h4>
-                                    <span class="text-gray-500">1 week ago</span>
-                                </div>
-                                <div class="flex text-yellow-400 my-1">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </div>
-                                <p class="text-gray-600">A thought-provoking read that makes you reflect on your life
-                                    choices. Well worth the investment.</p>
-                            </div>
-                        </div>
-                    </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <p class="text-gray-600">No reviews yet. Be the first to review this book!</p>
+                                    <% } %>
                 </div>
             </div>
 

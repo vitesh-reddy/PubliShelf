@@ -1,14 +1,15 @@
 import express from "express";
 import styles from "../public/css/styles.js";
-// import mockCart from "../public/mockData/mockCart.js";
-// import mockWishlist from "../public/mockData/mockWishlist.js";
-// import { BooksDataArray, BuyerLoginData } from "../public/mockData/MockUserData.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { generateToken } from "../utils/jwt.js";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import { getBuyerById } from "../services/buyerService.js";
-import { getAllBooks } from "../services/bookService.js";
+import {
+  getAllBooks,
+  getBookById,
+  searchBooks,
+} from "../services/bookService.js";
 import { getAllPublishers } from "../services/publisherService.js";
 
 import { createBuyer } from "../services/buyerService.js";
@@ -34,13 +35,79 @@ router.get("/dashboard", protect, async (req, res) => {
 });
 
 // Search Page (Protected Route)
-router.get("/search-page", protect, (req, res) => {
-  res.render("buyer/search-page", {
-    newlyBooks: BooksDataArray,
-    books: BooksDataArray,
-    buyerName: req.user.firstname,
-    styles: styles,
-  });
+router.get("/search-page", protect, async (req, res) => {
+  try {
+    const books = await getAllBooks();
+    res.render("buyer/search-page", {
+      newlyBooks: books,
+      books: books,
+      buyerName: req.user.firstname,
+      styles: styles,
+    });
+  } catch (error) {
+    console.error("Error loading buyer dashboard:", error);
+    res.status(500).send("Error loading dashboard");
+  }
+});
+
+// Search Books (Protected Route)
+router.get("/search", protect, async (req, res) => {
+  const searchQuery = req.query.q; // Get the search query from the URL
+  try {
+    const books = await searchBooks(searchQuery); // Call the service function
+    res.render("buyer/search-page", {
+      newlyBooks: books,
+      books: books,
+      buyerName: req.user.firstname,
+      styles: styles,
+    });
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).send("Error during search");
+  }
+});
+
+// Filter and Category Search (Protected Route)
+router.get("/filter", protect, async (req, res) => {
+  const { category, sort, condition, priceRange } = req.query;
+
+  try {
+    // Build the query object
+    const query = {};
+    if (category) query.genre = category; // Filter by genre
+
+    if (condition && condition !== "All") query.condition = condition; // Filter by condition
+
+    if (priceRange) {
+      const [minPrice, maxPrice] = priceRange.split("-").map(Number);
+      query.price = { $gte: minPrice, $lte: maxPrice }; // Filter by price range
+    }
+
+    // Fetch books based on the query
+    let books = await books.find(query);
+
+    // Sort the books if a sort option is provided
+    if (sort) {
+      if (sort === "priceLowToHigh")
+        books = books.sort((a, b) => a.price - b.price);
+      else if (sort === "priceHighToLow")
+        books = books.sort((a, b) => b.price - a.price);
+      else if (sort === "newestFirst")
+        books = books.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+    }
+
+    res.render("buyer/search-page", {
+      newlyBooks: books,
+      books: books,
+      buyerName: req.user.firstname,
+      styles: styles,
+    });
+  } catch (error) {
+    console.error("Error during filter/category search:", error);
+    res.status(500).send("Error during filter/category search");
+  }
 });
 
 // Buyer Profile (Protected Route)
@@ -94,24 +161,31 @@ router.post("/signup", async (req, res) => {
     console.error("Error during buyer signup:", error); // Log the error for debugging
 
     // Check for duplicate email error
-    if (error.code === 11000) 
+    if (error.code === 11000)
       return res.status(400).json({ message: "Email already exists." });
-    
 
     // Handle other errors
-    res.status(500).json({ message: "An unexpected error occurred while creating the buyer account." });
+    res.status(500).json({
+      message: "An unexpected error occurred while creating the buyer account.",
+    });
   }
 });
 
 // Product Detail (Protected Route)
-router.get("/product-detail/:id1", protect, (req, res) => {
-  const bookId = req.params.id1;
-  res.render("buyer/product-detail", {
-    book: BooksDataArray,
-    name: req.user.firstname,
-    buyerName: req.user.firstname,
-    styles: styles,
-  });
+router.get("/product-detail/:id", protect, async (req, res) => {
+  const bookId = req.params.id;
+  try {
+    const bookofId = await getBookById(bookId);
+    console.log(bookofId);
+    res.render("buyer/product-detail", {
+      buyerName: req.user.firstname,
+      book: bookofId,
+      styles: styles,
+    });
+  } catch (error) {
+    console.error("Error loading product detail:", error);
+    res.status(500).send("Error loading product detail");
+  }
 });
 
 // Cart Page (Protected Route)
@@ -145,7 +219,5 @@ router.get("/auction-ongoing/:id", protect, (req, res) => {
     buyerName: req.user.firstname,
   });
 });
-
-
 
 export default router;

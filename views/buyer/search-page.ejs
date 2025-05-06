@@ -128,7 +128,7 @@
 
             <!-- Books Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <% newlyBooks.concat(books.mostSold, books.trending).forEach(book=> { %>
+                <% newlyBooks.forEach(book=> { %>
                     <div onclick="window.location.href='/buyer/product-detail/<%= book.id %>'"
                         class="transition-all duration-300 ease hover:-translate-y-[5px] hover:shadow-lg bg-white rounded-lg shadow-md overflow-hidden">
                         <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
