@@ -176,11 +176,11 @@ router.get("/product-detail/:id", protect, async (req, res) => {
 router.get("/cart", protect, async (req, res) => {
   try {
     const buyer = await getBuyerById(req.user.id); // Fetch buyer with populated cart
-    if (!buyer) {
+    if (!buyer)
       return res.status(404).send("Buyer not found");
-    }
 
     const cart = buyer.cart;
+    const wishlist = buyer.wishlist;
 
     const calculateOrderSummary = (cart) => {
       const subtotal = cart.reduce(
@@ -197,6 +197,7 @@ router.get("/cart", protect, async (req, res) => {
     res.render("buyer/cart", {
       buyerName: req.user.firstname,
       cart: cart,
+      wishlist: wishlist,
       ...orderSummary,
       styles: styles,
       wishlist: buyer.wishlist,
@@ -270,6 +271,32 @@ router.delete("/cart/remove", protect, async (req, res) => {
     res.status(500).json({
       message: "An error occurred while removing the item from the cart.",
     });
+  }
+});
+
+router.post("/wishlist/add", protect, async (req, res) => {
+  const { bookId } = req.body;
+
+  try {
+      const buyer = await getBuyerById(req.user.id);
+
+      if (!buyer) {
+          return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      // Check if the book is already in the wishlist
+      if (buyer.wishlist.includes(bookId)) {
+          return res.status(400).json({ message: "Book is already in the wishlist" });
+      }
+
+      // Add the book to the wishlist
+      buyer.wishlist.push(bookId);
+      await buyer.save();
+
+      res.status(200).json({ message: "Book added to wishlist successfully." });
+  } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      res.status(500).json({ message: "An error occurred while adding to the wishlist." });
   }
 });
 

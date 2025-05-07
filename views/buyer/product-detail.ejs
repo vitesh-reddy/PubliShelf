@@ -150,8 +150,8 @@
                                             </button>
                                             <% } %>
                                 </div>
-                                <button
-                                    class="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors">
+                                <button id="addToWishlistBtn" data-book-id="<%= book._id %>"
+                                    class="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 hover:text-red-500 px-6 py-3 rounded-lg transition-colors">
                                     <i class="far fa-heart"></i>
                                     <span>Add to Wishlist</span>
                                 </button>
@@ -312,6 +312,32 @@
                 }
             });
         }
+        const addToWishlistBtn = document.getElementById('addToWishlistBtn');
+        addToWishlistBtn.addEventListener('click', async () => {
+            const bookId = addToWishlistBtn.getAttribute('data-book-id');
+
+            try {
+                const response = await fetch('/buyer/wishlist/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookId }),
+                });
+
+                if (response.ok) {
+                    alert('Book added to wishlist successfully!');
+                    addToWishlistBtn.querySelector('i').classList.replace('far', 'fas');
+                    addToWishlistBtn.classList.add('text-red-500');
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to add to wishlist: ${error.message}`);
+                }
+            } catch (err) {
+                console.error('Error adding to wishlist:', err);
+                alert('An error occurred while adding the book to the wishlist.');
+            }
+        });        
     </script>
 </body>
 
