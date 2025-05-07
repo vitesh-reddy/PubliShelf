@@ -70,3 +70,26 @@ export const updateCartItemQuantity = async (buyerId, bookId, quantity) => {
   await buyer.save();
   return buyer;
 };
+
+export const placeOrder = async (buyerId, cart) => {
+  const buyer = await Buyer.findById(buyerId);
+  if (!buyer) {
+      throw new Error("Buyer not found");
+  }
+
+  // Add cart items to orders
+  const newOrders = cart.map(item => ({
+      book: item.book,
+      quantity: item.quantity,
+      orderDate: new Date(),
+      delivered: false,
+  }));
+  buyer.orders.push(...newOrders);
+
+  // Empty the cart
+  buyer.cart = [];
+
+  // Save the updated buyer
+  await buyer.save();
+  return buyer;
+};

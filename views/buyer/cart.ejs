@@ -128,7 +128,7 @@
 
                                         <div class="text-right">
                                             <p class="text-lg font-bold text-gray-900">
-                                                <%= item.book.price %>
+                                               ₹<%= item.book.price %>
                                             </p>
                                             <button class="text-red-500 hover:text-red-600 text-sm remove-from-cart-btn"
                                                 data-book-id="<%= item.book._id %>"> Remove </button>
@@ -173,7 +173,7 @@
                                     </div>
                                     <div class="text-right space-y-2">
                                         <p class="text-lg font-bold text-gray-900">
-                                            <%= item.price %>
+                                            ₹<%= item.price %>
                                         </p>
                                         <button
                                             class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
@@ -215,8 +215,7 @@
                                     <span>₹<%= total.toFixed(2) %></span>
                                 </div>
                             </div>
-
-                            <button onclick="window.location.href='/buyer/checkout'"
+                            <button id="proceedToCheckoutBtn" onclick="window.location.href='/buyer/checkout'"
                                 class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
                                 Proceed to Checkout
                             </button>
@@ -233,6 +232,21 @@
     </div>
     <script src="/js/script.js"></script>
     <script>
+        const updateCheckoutButton = () => {
+            const proceedToCheckoutBtn = document.getElementById('proceedToCheckoutBtn');
+            const cartItems = document.querySelectorAll('.remove-from-cart-btn'); // Count cart items dynamically
+            if (cartItems.length > 0) {
+                proceedToCheckoutBtn.disabled = false;
+                proceedToCheckoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                proceedToCheckoutBtn.disabled = true;
+                proceedToCheckoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Call the function initially to set the correct state
+        updateCheckoutButton();
+
         document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
             button.addEventListener('click', async (event) => {
                 const bookId = event.target.getAttribute('data-book-id'); // Get the book ID from the button
@@ -248,6 +262,7 @@
 
                     if (response.ok) {
                         alert('Item removed from cart successfully!');
+                        updateCheckoutButton(); // Update the checkout button state
                         location.reload(); // Reload the page to update the cart
                     } else {
                         const error = await response.json();
@@ -313,31 +328,31 @@
         });
 
         document.querySelectorAll('.remove-from-wishlist-btn').forEach(button => {
-        button.addEventListener('click', async (event) => {
-            const bookId = button.getAttribute('data-book-id'); // Get the book ID from the button
+            button.addEventListener('click', async (event) => {
+                const bookId = button.getAttribute('data-book-id'); // Get the book ID from the button
 
-            try {
-                const response = await fetch('/buyer/wishlist/remove', {
-                    method: 'DELETE', // Use DELETE method for better semantics
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ bookId }), // Send the book ID in the request body
-                });
+                try {
+                    const response = await fetch('/buyer/wishlist/remove', {
+                        method: 'DELETE', // Use DELETE method for better semantics
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ bookId }), // Send the book ID in the request body
+                    });
 
-                if (response.ok) {
-                    alert('Item removed from favorites successfully!');
-                    location.reload(); // Reload the page to update the wishlist
-                } else {
-                    const error = await response.json();
-                    alert(`Failed to remove item: ${error.message}`);
+                    if (response.ok) {
+                        alert('Item removed from favorites successfully!');
+                        location.reload(); // Reload the page to update the wishlist
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to remove item: ${error.message}`);
+                    }
+                } catch (err) {
+                    console.error('Error removing item from favorites:', err);
+                    alert('An error occurred while removing the item from favorites.');
                 }
-            } catch (err) {
-                console.error('Error removing item from favorites:', err);
-                alert('An error occurred while removing the item from favorites.');
-            }
+            });
         });
-    });
     </script>
 </body>
 
