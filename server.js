@@ -74,7 +74,6 @@ app.get('/logout', (req, res) => {
   res.redirect('/'); // redirect to home
 });
 
-
 app.listen(PORT, () =>
   console.log(`server is running at http://localhost:${PORT}`)
 );

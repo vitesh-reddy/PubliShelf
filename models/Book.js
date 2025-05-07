@@ -17,6 +17,7 @@ const bookSchema = new mongoose.Schema({
   image: { type: String },
   rating: { type: Number, default: 0 }, // Average rating
   publisher: { type: mongoose.Schema.Types.ObjectId, ref: "Publisher" },
+  publishedAt: { type: Date, default: Date.now },  
   reviews: [reviewSchema], // Embedded reviews
 });
 

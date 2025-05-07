@@ -1,8 +1,10 @@
 import Publisher from "../models/Publisher.js";
 
 export const getPublisherById = async (publisherId) => {
-  console.log("Fetching publisher with ID:", publisherId); // Debugging line
-  return await Publisher.findById(publisherId).populate("books");
+  return await Publisher.findById(publisherId).populate({
+    path: "books",
+    options: { sort: { publishedAt: -1 } }, // Sort books by publishedAt in descending order
+  });
 };
 
 export const addBookToPublisher = async (publisherId, bookId) => {
