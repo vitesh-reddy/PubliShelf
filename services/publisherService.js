@@ -1,6 +1,7 @@
 import Publisher from "../models/Publisher.js";
 
 export const getPublisherById = async (publisherId) => {
+  console.log("Fetching publisher with ID:", publisherId); // Debugging line
   return await Publisher.findById(publisherId).populate("books");
 };
 
@@ -28,4 +29,8 @@ export const createPublisher = async ({ firstname, lastname, publishingHouse, em
   });
 
   return await newPublisher.save();
+};
+
+export const deletePublisherById = async (publisherId) => {
+  return await Publisher.findByIdAndDelete(publisherId); // Delete the publisher by ID
 };

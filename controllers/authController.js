@@ -38,7 +38,6 @@ export const loginPostController = async (req, res) => {
     
 
     if (!token) return res.status(401).json({ message: "Invalid credentials" });
-    console.log(user.role);    
 
     // Set the token in an HTTP-only cookie
     res.cookie("token", token, {
@@ -47,22 +46,13 @@ export const loginPostController = async (req, res) => {
       sameSite: "strict", // Prevent CSRF attacks
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    
-    console.log("User role from loginPostController:", user.role)
+
     return res.status(200).json({
       ok: true,
       message: "Login successful",
       token,
       user,
     });
-
-    // Redirect based on user role
-    if (user.role === "buyer") {
-      console.log("buyer bolthey");
-      return res.redirect("/buyer/dashboard");
-    } else if (user.role === "publisher")
-      return res.redirect("/publisher/dashboard");
-    else if (user.role === "admin") return res.redirect("/admin/dashboard");
   } catch (error) {
     res.status(500).json({ message: "Error logging in", error });
   }

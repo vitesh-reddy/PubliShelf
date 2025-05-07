@@ -81,13 +81,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Newly Added Books</h2>
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% newlyBooks.forEach(book=> { %>
+                    <% newlyBooks.slice(0, 8).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>"
                             onclick="window.location.href='/buyer/product-detail/<%= book.id %>'">
-                            <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
+                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
-                                    <%= book.bookTitle %>
+                                    <%= book.title %>
                                 </h3>
                                 <p class="text-gray-600 text-sm mb-2">by <%= book.author %>
                                 </p>
@@ -113,7 +113,7 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Most Sold Books</h2>
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.forEach(book=> { %>
+                    <% books.slice(9, 16).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>">
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
@@ -146,7 +146,7 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Trending Now</h2>
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.forEach(book=> { %>
+                    <% books.slice(16, 24).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>">
                             <div class="relative">
                                 <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">

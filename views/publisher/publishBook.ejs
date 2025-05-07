@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="../../public/css/styles.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="fixed w-full bg-white shadow-sm z-50">
@@ -17,7 +19,8 @@
                 <div class="flex items-center">
                     <a href="/publisher/dashboard" class="flex items-center">
                         <i class="fas fa-arrow-left text-gray-600 mr-4"></i>
-                        <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                        <span
+                            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
                     </a>
                 </div>
             </div>
@@ -32,62 +35,78 @@
                     <h1 class="text-2xl font-bold text-gray-900">Publish New Book</h1>
                     <p class="text-gray-500 mt-1">Fill in the details to list your book for sale</p>
                 </div>
-                
+
 
                 <!-- zzzz -->
-                <form method="POST" action="/publisher/publish-book" class="p-6 space-y-6 animate-fade-in">
+                <form method="POST" action="/publisher/publish-book" enctype="multipart/form-data"
+                    class="p-6 space-y-6 animate-fade-in">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="bookTitle" class="block text-sm font-medium text-gray-700">Book Title</label>
-                            <input type="text" name="bookTitle" id="bookTitle" required class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500">
+                            <input type="text" name="title" id="bookTitle" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700" for="author">Author</label>
-                            <input type="text" name="author" id="author" required class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm   hover:shadow-md focus:outline-none focus:outline-purple-500">
+                            <input type="text" name="author" id="author" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm   hover:shadow-md focus:outline-none focus:outline-purple-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="description">Description</label>
-                        <textarea rows="4" name="description" id="description" required class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500"></textarea>
+                        <textarea rows="4" name="description" id="description" required
+                            class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700" for="genre">Genre</label>
-                            <select required name="genre" id="genre" class="bg-white mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" disabled selected value="">Select Genre</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Fiction">Fiction</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Non-Fiction">Non-Fiction</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Mystery">Mystery</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Science Fiction">Science Fiction</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Romance">Romance</option>
-                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" value="Thriller">Thriller</option>
+                            <select required name="genre" id="genre"
+                                class="bg-white mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:outline-purple-500">
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50" disabled
+                                    selected value="">Select Genre</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Fiction">Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Non-Fiction">Non-Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Mystery">Mystery</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Science Fiction">Science Fiction</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Romance">Romance</option>
+                                <option class="bg-white block px-4 py-2 text-gray-700 hover:bg-purple-50"
+                                    value="Thriller">Thriller</option>
                             </select>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700" for="price">Price (₹)</label>
-                            <input type="number" name="price" id="price" step="1" min="0" required class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm   hover:shadow-md focus:outline-none focus:outline-purple-500">
+                            <input type="number" name="price" id="price" step="1" min="0" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm   hover:shadow-md focus:outline-none focus:outline-purple-500">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700" for="quantity">Quantity</label>
-                            <input type="number" name="quantity" id="quantity" required class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500">
+                            <input type="number" name="quantity" id="quantity" required
+                                class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm  hover:shadow-md focus:outline-none focus:outline-purple-500">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700" >Book Cover Image</label>
-                        <!-- <input type="url" name="image" id="image" class="mt-1 px-2 py-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50"> -->
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                        <label class="block text-sm font-medium text-gray-700">Book Cover Image</label>
+                        <div
+                            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
                             <div class="space-y-1 text-center">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl"></i>
                                 <div class="flex text-sm text-gray-600">
-                                    <label for="imageFile" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                                    <label for="imageFile"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
                                         <span>Upload a file</span>
-                                        <input name="imageFile" id="imageFile" type="file" class="sr-only" accept="image/*">
+                                        <input name="imageFile" id="imageFile" type="file" class="sr-only"
+                                            accept="image/*">
                                     </label>
                                     <p class="pl-1">or drag and drop</p>
                                 </div>
@@ -95,15 +114,12 @@
                             </div>
                         </div>
                     </div>
-
-                    
-                    <input type="text" name="image" id="image" class="h-0 w-0">
-
                     <div class="flex justify-end space-x-4">
-                        <button type="button" onclick="window.location.href='/publisher/dashboard'" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <button type="button" onclick="window.location.href='/publisher/dashboard'"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
                             Publish Book
                         </button>
                     </div>
@@ -113,18 +129,16 @@
     </div>
 
     <script>
-        
-        const f = document.querySelector('form');
-        const imageelement = document.getElementById('imageFile');
-        f.addEventListener('submit', async (event) =>{
-            event.preventDefault();
-            let reader = new FileReader();
-            reader.readAsDataURL(imageelement.files[0]);
-            reader.onload = (e) => {
-                document.getElementById('image').value = e.target.result;                 
-                f.submit();
+        const form = document.querySelector('form');
+        const imageElement = document.getElementById('imageFile');
+
+        form.addEventListener('submit', async (event) => {
+            if (!imageElement.files[0]) {
+                event.preventDefault();
+                alert("Please upload a book cover image.");
             }
         });
     </script>
 </body>
+
 </html>

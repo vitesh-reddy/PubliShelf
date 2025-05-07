@@ -22,25 +22,13 @@
                     </a>
                 </div>
                 <div class="flex items-center md:space-x-8 relative">
-                    <div class="relative">
-                        <input type="text" placeholder="Search books..."
-                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button onclick="window.location.href='/buyer/search-page'"
-                            class="absolute right-3 top-2.5 text-gray-400">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
                     <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
                     <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
-
-                    <button onclick="window.location.href='/logout'"
-                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300  hidden md:block">logout</button>
-
-                    <div class="relative">
+                    <div class="relative group">
                         <button class="scale-0 md:scale-100 flex items-center space-x-2"
                             onclick="window.location.href='/buyer/profile'">
                             <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
@@ -49,6 +37,11 @@
                                 <%= buyerName %>
                             </span>
                         </button>
+                        <div
+                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            <a href="/buyer/profile" class="<%= styles.categoryBtnStyle %>">Your Profile</a>
+                            <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
+                        </div>
                     </div>
                     <div class="relative group">
                         <button class="md:hidden flex items-center space-x-2">
@@ -83,7 +76,7 @@
                         <div class="flex items-center">
                             <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
                             <span class="text-gray-500">
-                                <%= book.bookTitle %>
+                                <%= book.title %>
                             </span>
                         </div>
                     </li>
@@ -97,7 +90,7 @@
                     <div class="space-y-4">
                         <div class="aspect-w-3 aspect-h-4 rounded-lg overflow-hidden">
                             <img src="<%= book.image %>" alt="The Midnight Library"
-                                class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
+                                class="w-[500px] h-[600px] object-cover transform transition-transform duration-500 hover:scale-[1.01]">
                         </div>
                         <!--  -->
                     </div>
@@ -106,7 +99,7 @@
                     <div class="space-y-6">
                         <div>
                             <h1 class="text-3xl font-bold text-gray-900">
-                                <%= book.bookTitle %>
+                                <%= book.title %>
                             </h1>
                             <p class="text-lg text-gray-600 mt-2">
                                 <%= book.author %>
@@ -133,27 +126,30 @@
                             <div class="flex items-center space-x-4">
                                 <div class="flex items-center border rounded-lg">
 
-                                    <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                        <br>
-                                    </button>
-                                    <input type="number" value="1" min="1" max="23"
-                                        class="text-center text-2xl focus:outline-none 
-                                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                    <button class="px-4 py-2 text-gray-600 hover:text-purple-600">
-                                        <br>
-                                    </button>
                                 </div>
-                                <button
+                                <button onclick="window.location.href = '/buyer/cart';"
                                     class="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
                                     Buy Now
                                 </button>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
-                                <button
-                                    class="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span>Add to Cart</span>
-                                </button>
+                                <div class="relative grid grid-cols-2 gap-4">
+                                    <% if (isInCart) { %>
+                                        <!-- If the book is already in the cart -->
+                                        <button onclick="window.location.href='/buyer/cart'"
+                                            class="absolute w-full flex items-center justify-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Go to Cart</span>
+                                        </button>
+                                        <% } else { %>
+                                            <!-- If the book is not in the cart -->
+                                            <button id="addToCartBtn"
+                                                class="absolute w-full flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span>Add to Cart</span>
+                                            </button>
+                                            <% } %>
+                                </div>
                                 <button
                                     class="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors">
                                     <i class="far fa-heart"></i>
@@ -287,6 +283,36 @@
     </div>
 
     <script src="/js/script.js"></script>
+    <script>
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async () => {
+                const bookId = "<%= book._id %>"; // Pass the book ID dynamically
+                const quantity = 1; // Default quantity for now
+
+                try {
+                    const response = await fetch('/buyer/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ bookId, quantity }),
+                    });
+
+                    if (response.ok) {
+                        alert('Book added to cart successfully!');
+                        location.reload(); // Reload the page to update the button
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to add to cart: ${error.message}`);
+                    }
+                } catch (err) {
+                    console.error('Error adding to cart:', err);
+                    alert('An error occurred while adding the book to the cart.');
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

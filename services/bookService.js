@@ -56,7 +56,7 @@ export const filterBooks = async (filters) => {
   }
   if (priceRange) {
     const [minPrice, maxPrice] = priceRange.split("-").map(Number);
-    query.price = { $gte: minPrice, $lte: maxPrice };
+    query.price = { $gte: minPrice, $lte: maxPrice }; // Adjusted for INR
   }
 
   let books = await Book.find(query);

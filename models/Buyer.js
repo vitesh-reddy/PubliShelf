@@ -12,6 +12,18 @@ const buyerSchema = new mongoose.Schema({
     },
   ],
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+  orders: [
+    {
+      book: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Book",
+        required: true,
+      },
+      quantity: { type: Number, default: 1 },
+      delivered: { type: Boolean, default: false }, // Delivered flag
+      orderDate: { type: Date, default: Date.now }, // Order date
+    },
+  ],
 });
 
 const Buyer = mongoose.model("Buyer", buyerSchema);

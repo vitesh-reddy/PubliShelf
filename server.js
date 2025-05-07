@@ -38,6 +38,7 @@ app.use(
   })
 );
 
+
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());
@@ -64,12 +65,15 @@ app.get("/about", (req, res) => res.render("about", { styles: styles }));
 app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
 
-app.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.redirect("/");
+app.get('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true, // only with HTTPS
+    sameSite: 'Strict',
   });
+  res.redirect('/'); // redirect to home
 });
+
 
 app.listen(PORT, () =>
   console.log(`server is running at http://localhost:${PORT}`)
