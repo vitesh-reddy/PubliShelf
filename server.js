@@ -2,21 +2,17 @@ import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import mockBuyerData from "./public/mockData/mockBuyerData.js";
 import buyerRouter from "./routes/buyerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publisherRoutes from "./routes/publisherRoutes.js";
 import authRoutes from "./routes/authRoutes.js"
 import bodyParser from "body-parser";
 import session from "express-session";
-import bcrypt from "bcrypt";
 import styles from "./public/css/styles.js";
 import { BooksDataArray } from "./public/mockData/MockUserData.js";
 import connectDB from "./config/db.js";
-
 import cookieParser from "cookie-parser";
 
-import { protect } from "./middleware/authMiddleware.js";
 console.clear();
 
 dotenv.config();
@@ -37,7 +33,6 @@ app.use(
     },
   })
 );
-
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true, limit: "5mb" }));
@@ -68,10 +63,10 @@ app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 app.get('/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
-    secure: true, // only with HTTPS
+    secure: true,
     sameSite: 'Strict',
   });
-  res.redirect('/'); // redirect to home
+  res.redirect('/');
 });
 
 app.listen(PORT, () =>

@@ -3,11 +3,24 @@ import styles from "../public/css/styles.js";
 import { protect } from "../middleware/authMiddleware.js";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
-import { getBuyerById } from "../services/buyerService.js";
-import { getAllBooks, getBookById, searchBooks, } from "../services/bookService.js";
-
-import { createBuyer } from "../services/buyerService.js";
-import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBookService.js";
+import {
+  getBuyerById,
+  createBuyer,
+  updateBuyerDetails,
+} from "../services/buyerService.js";
+import {
+  getAllBooks,
+  getBookById,
+  searchBooks,
+} from "../services/bookService.js";
+import {
+  getOngoingAuctions,
+  getFutureAuctions,
+  getEndedAuctions,
+  getAuctionItemById,
+  addBid,
+} from "../services/antiqueBookService.js";
+import Buyer from "../models/Buyer.js";
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -79,11 +92,6 @@ router.get("/filter", protect, async (req, res) => {
     console.error("Error during filter/category search:", error);
     res.status(500).send("Error during filter/category search");
   }
-});
-
-// Buyer Profile (Protected Route)
-router.get("/profile", protect, (req, res) => {
-  res.render("buyer/profile", { user: req.user });
 });
 
 // Checkout Page (Protected Route)
@@ -363,7 +371,6 @@ router.post("/checkout/place-order", protect, async (req, res) => {
   }
 });
 
-
 // Auction Page (Protected Route)
 router.get("/auction-page", protect, async (req, res) => {
   try {
@@ -387,8 +394,8 @@ router.get("/auction-page", protect, async (req, res) => {
 
 // Auction Item Detail (Protected Route)
 router.get("/auction-item-detail/:id", protect, async (req, res) => {
-  try {  
-    const auctionId = req.params.id; 
+  try {
+    const auctionId = req.params.id;
 
     // Fetch auction item details using the auctionId
     const book = await getAuctionItemById(auctionId);
@@ -398,7 +405,6 @@ router.get("/auction-item-detail/:id", protect, async (req, res) => {
       buyerName: req.user.firstname,
       book,
     });
-
   } catch (error) {
     console.error("Error loading auction item details:", error);
     res.status(500).send("Error loading auction item details");
@@ -412,9 +418,8 @@ router.get("/auction-ongoing/:id", protect, async (req, res) => {
     // Fetch the auction item details using the service method
     const book = await getAuctionItemById(auctionId);
 
-    if (!book)
-      return res.status(404).send("Auction item not found");
-    
+    if (!book) return res.status(404).send("Auction item not found");
+
     // Render the auction-ongoing.ejs file with the fetched data
     res.render("buyer/auction-ongoing", {
       buyerName: req.user.firstname,
@@ -423,7 +428,9 @@ router.get("/auction-ongoing/:id", protect, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching auction item details:", error);
-    res.status(500).send("An error occurred while fetching auction item details.");
+    res
+      .status(500)
+      .send("An error occurred while fetching auction item details.");
   }
 });
 
@@ -442,9 +449,73 @@ router.post("/auctions/:id/bid", protect, async (req, res) => {
     });
   } catch (error) {
     console.error("Error placing bid:", error);
-    res.status(500).json({ message: "An error occurred while placing the bid." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while placing the bid." });
   }
 });
 
+router.get("/profile", protect, async (req, res) => {
+  try {
+    const user = await Buyer.findById(req.user.id)
+      .populate("orders.book")
+      .populate("wishlist")
+      .lean();
+    if (!user) return res.status(404).send("User not found");
+
+    if (user.orders && user.orders.length > 0)
+      user.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+    res.render("buyer/profile", { user });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+// Update Buyer Profile (Protected Route)
+router.put("/profile", protect, async (req, res) => {
+  try {
+    const { firstName, lastName, email, currentPassword, newPassword } =
+      req.body;
+    const buyerId = req.user.id;
+
+    // Call the service to update the buyer profile
+    const updatedBuyer = await updateBuyerProfile(buyerId, {
+      firstName,
+      lastName,
+      email,
+      currentPassword,
+      newPassword,
+    });
+
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    if (error.message === "Incorrect password")
+      return res.status(401).json({ message: "Incorrect password" });
+    if (error.message === "Email already exists")
+      return res.status(400).json({ message: "Email already exists" });
+    console.error("Error updating profile:", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/update-profile/:id", protect, async (req, res) => {
+  const buyerId = req.params.id;
+  const { currentPassword, firstname, lastname, email, confirmPassword } = req.body;
+  console.log("update buyer", buyerId, currentPassword, confirmPassword, firstname, lastname, email);
+  try {
+    const updatedBuyer = await updateBuyerDetails(buyerId, currentPassword, {
+      firstname,
+      lastname,
+      email,
+      password: await bcrypt.hash(confirmPassword, 10)
+    });
+
+    res.status(200).json({ success: true, buyer: updatedBuyer });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
 
 export default router;

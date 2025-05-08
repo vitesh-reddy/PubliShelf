@@ -5,6 +5,7 @@ const buyerSchema = new mongoose.Schema({
   lastname: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
   cart: [
     {
       book: { type: mongoose.Schema.Types.ObjectId, ref: "Book" },

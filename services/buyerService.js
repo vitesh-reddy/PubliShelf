@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import Buyer from "../models/Buyer.js";
 
 export const createBuyer = async (buyerData) => {
@@ -92,4 +93,21 @@ export const placeOrder = async (buyerId, cart) => {
   // Save the updated buyer
   await buyer.save();
   return buyer;
+};
+
+export const updateBuyerDetails = async (buyerId, currentPassword, updatedData) => {
+  const buyer = await Buyer.findById(buyerId);
+  if (!buyer) throw new Error("Buyer not found");
+
+  const isPasswordValid = await bcrypt.compare(currentPassword, buyer.password);
+    if (!isPasswordValid)
+      throw new Error("Incorrect Password");  
+    
+  // Check if new email is taken by someone else
+  if (updatedData.email && updatedData.email !== buyer.email) {
+    const existingBuyer = await Buyer.findOne({ email: updatedData.email });
+    if (existingBuyer) throw new Error("Email already exists");
+  }
+  Object.assign(buyer, updatedData);
+  return await buyer.save();
 };
