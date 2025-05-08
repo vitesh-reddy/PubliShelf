@@ -15,6 +15,7 @@ import cloudinary from "../config/cloudinary.js";
 import Book from "../models/Book.js";
 import Buyer from "../models/Buyer.js";
 import AntiqueBook from "../models/AntiqueBook.js";
+import { createAntiqueBook } from "../services/antiqueBookService.js";
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -183,7 +184,39 @@ router.post("/signup", async (req, res) => {
 router.get("/sell-antique", protect, (req, res) => {
   res.render("publisher/sellAntique");
 });
-// Publisher Signup
+
+router.post("/sell-antique", protect, upload.single("imageFile"), async (req, res) => {
+  try {
+    const { title, author, description, genre, condition, basePrice, auctionStart, auctionEnd } = req.body;
+    console.log(title, author, description, genre, condition, basePrice, auctionStart, auctionEnd); // Debugging line
+    // Check if the image file was uploaded
+    if (!req.file) {
+      return res.status(400).send("Please upload an image.");
+    }
+
+    // Get the uploaded image URL from Cloudinary
+    const imageUrl = req.file.path;
+
+    const newAntiqueBook = await createAntiqueBook({
+      title,
+      author,
+      description,
+      genre,
+      condition,
+      basePrice,
+      auctionStart,
+      auctionEnd,
+      image: imageUrl, // Store the Cloudinary image URL
+      publisher: req.user.id,
+      publishedAt: new Date(),
+    });
+
+    res.status(201).send("Antique book listed for auction successfully.");
+  } catch (error) {
+    console.error("Error listing antique book:", error);
+    res.status(500).send("An error occurred while listing the antique book.");
+  }
+});
 
 router.get("/publish-book", protect, (req, res) => {
   res.render("publisher/publishBook");

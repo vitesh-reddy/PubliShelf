@@ -19,3 +19,13 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
   await book.save();
   return book;
 };
+
+export const createAntiqueBook = async (bookData) => {
+  try {
+    const newAntiqueBook = new AntiqueBook(bookData);
+    return await newAntiqueBook.save();
+  } catch (error) {
+    console.error("Error creating antique book:", error);
+    throw new Error("Failed to create antique book.");
+  }
+};

@@ -25,13 +25,14 @@ const antiqueBookSchema = new mongoose.Schema({
   biddingHistory: [biddingHistorySchema], // Embedded Bidding History
   auctionStart: { type: Date, required: true }, // Auction Start Date
   auctionEnd: { type: Date, required: true }, // Auction End Date
-  images: [{ type: String }], // Array of image URLs
+  images: { type: String }, // Array of image URLs
   authenticationDocuments: [{ type: String }], // Array of document URLs
   publisher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Publisher",
     required: true,
   }, // Reference to Publisher
+  publishedAt: { type: Date, default: Date.now }, 
 });
 
 const AntiqueBook = mongoose.model("AntiqueBook", antiqueBookSchema);
