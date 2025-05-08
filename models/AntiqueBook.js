@@ -25,8 +25,8 @@ const antiqueBookSchema = new mongoose.Schema({
   biddingHistory: [biddingHistorySchema], // Embedded Bidding History
   auctionStart: { type: Date, required: true }, // Auction Start Date
   auctionEnd: { type: Date, required: true }, // Auction End Date
-  images: { type: String }, // Array of image URLs
-  authenticationImages: { type: String }, // Array of document URLs
+  image: { type: String }, // Array of image URLs
+  authenticationImage: { type: String }, // Array of document URLs
   publisher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Publisher",

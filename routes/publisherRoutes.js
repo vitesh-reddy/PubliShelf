@@ -186,10 +186,7 @@ router.get("/sell-antique", protect, (req, res) => {
   res.render("publisher/sellAntique");
 });
 
-router.post(
-  "/sell-antique",
-  protect,
-  upload.fields([
+router.post("/sell-antique", protect, upload.fields([
     { name: "itemImage", maxCount: 1 },
     { name: "authenticationImage", maxCount: 1 },
   ]),
