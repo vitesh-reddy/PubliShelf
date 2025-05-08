@@ -38,7 +38,10 @@ app.use(
   })
 );
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());

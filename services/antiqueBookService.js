@@ -19,6 +19,7 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
   await book.save();
   return book;
 };
+<<<<<<< HEAD
 
 export const createAntiqueBook = async (bookData) => {
   try {
@@ -29,3 +30,5 @@ export const createAntiqueBook = async (bookData) => {
     throw new Error("Failed to create antique book.");
   }
 };
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94

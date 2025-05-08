@@ -113,8 +113,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Most Sold Books</h2>
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<<<<<<< HEAD
                     <% books.slice(9, 16).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>" onclick="window.location.href='/buyer/product-detail/<%= book._id %>'"> 
+=======
+                    <% books.forEach(book=> { %>
+                        <div class="<%= styles.bookCardStyle %>">
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
@@ -146,8 +151,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Trending Now</h2>
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<<<<<<< HEAD
                     <% books.slice(16, 24).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>"  onclick="window.location.href='/buyer/product-detail/<%= book._id %>'">
+=======
+                    <% books.forEach(book=> { %>
+                        <div class="<%= styles.bookCardStyle %>">
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
                             <div class="relative">
                                 <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                                 <div

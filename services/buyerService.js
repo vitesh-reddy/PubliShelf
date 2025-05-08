@@ -5,9 +5,12 @@ export const createBuyer = async (buyerData) => {
   return await newBuyer.save();
 };
 
+<<<<<<< HEAD
 export const getAllBuyers = async () => {
   return await Buyer.find(); // Fetch all buyers
 };
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 
 export const getBuyerById = async (buyerId) => {
   return await Buyer.findById(buyerId).populate("cart.book").populate("wishlist");
@@ -20,6 +23,7 @@ export const updateBuyerCart = async (buyerId, cart) => {
 export const updateBuyerWishlist = async (buyerId, wishlist) => {
   return await Buyer.findByIdAndUpdate(buyerId, { wishlist }, { new: true });
 };
+<<<<<<< HEAD
 
 export const addOrderToBuyer = async (buyerId, order) => {
   return await Buyer.findByIdAndUpdate(
@@ -93,3 +97,5 @@ export const placeOrder = async (buyerId, cart) => {
   await buyer.save();
   return buyer;
 };
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94

@@ -1,12 +1,17 @@
 import express from "express";
+import { protect } from "../middleware/authMiddleware.js";
 import styles from "../public/css/styles.js";
+<<<<<<< HEAD
 import { checkAdminKey } from "../middleware/authMiddleware.js";
 import { getAllPublishers, deletePublisherById } from "../services/publisherService.js";
 import { getAllBuyers, getAllOrders } from "../services/buyerService.js";
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 
 const router = express.Router();
 
 // Admin Signup (No authentication required)
+<<<<<<< HEAD
 router.get("/signup", (req, res) =>
   res.render("auth/signup-admin", { styles: styles })
 );
@@ -22,6 +27,17 @@ router.get("/dashboard/:key", checkAdminKey, async (req, res) => {
     const orders = await getAllOrders();
     // const auctions = await getAllAuctions();
     const auctions = []; // Placeholder for auctions, replace with actual data fetching
+=======
+router.get("/signup", (req, res) => res.render("auth/signup-admin", { styles: styles }));
+
+// Admin Dashboard (Protected Route)
+import { getAllPublishers } from "../services/publisherService.js";
+
+router.get("/dashboard", protect, async (req, res) => {
+  const publishers = await getAllPublishers();
+  res.render("admin/dashboard", { publishers });
+});
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 
     // Calculate analytics
     const totalBuyers = buyers.length;

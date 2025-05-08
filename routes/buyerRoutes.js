@@ -1,15 +1,26 @@
 import express from "express";
 import styles from "../public/css/styles.js";
+<<<<<<< HEAD
+=======
+// import mockCart from "../public/mockData/mockCart.js";
+// import mockWishlist from "../public/mockData/mockWishlist.js";
+// import { BooksDataArray, BuyerLoginData } from "../public/mockData/MockUserData.js";
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 import { protect } from "../middleware/authMiddleware.js";
 import { generateToken } from "../utils/jwt.js";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
+<<<<<<< HEAD
 import { getBuyerById, updateBuyerCart } from "../services/buyerService.js";
 import {
   getAllBooks,
   getBookById,
   searchBooks,
 } from "../services/bookService.js";
+=======
+import { getBuyerById } from "../services/buyerService.js";
+import { getAllBooks } from "../services/bookService.js";
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 import { getAllPublishers } from "../services/publisherService.js";
 
 import { createBuyer } from "../services/buyerService.js";
@@ -19,6 +30,10 @@ router.use(bodyParser.urlencoded({ extended: true }));
 
 // Buyer Dashboard (Protected Route)
 router.get("/dashboard", protect, async (req, res) => {
+<<<<<<< HEAD
+=======
+  console.log("Buyer Dashboard accessed by:", req.user.firstname);
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
   try {
     const books = await getAllBooks();
     res.render("buyer/dashboard", {
@@ -34,6 +49,7 @@ router.get("/dashboard", protect, async (req, res) => {
 });
 
 // Search Page (Protected Route)
+<<<<<<< HEAD
 router.get("/search-page", protect, async (req, res) => {
   try {
     const books = await getAllBooks();
@@ -91,6 +107,22 @@ router.get("/profile", protect, (req, res) => {
   res.render("buyer/profile", { user: req.user });
 });
 
+=======
+router.get("/search-page", protect, (req, res) => {
+  res.render("buyer/search-page", {
+    newlyBooks: BooksDataArray,
+    books: BooksDataArray,
+    buyerName: req.user.firstname,
+    styles: styles,
+  });
+});
+
+// Buyer Profile (Protected Route)
+router.get("/profile", protect, (req, res) => {
+  res.render("buyer/profile", { user: req.user });
+});
+
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 // Auction Page (Protected Route)
 router.get("/auction-page", protect, (req, res) => {
   res.render("buyer/auction-page", {
@@ -106,6 +138,7 @@ router.get("/auction-item-detail/:id", protect, (req, res) => {
 });
 
 // Checkout Page (Protected Route)
+<<<<<<< HEAD
 router.get("/checkout", protect, async (req, res) => {
   try {
     const buyer = await getBuyerById(req.user.id); // Fetch buyer with populated cart
@@ -134,6 +167,12 @@ router.get("/checkout", protect, async (req, res) => {
     console.error("Error loading Checkout Page:", error);
     res.status(500).send("Error loading Checkout Page");
   }
+=======
+router.get("/checkout", protect, (req, res) => {
+  res.render("buyer/checkout", {
+    buyerName: req.user.firstname,
+  });
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 });
 
 // Buyer Signup Page (Public Route)
@@ -161,6 +200,7 @@ router.post("/signup", async (req, res) => {
     console.error("Error during buyer signup:", error); // Log the error for debugging
 
     // Check for duplicate email error
+<<<<<<< HEAD
     if (error.code === 11000)
       return res.status(400).json({ message: "Email already exists." });
 
@@ -168,10 +208,19 @@ router.post("/signup", async (req, res) => {
     res.status(500).json({
       message: "An unexpected error occurred while creating the buyer account.",
     });
+=======
+    if (error.code === 11000) 
+      return res.status(400).json({ message: "Email already exists." });
+    
+
+    // Handle other errors
+    res.status(500).json({ message: "An unexpected error occurred while creating the buyer account." });
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
   }
 });
 
 // Product Detail (Protected Route)
+<<<<<<< HEAD
 router.get("/product-detail/:id", protect, async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -198,6 +247,36 @@ router.get("/product-detail/:id", protect, async (req, res) => {
 });
 
 // Cart Page (Protected Route)
+=======
+router.get("/product-detail/:id1", protect, (req, res) => {
+  const bookId = req.params.id1;
+  res.render("buyer/product-detail", {
+    book: BooksDataArray,
+    name: req.user.firstname,
+    buyerName: req.user.firstname,
+    styles: styles,
+  });
+});
+
+// Cart Page (Protected Route)
+
+router.get("/cart", protect, async (req, res) => {
+  const buyer = await getBuyerById(req.user.id);
+  const cart = buyer.cart;
+
+  const calculateOrderSummary = (cart) => {
+    const subtotal = cart.reduce(
+      (sum, item) => sum + item.book.price * item.quantity,
+      0
+    );
+    const shipping = subtotal >= 35 ? 0 : 5.99;
+    const tax = subtotal * 0.08; // 8% tax
+    const total = subtotal + shipping + tax;
+    return { subtotal, shipping, tax, total };
+  };
+
+  const orderSummary = calculateOrderSummary(cart);
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 
 router.get("/cart", protect, async (req, res) => {
   try {
@@ -392,7 +471,20 @@ router.post("/checkout/place-order", protect, async (req, res) => {
 router.get("/auction-ongoing/:id", protect, (req, res) => {
   res.render("buyer/auction-ongoing", {
     buyerName: req.user.firstname,
+<<<<<<< HEAD
+=======
+    cart: cart,
+    ...orderSummary,
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
   });
 });
+
+router.get("/auction-ongoing/:id", protect, (req, res) => {
+  res.render("buyer/auction-ongoing", {
+    buyerName: req.user.firstname,
+  });
+});
+
+
 
 export default router;

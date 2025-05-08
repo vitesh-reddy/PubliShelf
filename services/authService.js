@@ -24,8 +24,11 @@ export const loginUser = async (email, password) => {
     // Generate JWT token
     const token = generateToken(user);
 
+<<<<<<< HEAD
     console.log(user.firstname, user.lastname, "logged in as ", user.role);
 
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
     // Return the token and user details
     return { token, user, code: 0 };
   } catch (error) {

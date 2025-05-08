@@ -5,7 +5,11 @@ export const getAllBooks = async () => {
 };
 
 export const getBookById = async (bookId) => {
+<<<<<<< HEAD
   return await Book.findById(bookId).populate("reviews.buyer").populate("publisher");
+=======
+  return await Book.findById(bookId).populate("reviews.buyer");
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 };
 
 export const addReviewToBook = async (bookId, review) => {
@@ -28,6 +32,7 @@ export const addReviewToBook = async (bookId, review) => {
 export const createBook = async (bookData) => {
   const newBook = new Book(bookData);
   return await newBook.save();
+<<<<<<< HEAD
 };
 
 export const searchBooks = async (query) => {
@@ -72,4 +77,6 @@ export const filterBooks = async (filters) => {
   }
 
   return books;
+=======
+>>>>>>> d3cc9eae2fce0ee8716ec4b262dbc227a5a0ac94
 };
