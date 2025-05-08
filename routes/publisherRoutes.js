@@ -40,7 +40,8 @@ router.get("/dashboard", protect, async (req, res) => {
 
     // Fetch recent publications
     const books = await Book.find({ publisher: req.user.id })
-      .sort({ publishedAt: -1 }).limit(10);
+      .sort({ publishedAt: -1 })
+      .limit(10);
 
     // Fetch recent auctions
     const auctions = await AntiqueBook.find({ publisher: req.user.id })
@@ -185,44 +186,63 @@ router.get("/sell-antique", protect, (req, res) => {
   res.render("publisher/sellAntique");
 });
 
-router.post("/sell-antique", protect, upload.single("imageFile"), async (req, res) => {
-  try {
-    const { title, author, description, genre, condition, basePrice, auctionStart, auctionEnd } = req.body;
-    console.log(title, author, description, genre, condition, basePrice, auctionStart, auctionEnd); // Debugging line
-    // Check if the image file was uploaded
-    if (!req.file) {
-      return res.status(400).send("Please upload an image.");
+router.post(
+  "/sell-antique",
+  protect,
+  upload.fields([
+    { name: "itemImage", maxCount: 1 },
+    { name: "authenticationImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        title,
+        author,
+        description,
+        genre,
+        condition,
+        basePrice,
+        auctionStart,
+        auctionEnd,
+      } = req.body;
+      if (!req.files || !req.files.itemImage || !req.files.authenticationImage)
+        return res.status(400).send("Please upload both images.");
+
+      const itemImageUrl = req.files.itemImage[0].path;
+      const authenticationImageUrl = req.files.authenticationImage[0].path;
+
+      const newAntiqueBook = await createAntiqueBook({
+        title,
+        author,
+        description,
+        genre,
+        condition,
+        basePrice,
+        auctionStart,
+        auctionEnd,
+        image: itemImageUrl,
+        authenticationImage: authenticationImageUrl,
+        publisher: req.user.id,
+        publishedAt: new Date(),
+      });
+
+      res.status(201).send("Antique book listed for auction successfully.");
+    } catch (error) {
+      console.error("Error listing antique book:", error);
+      res.status(500).send("An error occurred while listing the antique book.");
     }
-
-    // Get the uploaded image URL from Cloudinary
-    const imageUrl = req.file.path;
-
-    const newAntiqueBook = await createAntiqueBook({
-      title,
-      author,
-      description,
-      genre,
-      condition,
-      basePrice,
-      auctionStart,
-      auctionEnd,
-      image: imageUrl, // Store the Cloudinary image URL
-      publisher: req.user.id,
-      publishedAt: new Date(),
-    });
-
-    res.status(201).send("Antique book listed for auction successfully.");
-  } catch (error) {
-    console.error("Error listing antique book:", error);
-    res.status(500).send("An error occurred while listing the antique book.");
   }
-});
+);
 
 router.get("/publish-book", protect, (req, res) => {
   res.render("publisher/publishBook");
 });
 
-router.post("/publish-book", protect, upload.single("imageFile"), async (req, res) => {
+router.post(
+  "/publish-book",
+  protect,
+  upload.single("imageFile"),
+  async (req, res) => {
     try {
       const { title, author, description, genre, price, quantity } = req.body;
 
