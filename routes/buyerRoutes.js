@@ -21,6 +21,7 @@ import {
   addBid,
 } from "../services/antiqueBookService.js";
 import Buyer from "../models/Buyer.js";
+import Book from "../models/Book.js";
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -346,6 +347,7 @@ router.post("/checkout/place-order", protect, async (req, res) => {
     if (!buyer) {
       return res.status(404).json({ message: "Buyer not found" });
     }
+    // console.log(buyer.cart);
 
     // Add current cart items to orders
     const newOrders = buyer.cart.map((item) => ({
@@ -356,12 +358,17 @@ router.post("/checkout/place-order", protect, async (req, res) => {
     }));
     buyer.orders.push(...newOrders);
 
-    // Empty the cart
+    buyer.cart.forEach(async (item) => {
+      console.log(
+        await Book.findByIdAndUpdate(
+          { _id: item.book._id },
+          { $inc: { quantity: -parseInt(item.quantity) } },
+          { new: "true" }
+        )
+      );
+    });
     buyer.cart = [];
-
-    // Save the updated buyer
     await buyer.save();
-
     res.status(200).json({ message: "Order placed successfully." });
   } catch (error) {
     console.error("Error placing order:", error);
@@ -502,14 +509,23 @@ router.put("/profile", protect, async (req, res) => {
 
 router.post("/update-profile/:id", protect, async (req, res) => {
   const buyerId = req.params.id;
-  const { currentPassword, firstname, lastname, email, confirmPassword } = req.body;
-  console.log("update buyer", buyerId, currentPassword, confirmPassword, firstname, lastname, email);
+  const { currentPassword, firstname, lastname, email, confirmPassword } =
+    req.body;
+  console.log(
+    "update buyer",
+    buyerId,
+    currentPassword,
+    confirmPassword,
+    firstname,
+    lastname,
+    email
+  );
   try {
     const updatedBuyer = await updateBuyerDetails(buyerId, currentPassword, {
       firstname,
       lastname,
       email,
-      password: await bcrypt.hash(confirmPassword, 10)
+      password: await bcrypt.hash(confirmPassword, 10),
     });
 
     res.status(200).json({ success: true, buyer: updatedBuyer });
