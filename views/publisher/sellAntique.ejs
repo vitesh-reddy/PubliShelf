@@ -122,6 +122,12 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Image Preview Section -->
+                    <div id="imagePreviewContainer1" class="mt-4 hidden">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2"> Item Image Preview:</h4>
+                        <img id="imagePreview1" class="w-48 h-64 object-cover rounded-lg shadow-md"
+                            alt="Uploaded Image Preview">
+                    </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Authentication Image</label>
@@ -138,6 +144,12 @@
                                 <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                             </div>
                         </div>
+                    </div>
+                    <!-- Image Preview Section -->
+                    <div id="imagePreviewContainer2" class="mt-4 hidden">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2"> Authentication Image Preview:</h4>
+                        <img id="imagePreview2" class="w-48 h-64 object-cover rounded-lg shadow-md"
+                            alt="Uploaded Image Preview">
                     </div>
 
                     <div class="flex justify-end space-x-4">
@@ -156,6 +168,52 @@
     </div>
 
     <script src="/js/script.js"></script>
+    <script>
+        const form = document.querySelector('form');
+        const imageElement = document.getElementById('imageFile');
+
+        form.addEventListener('submit', async (event) => {
+            if (!imageElement.files[0]) {
+                event.preventDefault();
+                alert("Please upload a book cover image.");
+            }
+        });
+        const imageFileInput1 = document.getElementById('itemImage');
+        const imagePreviewContainer1 = document.getElementById('imagePreviewContainer1');
+        const imagePreview1 = document.getElementById('imagePreview1');
+
+        imageFileInput1.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview1.src = e.target.result; // Set the preview image source
+                    imagePreviewContainer1.classList.remove('hidden'); // Show the preview container
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            } else {
+                imagePreviewContainer1.classList.add('hidden'); // Hide the preview container if no file is selected
+            }
+        });
+
+        const imageFileInput2 = document.getElementById('authenticationImage');
+        const imagePreviewContainer2 = document.getElementById('imagePreviewContainer2');
+        const imagePreview2 = document.getElementById('imagePreview2');
+
+        imageFileInput2.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview2.src = e.target.result; // Set the preview image source
+                    imagePreviewContainer2.classList.remove('hidden'); // Show the preview container
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            } else {
+                imagePreviewContainer2.classList.add('hidden'); // Hide the preview container if no file is selected
+            }
+        });
+    </script>
 </body>
 
 </html>
