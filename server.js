@@ -6,16 +6,17 @@ import mockBuyerData from "./public/mockData/mockBuyerData.js";
 import buyerRouter from "./routes/buyerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publisherRoutes from "./routes/publisherRoutes.js";
+import authRoutes from "./routes/authRoutes.js"
 import bodyParser from "body-parser";
 import session from "express-session";
 import bcrypt from "bcrypt";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import "./config/passportConfig.js";
 import styles from "./public/css/styles.js";
 import { BooksDataArray } from "./public/mockData/MockUserData.js";
 import connectDB from "./config/db.js";
-import { loginGetController, loginPostController } from "./controllers/authController.js";
+
+import cookieParser from "cookie-parser";
+
+import { protect } from "./middleware/authMiddleware.js";
 console.clear();
 
 dotenv.config();
@@ -37,11 +38,12 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true, limit: "5mb" }));
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
@@ -58,17 +60,18 @@ app.get("/", (req, res) => {
 
 app.use("/buyer", buyerRouter);
 app.use("/publisher", publisherRoutes);
+app.use("/auth", authRoutes);
 app.get("/about", (req, res) => res.render("about", { styles: styles }));
 app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
-app.get("/auth/login", loginGetController);
-app.post("/auth/login", loginPostController);
 
-app.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.redirect("/");
+app.get('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true, // only with HTTPS
+    sameSite: 'Strict',
   });
+  res.redirect('/'); // redirect to home
 });
 
 app.listen(PORT, () =>

@@ -7,162 +7,361 @@
     <title>Admin Dashboard - PubliShelf</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="fixed w-full bg-white shadow-sm z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
+            <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="/admin/dashboard" class="flex items-center">
                         <span
                             class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
                     </a>
                 </div>
-                <div class="">
-                </div>
-                <div class="flex items-center space-x-4 scale-0 md:scale-100">
-                    <button
-                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
-                        <a href="#manage-publishers"> Manage Publishers </a>
-                    </button>
-                    <button
-                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">
-                        <a href="/logout"> Logout </a>
-                    </button>
-                    <div class="relative">
-                        <button class="flex items-center space-x-2">
-                            <img src="https://ui-avatars.com/api/?name=Admin" alt="Profile"
-                                class="w-8 h-8 rounded-full">
-                            <span class="text-gray-700">Admin Name</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="relative group md:hidden">
-                    <button class="md:hidden w-auto h-auto"><img src="https://ui-avatars.com/api/?name=Admin"
-                            alt="Profile" class="w-8 h-8 rounded-full"></button>
-                    <div
-                        class="absolute top-full right-1 w-32 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                        <a href="#manage-publishers" class="<%= styles.categoryBtnStyle %>"> Manage Publishers</a>
-                        <a href="/logout" class="<%= styles.categoryBtnStyle %>">Logout</a>
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">
+                        <%=admin.name%>
+                    </span>
+                    <button onclick="window.location.href='/logout'"
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Logout</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="pt-20">
+    <div class="pt-16 pb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 class="text-4xl font-bold text-purple-600 mb-8">Admin Dashboard</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">User Activity</h2>
-                    <canvas id="userActivityChart"></canvas>
+            <!-- Header -->
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
+
+            <!-- Analytics Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Buyers</h3>
+                    <p class="text-2xl font-bold text-purple-600 mt-2">
+                        <%=analytics?.totalBuyers || 0%>
+                    </p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Sales Analytics</h2>
-                    <canvas class="mt-20" id="salesAnalyticsChart"></canvas>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Sold Items</h3>
+                    <p class="text-2xl font-bold text-purple-600 mt-2">
+                        <%=analytics?.totalOrders || 0%>
+                    </p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Auction Analytics</h2>
-                    <canvas class="mt-20" id="auctionAnalyticsChart"></canvas>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Revenue</h3>
+                    <p class="text-2xl font-bold text-purple-600 mt-2">₹<%=analytics?.totalRevenue?.toFixed(2) || '0.00'
+                            %>
+                    </p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Active Auctions</h3>
+                    <p class="text-2xl font-bold text-purple-600 mt-2">
+                        <%=analytics?.activeAuctions || 3%>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+                <!-- Pie Chart: Genre Distribution -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Book Genre Distribution</h3>
+                    <canvas id="genreChart" class="w-full h-64"></canvas>
+                </div>
+                <!-- Bar Graph: Revenue by Genre -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue by Genre</h3>
+                    <canvas id="revenueChart" class="w-full h-64"></canvas>
+                </div>
+            </div>
+
+            <!-- Publisher Approvals -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-12">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Publisher Approvals</h3>
+                <% if (publishers.length> 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Publishing House</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Ban Publishing House</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% publishers.forEach(publisher=> { %>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=publisher.firstname + " " + publisher.lastname%>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=publisher.email%>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=publisher.publishingHouse%>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-80">
+                                                Approved
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <button
+                                              onclick="banPublisher('<%= publisher._id %>')"
+                                              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-300 text-red-800 hover:bg-red-400"
+                                            > Ban <%= publisher.publishingHouse %> </button>
+                                          </td>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } else { %>
+                        <p class="text-gray-600 text-sm">No publishers pending approval.</p>
+                        <% } %>
+            </div>
+
+            <!-- Publisher Activities -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Publisher Activities</h3>
+                <% if (activities.length> 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Publisher</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Action</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% activities.forEach(activity=> { %>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=activity.publisherName%>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=activity.action%>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%=new Date(activity.timestamp).toLocaleString('en-US', { month: 'short' ,
+                                                day: '2-digit' , year: 'numeric' , hour: '2-digit' , minute: '2-digit'
+                                                })%>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } else { %>
+                        <p class="text-gray-600 text-sm">No recent activities.</p>
+                        <% } %>
+            </div>
+
+            <!-- Approval Confirmation Modal -->
+            <div id="approve-modal"
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">Approve Publisher</h3>
+                        <button id="approve-modal-close" class="text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600">Are you sure you want to approve <span id="approve-publisher-name"></span>?
+                    </p>
+                    <form id="approve-form" method="POST" action="">
+                        <div class="flex justify-end space-x-4 mt-6">
+                            <button type="button" id="approve-modal-cancel"
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Approve</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Rejection Confirmation Modal -->
+            <div id="reject-modal"
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">Reject Publisher</h3>
+                        <button id="reject-modal-close" class="text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600">Are you sure you want to reject <span id="reject-publisher-name"></span>?
+                    </p>
+                    <form id="reject-form" method="POST" action="">
+                        <div class="flex justify-end space-x-4 mt-6">
+                            <button type="button" id="reject-modal-cancel"
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Reject</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-gray-50">
-        <!-- Main Content -->
-        <div id="manage-publishers" class="pt-20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 class="text-4xl font-bold text-purple-600 mb-8">Manage Publishers</h1>
-                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Publisher Name
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% publishers.forEach(publisher=> { %>
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    <%= publisher.name %>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            class="text-red-600 hover:text-red-900 transition-colors duration-200">Remove</button>
-                                    </td>
-                                </tr>
-                                <% }); %>
-                        </tbody>
-                    </table>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <span
+                        class="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
+                    <p class="text-sm mt-2">© 2025 PubliShelf. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="/terms" class="text-gray-300 hover:text-purple-400 text-sm">Terms and Conditions</a>
+                    <a href="/privacy" class="text-gray-300 hover:text-purple-400 text-sm">Privacy Policy</a>
                 </div>
             </div>
         </div>
-
-
-
-        <script>
-            // JavaScript to initialize charts
-            const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
-            const salesAnalyticsCtx = document.getElementById('salesAnalyticsChart').getContext('2d');
-            const auctionAnalyticsCtx = document.getElementById('auctionAnalyticsChart').getContext('2d');
-
-            const userActivityChart = new Chart(userActivityCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Active', 'Inactive', 'Banned'],
-                    datasets: [{
-                        data: [300, 50, ],
-                        backgroundColor: ['#9333ea', '#4f46e5', '#a855f7']
-                    }]
+    </footer>
+    <script>
+        const analytics = <%- JSON.stringify(analytics) %>;
+        const banPublisher = async (publisherId) => {
+                if (confirm("Are you sure you want to ban this publisher?")) {
+                  try {
+                    const response = await fetch(`/admin/publishers/${publisherId}/ban`, {
+                      method: "DELETE",
+                    });
+                
+                    if (response.ok) {
+                      alert("Publisher banned successfully.");
+                      location.reload(); // Reload the page to reflect the changes
+                    } else {
+                      const errorData = await response.json();
+                      alert(errorData.message || "Failed to ban publisher.");
+                    }
+                  } catch (error) {
+                    console.error("Error banning publisher:", error);
+                    alert("An error occurred. Please try again.");
+                  }
                 }
+            }
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize charts only if elements exist and data is available
+            if (document.getElementById('genreChart') && document.getElementById('revenueChart')) {
+                // Chart.js: Genre Distribution Pie Chart
+                if (analytics?.genreCounts?.length > 0) {
+                    console.log("Genre Counts: ", analytics.genreCounts); // Debugging line
+                    const genreChart = new Chart(document.getElementById('genreChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: analytics.genreCounts.map(g => g.genre), // Pass as an array
+                            datasets: [{
+                                data: analytics.genreCounts.map(g => g.count), // Pass as an array
+                                backgroundColor: [
+                                    '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe',
+                                    '#6b7280', '#9ca3af', '#d1d5db'
+                                ],
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                if (analytics?.revenueByGenre?.length > 0) {
+                    const revenueChart = new Chart(document.getElementById('revenueChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: analytics.revenueByGenre.map(r => r.genre), // Pass as an array
+                            datasets: [{
+                                label: 'Revenue (₹)',
+                                data: analytics.revenueByGenre.map(r => r.revenue), // Pass as an array
+                                backgroundColor: '#8b5cf6',
+                                borderColor: '#6d28d9',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, title: { display: true, text: 'Revenue (₹)' } }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Modal Handling
+            const approveModal = document.getElementById('approve-modal');
+            const rejectModal = document.getElementById('reject-modal');
+            const approveForm = document.getElementById('approve-form');
+            const rejectForm = document.getElementById('reject-form');
+            const approvePublisherName = document.getElementById('approve-publisher-name');
+            const rejectPublisherName = document.getElementById('reject-publisher-name');
+
+            function openApproveModal(publisherId, publisherName) {
+                approvePublisherName.textContent = publisherName;
+                approveForm.action = `/admin/publishers/${publisherId}/approve`;
+                approveModal.classList.remove('hidden');
+            }
+
+            function openRejectModal(publisherId, publisherName) {
+                rejectPublisherName.textContent = publisherName;
+                rejectForm.action = `/admin/publishers/${publisherId}/reject`;
+                rejectModal.classList.remove('hidden');
+            }
+
+            document.getElementById('approve-modal-close').addEventListener('click', () => {
+                approveModal.classList.add('hidden');
             });
 
-            const salesAnalyticsChart = new Chart(salesAnalyticsCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['January', 'February', 'March', 'April', 'May'],
-                    datasets: [{
-                        label: 'Sales',
-                        data: [65, 59, 80, 81, 56],
-                        backgroundColor: '#9333ea'
-                    }]
-                }
+            document.getElementById('reject-modal-close').addEventListener('click', () => {
+                rejectModal.classList.add('hidden');
             });
 
-            const auctionAnalyticsChart = new Chart(auctionAnalyticsCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Auctions',
-                        data: [10, 20, 15, 21],
-                        backgroundColor: '#4f46e5',
-                        borderColor: '#4f46e5',
-                        fill: false
-                    }]
-                }
+            document.getElementById('approve-modal-cancel').addEventListener('click', () => {
+                approveModal.classList.add('hidden');
             });
-        </script>
+
+            document.getElementById('reject-modal-cancel').addEventListener('click', () => {
+                rejectModal.classList.add('hidden');
+            });   
+
+        });
+    </script>
+
 </body>
 
 </html>

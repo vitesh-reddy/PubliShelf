@@ -23,13 +23,13 @@
                 </div>
                 <div class="flex items-center md:space-x-8 relative">
                     <div class="relative">
-                        <input type="text" placeholder="Search books..."
-                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button onclick="window.location.href='/buyer/search-page'"
-                            class="absolute right-3 top-2.5 text-gray-400">
+                        <form action="/buyer/search" method="GET">
+                          <input type="text" name="q" placeholder="Search books..." class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600" />
+                          <button type="submit" class="absolute right-3 top-2.5 text-gray-400">
                             <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+                          </button>
+                        </form>
+                      </div>
                     <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
@@ -81,13 +81,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Newly Added Books</h2>
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% newlyBooks.forEach(book=> { %>
+                    <% newlyBooks.slice(0, 8).forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>"
                             onclick="window.location.href='/buyer/product-detail/<%= book.id %>'">
-                            <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
+                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
-                                    <%= book.bookTitle %>
+                                    <%= book.title %>
                                 </h3>
                                 <p class="text-gray-600 text-sm mb-2">by <%= book.author %>
                                 </p>
@@ -113,8 +113,8 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Most Sold Books</h2>
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.mostSold.forEach(book=> { %>
-                        <div class="<%= styles.bookCardStyle %>">
+                    <% books.slice(9, 16).forEach(book=> { %>
+                        <div class="<%= styles.bookCardStyle %>" onclick="window.location.href='/buyer/product-detail/<%= book._id %>'"> 
                             <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
@@ -146,8 +146,8 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Trending Now</h2>
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.trending.forEach(book=> { %>
-                        <div class="<%= styles.bookCardStyle %>">
+                    <% books.slice(16, 24).forEach(book=> { %>
+                        <div class="<%= styles.bookCardStyle %>"  onclick="window.location.href='/buyer/product-detail/<%= book._id %>'">
                             <div class="relative">
                                 <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
                                 <div

@@ -34,8 +34,8 @@
                     <div class="address-option">
                         <input type="radio" name="address" id="address1" checked>
                         <label for="address1">
-                            <strong>Donald Trump</strong><br>
-                            WhiteHouse , 123 Main St, Apt 4B, Washington DC, 62704<br>
+                            <strong>Vitesh Reddy</strong><br>
+                            Mandapeta, East Godavari District, 532459<br>
                             Phone: +91 98765 43210
                         </label>
                     </div>
@@ -43,8 +43,8 @@
                         <input type="radio" name="address" id="address2">
                         <label for="address2">
                             <strong>Balayya Babu</strong><br>
-                            456 Elm St, Suite 10,Telangana, HYD, 10001<br>
-                            Phone: +91 87654 32109
+                            Sri City, Tirupati District, 517425<br>
+                            Phone: +91 80992 69269
                         </label>
                     </div>
                     <button class="add-address-btn" onclick="toggleAddressForm()">+ Add New Address</button>
@@ -165,17 +165,21 @@
                 <h2>Order Summary</h2>
                 <div class="summary-item">
                     <span>Subtotal</span>
-                    <span>₹1,299.00</span>
+                    <span>₹<%= subtotal %></span>
                 </div>
                 <div class="summary-item">
                     <span>Shipping</span>
-                    <span>₹49.00</span>
+                    <span>₹<%= shipping %></span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax</span>
+                    <span>₹<%= tax.toFixed(2) %></span>
                 </div>
                 <div class="summary-item total">
                     <span>Total</span>
-                    <span>₹1,401.00</span>
+                    <span>₹<%= total %></span>
                 </div>
-                <button type="submit" class="submit-btn">Place Your Order</button>
+                <button id="placeOrderBtn" type="button" class="submit-btn">Place Your Order</button>
             </div>
         </div>
     </div>
@@ -239,6 +243,28 @@
             event.preventDefault();
             alert('UPI details saved!');
         }
+
+        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/buyer/checkout/place-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                alert('Order placed successfully!');
+                window.location.href = '/buyer/cart'; // Redirect to orders page
+            } else {
+                const error = await response.json();
+                alert(`Failed to place order: ${error.message}`);
+            }
+        } catch (err) {
+            console.error('Error placing order:', err);
+            alert('An error occurred while placing the order.');
+        }
+    });
     </script>
 </body>
 
