@@ -1,18 +1,13 @@
 import express from "express";
 import styles from "../public/css/styles.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { generateToken } from "../utils/jwt.js";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
-import { getBuyerById, updateBuyerCart } from "../services/buyerService.js";
-import {
-  getAllBooks,
-  getBookById,
-  searchBooks,
-} from "../services/bookService.js";
-import { getAllPublishers } from "../services/publisherService.js";
+import { getBuyerById } from "../services/buyerService.js";
+import { getAllBooks, getBookById, searchBooks, } from "../services/bookService.js";
 
 import { createBuyer } from "../services/buyerService.js";
+import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBookService.js";
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -91,20 +86,6 @@ router.get("/profile", protect, (req, res) => {
   res.render("buyer/profile", { user: req.user });
 });
 
-// Auction Page (Protected Route)
-router.get("/auction-page", protect, (req, res) => {
-  res.render("buyer/auction-page", {
-    buyerName: req.user.firstname,
-  });
-});
-
-// Auction Item Detail (Protected Route)
-router.get("/auction-item-detail/:id", protect, (req, res) => {
-  res.render("buyer/auction-item-detail", {
-    buyerName: req.user.firstname,
-  });
-});
-
 // Checkout Page (Protected Route)
 router.get("/checkout", protect, async (req, res) => {
   try {
@@ -112,7 +93,7 @@ router.get("/checkout", protect, async (req, res) => {
     if (!buyer) return res.status(404).send("Buyer not found");
 
     const cart = buyer.cart;
-    
+
     const calculateOrderSummary = (cart) => {
       const subtotal = cart.reduce(
         (sum, item) => sum + item.book.price * item.quantity,
@@ -128,7 +109,7 @@ router.get("/checkout", protect, async (req, res) => {
 
     res.render("buyer/checkout", {
       buyerName: req.user.firstname,
-      ...orderSummary
+      ...orderSummary,
     });
   } catch (error) {
     console.error("Error loading Checkout Page:", error);
@@ -184,7 +165,6 @@ router.get("/product-detail/:id", protect, async (req, res) => {
       (item) => item.book._id.toString() === bookId
     );
 
-    console.log("inside product detail route", isInCart);
     res.render("buyer/product-detail", {
       buyerName: buyer.firstname,
       styles: styles,
@@ -198,7 +178,6 @@ router.get("/product-detail/:id", protect, async (req, res) => {
 });
 
 // Cart Page (Protected Route)
-
 router.get("/cart", protect, async (req, res) => {
   try {
     const buyer = await getBuyerById(req.user.id); // Fetch buyer with populated cart
@@ -216,7 +195,7 @@ router.get("/cart", protect, async (req, res) => {
       const tax = subtotal * 0.08; // 8% tax
       const total = subtotal + shipping + tax;
       return { subtotal, shipping, tax, total };
-    };  
+    };
 
     const orderSummary = calculateOrderSummary(cart);
     res.render("buyer/cart", {
@@ -239,22 +218,18 @@ router.post("/cart/add", protect, async (req, res) => {
   try {
     const buyer = await getBuyerById(req.user.id);
 
-    if (!buyer) {
-      return res.status(404).json({ message: "Buyer not found" });
-    }
+    if (!buyer) return res.status(404).json({ message: "Buyer not found" });
 
     // Check if the book is already in the cart
     const existingCartItem = buyer.cart.find(
       (item) => item.book.toString() === bookId
     );
 
-    if (existingCartItem) {
+    if (existingCartItem)
       // If the book is already in the cart, update the quantity
       existingCartItem.quantity += quantity;
-    } else {
-      // Otherwise, add the book to the cart
-      buyer.cart.push({ book: bookId, quantity });
-    }
+    // Otherwise, add the book to the cart
+    else buyer.cart.push({ book: bookId, quantity });
 
     // Save the updated cart
     await buyer.save();
@@ -334,17 +309,14 @@ router.patch("/cart/update-quantity", protect, async (req, res) => {
   try {
     const buyer = await getBuyerById(req.user.id);
 
-    if (!buyer) {
-      return res.status(404).json({ message: "Buyer not found" });
-    }
-    console.log("cart buyer", buyer.cart);
+    if (!buyer) return res.status(404).json({ message: "Buyer not found" });
+
     // Find the item in the cart and update its quantity
     const cartItem = buyer.cart.find(
       (item) => item.book._id.toString() === bookId
     );
-    if (!cartItem) {
+    if (!cartItem)
       return res.status(404).json({ message: "Item not found in cart" });
-    }
 
     cartItem.quantity = quantity;
 
@@ -361,38 +333,118 @@ router.patch("/cart/update-quantity", protect, async (req, res) => {
 
 router.post("/checkout/place-order", protect, async (req, res) => {
   try {
-      const buyer = await getBuyerById(req.user.id);
+    const buyer = await getBuyerById(req.user.id);
 
-      if (!buyer) {
-          return res.status(404).json({ message: "Buyer not found" });
-      }
+    if (!buyer) {
+      return res.status(404).json({ message: "Buyer not found" });
+    }
 
-      // Add current cart items to orders
-      const newOrders = buyer.cart.map(item => ({
-          book: item.book,
-          quantity: item.quantity,
-          orderDate: new Date(),
-          delivered: false,
-      }));
-      buyer.orders.push(...newOrders);
+    // Add current cart items to orders
+    const newOrders = buyer.cart.map((item) => ({
+      book: item.book,
+      quantity: item.quantity,
+      orderDate: new Date(),
+      delivered: false,
+    }));
+    buyer.orders.push(...newOrders);
 
-      // Empty the cart
-      buyer.cart = [];
+    // Empty the cart
+    buyer.cart = [];
 
-      // Save the updated buyer
-      await buyer.save();
+    // Save the updated buyer
+    await buyer.save();
 
-      res.status(200).json({ message: "Order placed successfully." });
+    res.status(200).json({ message: "Order placed successfully." });
   } catch (error) {
-      console.error("Error placing order:", error);
-      res.status(500).json({ message: "An error occurred while placing the order." });
+    console.error("Error placing order:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while placing the order." });
   }
 });
 
-router.get("/auction-ongoing/:id", protect, (req, res) => {
-  res.render("buyer/auction-ongoing", {
-    buyerName: req.user.firstname,
-  });
+
+// Auction Page (Protected Route)
+router.get("/auction-page", protect, async (req, res) => {
+  try {
+    // Fetch data using service methods
+    const ongoingAuctions = await getOngoingAuctions();
+    const futureAuctions = await getFutureAuctions();
+    const endedAuctions = await getEndedAuctions();
+
+    // Render the auction-page.ejs file with the fetched data
+    res.render("buyer/auction-page", {
+      buyerName: req.user.firstname,
+      ongoingAuctions,
+      futureAuctions,
+      endedAuctions,
+    });
+  } catch (error) {
+    console.error("Error fetching auction data:", error);
+    res.status(500).send("An error occurred while fetching auction data.");
+  }
 });
+
+// Auction Item Detail (Protected Route)
+router.get("/auction-item-detail/:id", protect, async (req, res) => {
+  try {  
+    const auctionId = req.params.id; 
+
+    // Fetch auction item details using the auctionId
+    const book = await getAuctionItemById(auctionId);
+    if (!book) return res.status(404).send("Auction item not found");
+
+    res.render("buyer/auction-item-detail", {
+      buyerName: req.user.firstname,
+      book,
+    });
+
+  } catch (error) {
+    console.error("Error loading auction item details:", error);
+    res.status(500).send("Error loading auction item details");
+  }
+});
+
+router.get("/auction-ongoing/:id", protect, async (req, res) => {
+  try {
+    const auctionId = req.params.id;
+
+    // Fetch the auction item details using the service method
+    const book = await getAuctionItemById(auctionId);
+
+    if (!book)
+      return res.status(404).send("Auction item not found");
+    
+    // Render the auction-ongoing.ejs file with the fetched data
+    res.render("buyer/auction-ongoing", {
+      buyerName: req.user.firstname,
+      buyerId: req.user.id,
+      book,
+    });
+  } catch (error) {
+    console.error("Error fetching auction item details:", error);
+    res.status(500).send("An error occurred while fetching auction item details.");
+  }
+});
+
+router.post("/auctions/:id/bid", protect, async (req, res) => {
+  try {
+    const { id: auctionId } = req.params;
+    const { bidAmount } = req.body;
+    const bidderId = req.user.id; // Get the logged-in buyer's ID
+    // Use the service method to add the bid
+    const updatedBook = await addBid(auctionId, bidderId, bidAmount);
+
+    res.status(200).json({
+      message: "Bid placed successfully",
+      currentPrice: updatedBook.currentPrice,
+      biddingHistory: updatedBook.biddingHistory,
+    });
+  } catch (error) {
+    console.error("Error placing bid:", error);
+    res.status(500).json({ message: "An error occurred while placing the bid." });
+  }
+});
+
 
 export default router;

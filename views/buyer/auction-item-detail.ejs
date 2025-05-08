@@ -21,14 +21,6 @@
                     </a>
                 </div>
                 <div class="flex items-center md:space-x-8 relative">
-                    <div class="relative">
-                        <input type="text" placeholder="Search auctions..."
-                            class="w-[25vw] px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <button onclick="window.location.href='/buyer/search-page'"
-                            class="absolute right-3 top-2.5 text-gray-400">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
                     <a href="/buyer/cart/#wishlist-section" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="far fa-heart"></i>
                     </a>
@@ -42,7 +34,7 @@
                             onclick="window.location.href='/buyer/profile'">
                             <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
                                 alt="Profile" class="w-5 h-5 rounded-full">
-                            <span class="text-gray-700">Buyer Name</span>
+                            <span class="text-gray-700"><%= buyerName %></span>
                         </button>
                     </div>
                     <div class="relative group">
@@ -80,13 +72,15 @@
                     <li>
                         <div class="flex items-center">
                             <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                            <a href="/buyer/auctions" class="text-gray-700 hover:text-purple-600">Auctions</a>
+                            <a href="/buyer/auction-page" class="text-gray-700 hover:text-purple-600">Auctions</a>
                         </div>
                     </li>
                     <li>
                         <div class="flex items-center">
                             <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                            <span class="text-gray-500">Pride and Prejudice</span>
+                            <span class="text-gray-500">
+                                <%= book.title %>
+                            </span>
                         </div>
                     </li>
                 </ol>
@@ -98,8 +92,8 @@
                     <!-- Image Section -->
                     <div class="space-y-4">
                         <div class="relative rounded-lg overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600"
-                                alt="Pride and Prejudice"
+                            <img src="<%= book.image || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600' %>"
+                                alt="<%= book.title %>"
                                 class="w-full h-96 object-cover transform transition-transform duration-500 hover:scale-105">
                         </div>
                     </div>
@@ -107,26 +101,45 @@
                     <!-- Item Info -->
                     <div class="space-y-5">
                         <div>
-                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Pride and Prejudice</h1>
-                            <p class="text-base md:text-lg text-gray-600 mt-1">Jane Austen</p>
-                            <p class="text-gray-600 text-sm">Genre: Romance</p>
-                            <p class="text-gray-600 text-sm">Condition: Near Mint</p>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                                <%= book.title %>
+                            </h1>
+                            <p class="text-base md:text-lg text-gray-600 mt-1">
+                                <%= book.author %>
+                            </p>
+                            <p class="text-gray-600 text-sm">Genre: <%= book.genre %>
+                            </p>
+                            <p class="text-gray-600 text-sm">Condition: <%= book.condition %>
+                            </p>
                         </div>
 
                         <div class="flex items-center space-x-3 text-sm">
-                            <span class="text-green-600 font-medium">Active Auction</span>
-                            <span class="text-gray-600">Ends in: <span id="countdown"
-                                    class="font-semibold"></span></span>
+                            <% const now=new Date(); let auctionStatus='Upcoming' ; if (now>= book.auctionStart && now
+                                <= book.auctionEnd) { auctionStatus='Active' ; } else if (now> book.auctionEnd) {
+                                    auctionStatus = 'Ended';
+                                    }
+                                    %>
+                                    <span
+                                        class="<%= auctionStatus === 'Active' ? 'text-green-600' : auctionStatus === 'Ended' ? 'text-red-600' : 'text-yellow-600' %> font-medium">
+                                        <%= auctionStatus %> Auction
+                                    </span>
+                                    <% if (auctionStatus !=='Ended' ) { %>
+                                        <span class="text-gray-600">Ends in: <span id="countdown"
+                                                class="font-semibold"></span></span>
+                                        <% } else { %>
+                                            <span class="text-gray-600">Auction Ended</span>
+                                            <% } %>
                         </div>
 
                         <div class="border-t border-b py-3">
                             <div class="flex items-baseline space-x-4">
                                 <div>
-                                    <span class="text-3xl font-bold text-gray-900">₹7500</span>
+                                    <span class="text-3xl font-bold text-gray-900">₹<%= book.currentPrice ||
+                                            book.basePrice %></span>
                                     <p class="text-gray-600 text-xs">Current Bid</p>
                                 </div>
                                 <div>
-                                    <span class="text-lg text-gray-600">₹5000</span>
+                                    <span class="text-lg text-gray-600">₹<%= book.basePrice %></span>
                                     <p class="text-gray-600 text-xs">Base Price</p>
                                 </div>
                             </div>
@@ -134,13 +147,14 @@
 
                         <div class="space-y-2">
                             <h3 class="text-base font-semibold">Description</h3>
-                            <p class="text-gray-600 text-sm">A rare first edition of Jane Austen's classic novel, Pride
-                                and Prejudice, in near mint condition. This copy includes original illustrations and
-                                authentication documents, verified by Literary Archives.</p>
+                            <p class="text-gray-600 text-sm">
+                                <%= book.description %>
+                            </p>
                         </div>
 
-                        <button onclick="window.location.href='/buyer/auction/1/ongoing'"
-                            class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2 text-sm">
+                        <button onclick="window.location.href='/buyer/auction-ongoing/<%= book._id %>'"
+                            class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg <%= auctionStatus === 'Active' ? 'hover:bg-purple-700' : 'opacity-50 cursor-not-allowed' %> transition-colors flex items-center justify-center space-x-2 text-sm"
+                            <%=auctionStatus !=='Active' ? 'disabled' : '' %>>
                             <i class="fas fa-gavel"></i>
                             <span>Join Auction</span>
                         </button>
@@ -268,7 +282,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-300 py-6">
+    <footer class="bg-gray-800 text-gray-300沿着py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
@@ -287,22 +301,23 @@
     </footer>
 
     <script>
-        // Mock auction data
-        const auctionEnd = new Date('2025-05-07T23:59:59Z');
+        // Pass auction end date from EJS to JavaScript
+        const auctionEnd = new Date('<%= book.auctionEnd %>');
+        const auctionStatus = '<%= auctionStatus %>';
 
         // Update countdown timer
         function updateCountdown() {
             const now = new Date();
             const element = document.getElementById('countdown');
-            if (now < auctionEnd) {
+            if (element && auctionStatus === 'Active' && now < auctionEnd) {
                 const diff = auctionEnd - now;
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                 element.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-            } else {
-                element.textContent = 'Auction Ended';
+            } else if (element && auctionStatus !== 'Active') {
+                element.textContent = auctionStatus === 'Ended' ? 'Auction Ended' : 'Awaiting Start';
             }
         }
 

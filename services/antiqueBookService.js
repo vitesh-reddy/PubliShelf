@@ -29,3 +29,35 @@ export const createAntiqueBook = async (bookData) => {
     throw new Error("Failed to create antique book.");
   }
 };
+
+// Fetch ongoing auctions
+export const getOngoingAuctions = async () => {
+  return await AntiqueBook.find({
+    auctionStart: { $lte: new Date() },
+    auctionEnd: { $gte: new Date() },
+  }).sort({ auctionEnd: 1 }).lean();
+};
+
+// Fetch future auctions
+export const getFutureAuctions = async () => {
+  return await AntiqueBook.find({
+    auctionStart: { $gt: new Date() },
+  }).sort({ auctionStart: 1 }).lean();
+};
+
+// Fetch ended auctions
+export const getEndedAuctions = async () => {
+  return await AntiqueBook.find({
+    auctionEnd: { $lt: new Date() }, 
+  }).sort({ auctionEnd: -1 }).lean();
+};
+
+export const getAuctionItemById = async (bookId) => {
+  const book = await AntiqueBook.findById(bookId)
+    .populate("biddingHistory.bidder", "firstname lastname email") // Populate the bidder field with only the username
+    .lean()
+  if (!book) {
+    throw new Error("Antique book not found");
+  }
+  return book;
+};
