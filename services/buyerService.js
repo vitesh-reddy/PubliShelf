@@ -219,7 +219,7 @@ export const getTrendingBooks = async () => {
   }
 };
 
-export const getBookMetrics = async () => {
+export const getMetrics = async () => {
   try {
     // Books Available: Count books with quantity > 0
     const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 } });

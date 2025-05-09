@@ -12,7 +12,7 @@ import styles from "./public/css/styles.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import Book from "./models/Book.js";
-import { getBookMetrics, getTopSoldBooks, getTrendingBooks } from "./services/buyerService.js";
+import { getMetrics, getTopSoldBooks, getTrendingBooks } from "./services/buyerService.js";
 
 console.clear();
 
@@ -51,14 +51,14 @@ app.get("/", async (req, res) => {
     const mostSoldBooks = await getTopSoldBooks();
     const trendingBooks = await getTrendingBooks();
 
-    const bookMetrics = await getBookMetrics();
+    const metrics = await getMetrics();
       
     res.render("index", {
       newlyBooks: newlyBooks,
       mostSoldBooks: mostSoldBooks,
       trendingBooks: trendingBooks,
       styles: styles,
-      bookMetrics: bookMetrics,
+      metrics: metrics,
     });
   } catch (error) {
     console.error("Error fetching books:", error);
