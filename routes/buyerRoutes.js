@@ -7,6 +7,8 @@ import {
   getBuyerById,
   createBuyer,
   updateBuyerDetails,
+  getTopSoldBooks,
+  getTrendingBooks,
 } from "../services/buyerService.js";
 import {
   getAllBooks,
@@ -29,10 +31,13 @@ router.use(bodyParser.urlencoded({ extended: true }));
 // Buyer Dashboard (Protected Route)
 router.get("/dashboard", protect, async (req, res) => {
   try {
-    const books = await getAllBooks();
+      const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
+      const mostSoldBooks = await getTopSoldBooks();
+      const trendingBooks = await getTrendingBooks();
     res.render("buyer/dashboard", {
-      newlyBooks: books,
-      books: books,
+      newlyBooks: newlyBooks,
+      mostSoldBooks: mostSoldBooks,
+      trendingBooks: trendingBooks,
       buyerName: req.user.firstname,
       styles: styles,
     });

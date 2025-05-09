@@ -424,7 +424,7 @@
 
         enterBidBtn.addEventListener('click', () => {
             const bidAmount = parseInt(bidInput.value);
-            if (isNaN(bidAmount) || bidAmount < +currentBid + minIncrement) {
+            if (isNaN(bidAmount) || bidAmount < parseInt(currentBid) + minIncrement) {
                 errorMessage.classList.remove('hidden');
                 return;
             }

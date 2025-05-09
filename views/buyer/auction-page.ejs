@@ -27,31 +27,34 @@
                     <a href="/buyer/cart" class="text-gray-700 hover:text-purple-600 hidden md:block">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
-                    <button onclick="window.location.href='/logout'"
-                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300 hidden md:block">Logout</button>
-                    <div class="relative">
-                        <button class="scale-0 md:scale-100 flex items-center space-x-2"
-                            onclick="window.location.href='/buyer/profile'">
-                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                                alt="Profile" class="w-5 h-5 rounded-full">
-                            <span class="text-gray-700"><%= buyerName %></span>
-                        </button>
-                    </div>
+                    <button onclick="window.location.href='/buyer/dashboard'"
+                        class="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300 hidden md:block">Bookstore</button>
                     <div class="relative group">
-                        <button class="md:hidden flex items-center space-x-2">
+                        <button class="flex items-center space-x-2">
                             <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
                                 alt="Profile" class="w-5 h-5 rounded-full">
+                            <span class="text-gray-700 hidden md:block">
+                                <%= buyerName %>
+                            </span>
                         </button>
                         <div
-                            class="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                            class="absolute top-[22px] right-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
                             <a href="/buyer/profile" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Your
                                 Profile</a>
+                            <a href="/buyer/dashboard"
+                                class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Bookstore</a>
                             <a href="/buyer/cart/#wishlist-section"
-                                class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Wishlist</a>
-                            <a href="/buyer/cart" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Cart</a>
+                                class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Wishlist Page</a>
+                            <a href="/buyer/cart" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Cart Page</a>
                             <a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">Logout</a>
                         </div>
                     </div>
+                    <!-- <div class="relative group">
+                        <button class="flex items-center space-x-2 md:hidden">
+                            <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                                alt="Profile" class="w-5 h-5 rounded-full">
+                        </button>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -79,148 +82,177 @@
             </nav>
 
             <!-- Ongoing Auctions Section -->
-            <% if (ongoingAuctions && ongoingAuctions.length > 0) { %>
-            <h1 class="text-3xl font-bold text-gray-900 mb-8">Ongoing Auctions</h1>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <% ongoingAuctions.forEach(book => { %>
-                <div
-                    class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-                    <div class="relative">
-                        <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-48 object-cover">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-900"><%= book.title %></h3>
-                        <p class="text-gray-600 text-sm"><%= book.author %></p>
-                        <div class="mt-2 flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm">Current Bid</p>
-                                <p class="text-lg font-bold text-purple-600">₹<%= book.currentPrice || book.basePrice %></p>
+            <% if (ongoingAuctions && ongoingAuctions.length> 0) { %>
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Ongoing Auctions</h1>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <% ongoingAuctions.forEach(book=> { %>
+                        <div
+                            class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl">
+                            <div class="relative">
+                                <img src="<%= book.image %>" alt="<%= book.title %>"
+                                    class="w-full h-[260px] object-cover">
                             </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Ends in</p>
-                                <p class="text-sm font-semibold countdown" data-end="<%= book.auctionEnd %>"></p>
-                            </div>
-                        </div>
-                        <button onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
-                            class="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                            View Auction
-                        </button>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
-            <% } %>
-
-            <!-- Future Auctions Section -->
-            <% if (futureAuctions && futureAuctions.length > 0) { %>
-            <h1 class="text-3xl font-bold text-gray-900 mt-12 mb-8">Upcoming Auctions</h1>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <% futureAuctions.forEach(book => { %>
-                <div
-                    class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-                    <div class="relative">
-                        <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-48 object-cover">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-900"><%= book.title %></h3>
-                        <p class="text-gray-600 text-sm"><%= book.author %></p>
-                        <div class="mt-2 flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm">Starting Bid</p>
-                                <p class="text-lg font-bold text-purple-600">₹<%= book.basePrice %></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Starts in</p>
-                                <p class="text-sm font-semibold countdown" data-start="<%= book.auctionStart %>"></p>
-                            </div>
-                        </div>
-                        <button onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
-                            class="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                            View Details
-                        </button>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
-            <% } %>
-
-            <!-- Ended Auctions Section -->
-            <% if (endedAuctions && endedAuctions.length > 0) { %>
-            <h1 class="text-3xl font-bold text-gray-900 mt-12 mb-8">Past Auctions</h1>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <% endedAuctions.forEach(book => { %>
-                <div
-                    class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-                    <div class="relative">
-                        <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-48 object-cover">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-900"><%= book.title %></h3>
-                        <p class="text-gray-600 text-sm"><%= book.author %></p>
-                        <div class="mt-2 flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm">Final Price</p>
-                                <p class="text-lg font-bold text-purple-600">₹<%= book.currentPrice || 'Not sold' %></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Status</p>
-                                <p class="text-sm font-semibold">
-                                    <%= book.currentPrice ? 'Sold' : 'Not sold' %>
+                            <div class="px-4 py-2">
+                                <h3 class="text-lg font-semibold text-gray-900">
+                                    <%= book.title %>
+                                </h3>
+                                <p class="text-gray-600 text-sm">
+                                    <%= book.author %>
                                 </p>
+                                <div class="mt-2 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-600 text-sm">Current Bid</p>
+                                        <p class="text-lg font-bold text-purple-600">₹<%= book.currentPrice ||
+                                                book.basePrice %>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 text-sm">Ends in</p>
+                                        <p class="text-sm font-semibold countdown" data-end="<%= book.auctionEnd %>">
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
+                                    class="mt-4 mb-1 w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                    View Auction
+                                </button>
                             </div>
                         </div>
-                        <button onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
-                            class="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                            View Details
-                        </button>
-                    </div>
+                        <% }); %>
                 </div>
-                <% }); %>
-            </div>
-            <% } %>
+                <% } %>
 
-            <!-- Empty State -->
-            <% if ((!ongoingAuctions || ongoingAuctions.length === 0) && 
-                 (!futureAuctions || futureAuctions.length === 0) && 
-                 (!endedAuctions || endedAuctions.length === 0)) { %>
-            <div class="text-center py-12">
-                <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
-                <h2 class="text-2xl font-semibold text-gray-700">No auctions available</h2>
-                <p class="text-gray-500 mt-2">Check back later for new antique book auctions</p>
-            </div>
-            <% } %>
+                    <!-- Future Auctions Section -->
+                    <% if (futureAuctions && futureAuctions.length> 0) { %>
+                        <h1 class="text-3xl font-bold text-gray-900 mt-12 mb-8">Upcoming Auctions</h1>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <% futureAuctions.forEach(book=> { %>
+                                <div
+                                    class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl">
+                                    <div class="relative">
+                                        <img src="<%= book.image %>" alt="<%= book.title %>"
+                                            class="w-full h-[260px] object-cover">
+                                    </div>
+                                    <div class="px-4 py-2">
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            <%= book.title %>
+                                        </h3>
+                                        <p class="text-gray-600 text-sm">
+                                            <%= book.author %>
+                                        </p>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <div>
+                                                <p class="text-gray-600 text-sm">Starting Bid</p>
+                                                <p class="text-lg font-bold text-purple-600">₹<%= book.basePrice %>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-600 text-sm">Starts in</p>
+                                                <p class="text-sm font-semibold countdown"
+                                                    data-start="<%= book.auctionStart %>"></p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
+                                            class="mt-4 mb-1  w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } %>
 
-            <!-- Terms and Conditions Modal -->
-            <div id="tnc-modal"
-                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-                <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-gray-900">Terms and Conditions</h3>
-                        <button id="tnc-modal-close" class="text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="text-gray-600 text-sm space-y-4">
-                        <!-- Terms content remains the same -->
-                    </div>
-                </div>
-            </div>
+                            <!-- Ended Auctions Section -->
+                            <% if (endedAuctions && endedAuctions.length> 0) { %>
+                                <h1 class="text-3xl font-bold text-gray-900 mt-12 mb-8">Past Auctions</h1>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    <% endedAuctions.forEach(book=> { %>
+                                        <div
+                                            class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl">
+                                            <div class="relative">
+                                                <img src="<%= book.image %>" alt="<%= book.title %>"
+                                                    class="w-full h-[260px] object-cover">
+                                            </div>
+                                            <div class="px-4 py-2">
+                                                <h3 class="text-lg font-semibold text-gray-900">
+                                                    <%= book.title %>
+                                                </h3>
+                                                <p class="text-gray-600 text-sm">
+                                                    <%= book.author %>
+                                                </p>
+                                                <div class="mt-2 flex items-center justify-between">
+                                                    <div>
+                                                        <p class="text-gray-600 text-sm">Final Price</p>
+                                                        <p class="text-lg font-bold text-purple-600">₹<%=
+                                                                book.currentPrice || 'Not sold' %>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-gray-600 text-sm">Status</p>
+                                                        <p class="text-sm font-semibold">
+                                                            <%= book.currentPrice ? 'Sold' : 'Not sold' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onclick="window.location.href='/buyer/auction-item-detail/<%= book._id %>'"
+                                                    class="mt-4 mb-1  w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <% }); %>
+                                </div>
+                                <% } %>
 
-            <!-- Privacy Policy Modal -->
-            <div id="privacy-modal"
-                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-                <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-gray-900">Privacy Policy</h3>
-                        <button id="privacy-modal-close" class="text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="text-gray-600 text-sm space-y-4">
-                        <!-- Privacy content remains the same -->
-                    </div>
-                </div>
-            </div>
+                                    <!-- Empty State -->
+                                    <% if ((!ongoingAuctions || ongoingAuctions.length===0) && (!futureAuctions ||
+                                        futureAuctions.length===0) && (!endedAuctions || endedAuctions.length===0)) { %>
+                                        <div class="text-center py-12">
+                                            <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
+                                            <h2 class="text-2xl font-semibold text-gray-700">No auctions available</h2>
+                                            <p class="text-gray-500 mt-2">Check back later for new antique book auctions
+                                            </p>
+                                        </div>
+                                        <% } %>
+
+                                            <!-- Terms and Conditions Modal -->
+                                            <div id="tnc-modal"
+                                                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                                                <div
+                                                    class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                                                    <div class="flex justify-between items-center mb-4">
+                                                        <h3 class="text-xl font-bold text-gray-900">Terms and Conditions
+                                                        </h3>
+                                                        <button id="tnc-modal-close"
+                                                            class="text-gray-600 hover:text-gray-900">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-gray-600 text-sm space-y-4">
+                                                        <!-- Terms content remains the same -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Privacy Policy Modal -->
+                                            <div id="privacy-modal"
+                                                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                                                <div
+                                                    class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                                                    <div class="flex justify-between items-center mb-4">
+                                                        <h3 class="text-xl font-bold text-gray-900">Privacy Policy</h3>
+                                                        <button id="privacy-modal-close"
+                                                            class="text-gray-600 hover:text-gray-900">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-gray-600 text-sm space-y-4">
+                                                        <!-- Privacy content remains the same -->
+                                                    </div>
+                                                </div>
+                                            </div>
         </div>
     </div>
 
@@ -247,7 +279,7 @@
         // Update countdown timers
         function updateCountdown() {
             const now = new Date();
-            
+
             // For ongoing auctions (countdown to end)
             document.querySelectorAll('.countdown[data-end]').forEach(element => {
                 const endTime = new Date(element.getAttribute('data-end'));
@@ -262,7 +294,7 @@
                     element.textContent = 'Auction Ended';
                 }
             });
-            
+
             // For future auctions (countdown to start)
             document.querySelectorAll('.countdown[data-start]').forEach(element => {
                 const startTime = new Date(element.getAttribute('data-start'));
@@ -308,4 +340,5 @@
         updateCountdown();
     </script>
 </body>
+
 </html>
