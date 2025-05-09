@@ -613,7 +613,7 @@
                 </div>
                 <div>
                     <label for="email" style="display: block; margin-bottom: 5px; color: rgb(55, 65, 81);">Email</label>
-                    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+                    <input type="text" id="email" name="email" value="<%= user.email %>" required>
                     <p class="error-message" id="emailError"></p>
                 </div>
 
@@ -751,10 +751,6 @@
             const currentPassword = form.currentPassword.value.trim();
             const newPassword = form.newPassword.value.trim();
             const confirmPassword = form.confirmPassword.value.trim();
-
-
-
-            console.log(email, currentPassword, confirmPassword || currentPassword, newPassword);
 
             const errorMessage = document.getElementById("errorMessage");
             errorMessage.innerText = ""; // Clear previous error
