@@ -30,7 +30,6 @@ const router = express.Router();
 
 router.get("/dashboard", protect, async (req, res) => {
   try {
-    console.log("dashoard Publisher ID:", req.user.id); // Debugging line
     const publisher = await getPublisherById(req.user.id);
 
     if (!publisher) {

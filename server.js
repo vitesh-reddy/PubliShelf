@@ -5,13 +5,14 @@ import { fileURLToPath } from "url";
 import buyerRouter from "./routes/buyerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publisherRoutes from "./routes/publisherRoutes.js";
-import authRoutes from "./routes/authRoutes.js"
+import authRoutes from "./routes/authRoutes.js";
 import bodyParser from "body-parser";
 import session from "express-session";
 import styles from "./public/css/styles.js";
-import { BooksDataArray } from "./public/mockData/MockUserData.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
+import Book from "./models/Book.js";
+import { getBookMetrics, getTopSoldBooks, getTrendingBooks } from "./services/buyerService.js";
 
 console.clear();
 
@@ -44,14 +45,26 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use("/admin", adminRoutes);
 
-app.get("/", (req, res) => {
-  res.render("index", {
-    newlyBooks: BooksDataArray,
-    books: BooksDataArray,
-    styles: styles,
-  });
-});
+app.get("/", async (req, res) => {
+  try {
+    const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
+    const mostSoldBooks = await getTopSoldBooks();
+    const trendingBooks = await getTrendingBooks();
 
+    const bookMetrics = await getBookMetrics();
+      
+    res.render("index", {
+      newlyBooks: newlyBooks,
+      mostSoldBooks: mostSoldBooks,
+      trendingBooks: trendingBooks,
+      styles: styles,
+      bookMetrics: bookMetrics,
+    });
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 app.use("/buyer", buyerRouter);
 app.use("/publisher", publisherRoutes);
@@ -59,14 +72,13 @@ app.use("/auth", authRoutes);
 app.get("/about", (req, res) => res.render("about", { styles: styles }));
 app.get("/contact", (req, res) => res.render("contact", { styles: styles }));
 
-
-app.get('/logout', (req, res) => {
-  res.clearCookie('token', {
+app.get("/logout", (req, res) => {
+  res.clearCookie("token", {
     httpOnly: true,
     secure: true,
-    sameSite: 'Strict',
+    sameSite: "Strict",
   });
-  res.redirect('/');
+  res.redirect("/");
 });
 
 app.listen(PORT, () =>

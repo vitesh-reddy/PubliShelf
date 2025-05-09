@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 import Buyer from "../models/Buyer.js";
+import Publisher from "../models/Publisher.js";
+import Book from "../models/Book.js";
 
 export const createBuyer = async (buyerData) => {
   const newBuyer = new Buyer(buyerData);
@@ -110,4 +112,148 @@ export const updateBuyerDetails = async (buyerId, currentPassword, updatedData) 
   }
   Object.assign(buyer, updatedData);
   return await buyer.save();
+};
+
+export const getTopSoldBooks = async () => {
+  try {
+    // Aggregate orders from all buyers to count book sales
+    const topBooks = await Buyer.aggregate([
+      // Unwind the orders array to process each order individually
+      { $unwind: "$orders" },
+      // Group by book ID and sum the quantities sold
+      {
+        $group: {
+          _id: "$orders.book",
+          totalSold: { $sum: "$orders.quantity" },
+        },
+      },
+      // Sort by total sold in descending order
+      { $sort: { totalSold: -1 } },
+      // Limit to top 8 books
+      { $limit: 8 },
+      // Lookup to join with the Book collection
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "bookDetails",
+        },
+      },
+      // Unwind the bookDetails array
+      { $unwind: "$bookDetails" },
+      // Project the desired fields
+      {
+        $project: {
+          _id: "$bookDetails._id",
+          title: "$bookDetails.title",
+          author: "$bookDetails.author",
+          price: "$bookDetails.price",
+          image: "$bookDetails.image",
+          rating: "$bookDetails.rating",
+          totalSold: 1,
+        },
+      },
+    ]);
+
+    return topBooks;
+  } catch (error) {
+    throw new Error("Failed to fetch top sold books: " + error.message);
+  }
+};
+
+export const getTrendingBooks = async () => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Aggregate orders from buyers to find trending books
+    const trendingBooks = await Buyer.aggregate([
+      // Unwind the orders array
+      { $unwind: "$orders" },
+      // Filter orders from the last 30 days
+      {
+        $match: {
+          "orders.orderDate": { $gte: thirtyDaysAgo },
+        },
+      },
+      // Group by book ID and sum quantities
+      {
+        $group: {
+          _id: "$orders.book",
+          totalOrdered: { $sum: "$orders.quantity" },
+        },
+      },
+      // Sort by total ordered in descending order
+      { $sort: { totalOrdered: -1 } },
+      // Limit to top 8 books
+      { $limit: 8 },
+      // Lookup to join with the Book collection
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "bookDetails",
+        },
+      },
+      // Unwind the bookDetails array
+      { $unwind: "$bookDetails" },
+      // Project the desired fields
+      {
+        $project: {
+          _id: "$bookDetails._id",
+          title: "$bookDetails.title",
+          author: "$bookDetails.author",
+          price: "$bookDetails.price",
+          image: "$bookDetails.image",
+          rating: "$bookDetails.rating",
+          totalOrdered: 1,
+        },
+      },
+    ]);
+
+    return trendingBooks;
+  } catch (error) {
+    throw new Error("Failed to fetch trending books: " + error.message);
+  }
+};
+
+export const getBookMetrics = async () => {
+  try {
+    // Books Available: Count books with quantity > 0
+    const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 } });
+
+    // Active Readers: Count buyers with non-empty orders
+    const activeReaders = await Buyer.countDocuments({ orders: { $ne: [] } });
+
+    // Publishers: Count unique publishers in Book collection
+    const publishers = await Publisher.countDocuments();
+
+    // Books Sold: Sum quantities from all orders
+    const booksSold = await Buyer.aggregate([
+      { $unwind: "$orders" },
+      {
+        $group: {
+          _id: null,
+          totalSold: { $sum: "$orders.quantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalSold: 1,
+        },
+      },
+    ]).then((result) => (result.length > 0 ? result[0].totalSold : 0));
+
+    return {
+      booksAvailable,
+      activeReaders,
+      publishers,
+      booksSold,
+    };
+  } catch (error) {
+    throw new Error("Failed to fetch book metrics: " + error.message);
+  }
 };

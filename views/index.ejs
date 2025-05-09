@@ -78,19 +78,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-4 gap-8 text-center">
                 <div class="stat-card">
-                    <div class="text-3xl font-bold text-purple-600 counter" data-target="454">1436</div>
+                    <div class="text-3xl font-bold text-purple-600 counter" data-target="454"><%= bookMetrics.booksAvailable %></div>
                     <div class="text-gray-600">Books Available</div>
                 </div>
                 <div class="stat-card">
-                    <div class="text-3xl font-bold text-purple-600 counter" data-target="492">492</div>
+                    <div class="text-3xl font-bold text-purple-600 counter" data-target="492"><%= bookMetrics.activeReaders %></div>
                     <div class="text-gray-600">Active Readers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="text-3xl font-bold text-purple-600 counter" data-target="131">123</div>
+                    <div class="text-3xl font-bold text-purple-600 counter" data-target="131"><%= bookMetrics.publishers %></div>
                     <div class="text-gray-600">Publishers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="text-3xl font-bold text-purple-600 counter" data-target="1242">542</div>
+                    <div class="text-3xl font-bold text-purple-600 counter" data-target="1242"><%= bookMetrics.booksSold %></div>
                     <div class="text-gray-600">Books Sold</div>
                 </div>
             </div>
@@ -203,11 +203,11 @@
             <div class="book-carousel" id="topRatedCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <% newlyBooks.forEach(book=> { %>
-                        <div class="<%= styles.bookCardStyle %>">
-                            <img src="<%= book.image %>" alt="<%= book.bookTitle %>" class="w-full h-40 object-cover">
+                        <div class="<%= styles.bookCardStyle %>" onclick="window.location.href='/buyer/product-detail/:<%= book.id %>'">
+                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-64 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
-                                    <%= book.bookTitle %>
+                                    <%= book.title %>
                                 </h3>
                                 <p class="text-gray-600 text-sm mb-2">by <%= book.author %>
                                 </p>
@@ -233,9 +233,9 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Most Sold Books</h2>
             <div class="book-carousel" id="mostSoldCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.forEach(book=> { %>
+                    <% mostSoldBooks.forEach(book=> { %>
                         <div class="<%= styles.bookCardStyle %>">
-                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
+                            <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-64 object-cover">
                             <div class="p-3">
                                 <h3 class="text-lg font-semibold mb-1 truncate">
                                     <%= book.title %>
@@ -245,7 +245,7 @@
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center">
                                         <span class="text-purple-600 text-sm">
-                                            <%= book.sales %>
+                                            Total Sold: <%= book.totalSold %>
                                         </span>
                                     </div>
                                     <span class="font-bold text-purple-600 text-sm">
@@ -266,13 +266,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Trending Now</h2>
             <div class="book-carousel" id="trendingCarousel">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <% books.forEach(book=> { %>
+                    <% trendingBooks.forEach((book, idx)=> { %>
                         <div class="<%= styles.bookCardStyle %>">
                             <div class="relative">
-                                <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-40 object-cover">
+                                <img src="<%= book.image %>" alt="<%= book.title %>" class="w-full h-64 object-cover">
                                 <div
                                     class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs">
-                                    <%= book.trending %>
+                                    #<%= idx %>
                                 </div>
                             </div>
                             <div class="p-3">
