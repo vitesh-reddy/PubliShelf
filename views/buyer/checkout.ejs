@@ -5,8 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - PubliShelf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/css/checkout.css">
+    <style>
+        /* Additional validation styles */
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        input.error, textarea.error {
+            border: 1px solid #e74c3c;
+        }
+    </style>
 </head>
 
 <body>
@@ -53,35 +68,42 @@
                 <!-- New Address Form (Hidden by Default) -->
                 <div class="new-address-form" id="newAddressForm">
                     <h3>Add New Address</h3>
-                    <form id="addressForm" onsubmit="saveAddress(event)">
+                    <form id="addressForm" onsubmit="validateAndSaveAddress(event)">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Full Name</label>
-                                <input type="text" id="fullName" required>
+                                <input type="text" id="fullName" required minlength="3">
+                                <div class="error-message" id="fullNameError">Name must be at least 3 characters</div>
                             </div>
                             <div class="form-group">
                                 <label>Phone Number</label>
                                 <input type="tel" id="phoneNumber" required>
+                                <div class="error-message" id="phoneNumberError">Please enter a valid phone number (10 digits)</div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Address</label>
-                            <textarea rows="3" id="address" required></textarea>
+                            <textarea rows="3" id="address" required ></textarea>
+                            <div class="error-message" id="addressError">Address must be at least 10 characters</div>
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>City</label>
                                 <input type="text" id="city" required>
+                                <div class="error-message" id="cityError">City must be at least 3 characters</div>
                             </div>
                             <div class="form-group">
                                 <label>State</label>
                                 <input type="text" id="state" required>
+                                <div class="error-message" id="stateError">State must be at least 2 characters</div>
                             </div>
                             <div class="form-group">
                                 <label>Postal Code</label>
                                 <input type="text" id="postalCode" required>
+                                <div class="error-message" id="postalCodeError">Please enter a valid 6-digit postal code</div>
                             </div>
                         </div>
+                        <p id="errorMessage" class="text-red-500 font-semibold"></p>
                         <div class="form-actions">
                             <button type="button" class="cancel-btn" onclick="toggleAddressForm()">Cancel</button>
                             <button type="submit" class="submit-btn">Save Address</button>
@@ -108,19 +130,22 @@
                     </div>
                     <div class="payment-form" id="cardForm">
                         <h3>Enter Card Details</h3>
-                        <form id="cardDetailsForm" onsubmit="saveCardDetails(event)">
+                        <form id="cardDetailsForm" onsubmit="validateAndSaveCardDetails(event)">
                             <div class="form-group">
                                 <label>Card Number</label>
-                                <input type="text" id="cardNumber" required>
+                                <input type="text" id="cardNumber" required pattern="[0-9]{16}">
+                                <div class="error-message" id="cardNumberError">Please enter a valid 16-digit card number</div>
                             </div>
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label>Expiration Date</label>
-                                    <input type="text" id="expiryDate" placeholder="MM/YY" required>
+                                    <input type="text" id="expiryDate" placeholder="MM/YY" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}">
+                                    <div class="error-message" id="expiryDateError">Please enter a valid expiry date (MM/YY)</div>
                                 </div>
                                 <div class="form-group">
                                     <label>CVV</label>
-                                    <input type="text" id="cvv" required>
+                                    <input type="text" id="cvv" required pattern="[0-9]{3,4}">
+                                    <div class="error-message" id="cvvError">Please enter a valid 3 or 4 digit CVV</div>
                                 </div>
                             </div>
                             <div class="form-actions">
@@ -139,10 +164,11 @@
                     </div>
                     <div class="payment-form" id="upiForm">
                         <h3>Enter UPI ID</h3>
-                        <form id="upiDetailsForm" onsubmit="saveUpiDetails(event)">
+                        <form id="upiDetailsForm" onsubmit="validateAndSaveUpiDetails(event)">
                             <div class="form-group">
                                 <label>UPI ID</label>
-                                <input type="text" id="upiId" required>
+                                <input type="text" id="upiId" required pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9]+">
+                                <div class="error-message" id="upiIdError">Please enter a valid UPI ID (username@provider)</div>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="submit-btn">Save UPI</button>
@@ -189,82 +215,269 @@
         function toggleAddressForm() {
             const form = document.getElementById('newAddressForm');
             form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            
+            // Reset form and error messages if closing
+            if (form.style.display === 'none') {
+                document.getElementById('addressForm').reset();
+                clearErrors();
+            }
+        }
+        
+        // Clear all error messages and styling
+        function clearErrors() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            const inputs = document.querySelectorAll('input, textarea');
+            
+            errorMessages.forEach(error => {
+                error.style.display = 'none';
+            });
+            
+            inputs.forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+        
+        // Show error for specific field
+        function showError(fieldId, show = true) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(fieldId + 'Error');
+            
+            if (show) {
+                field.classList.add('error');
+                errorElement.style.display = 'block';
+                return false;
+            } else {
+                field.classList.remove('error');
+                errorElement.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate all address fields
+        function validateAddressForm() {
+            const fullName = document.getElementById('fullName');
+            const phoneNumber = document.getElementById('phoneNumber');
+            const address = document.getElementById('address');
+            const city = document.getElementById('city');
+            const state = document.getElementById('state');
+            const postalCode = document.getElementById('postalCode');
+            
+            let isValid = true;
+            
+            // Full name validation (at least 3 characters)
+            if (fullName.value.trim().length < 3) {
+                isValid = showError('fullName') && isValid;
+            } else {
+                showError('fullName', false);
+            }
+            
+            // Phone number validation (10-15 digits, can include + and spaces)
+            const phoneRegex = /^[0-9+\s]{10,15}$/;
+            if (!phoneRegex.test(phoneNumber.value.trim())) {
+                isValid = showError('phoneNumber') && isValid;
+            } else {
+                showError('phoneNumber', false);
+            }
+            
+            // Address validation (at least 10 characters)
+            if (address.value.trim().length < 10) {
+                isValid = showError('address') && isValid;
+            } else {
+                showError('address', false);
+            }
+            
+            // City validation (at least 3 characters)
+            if (city.value.trim().length < 3) {
+                isValid = showError('city') && isValid;
+            } else {
+                showError('city', false);
+            }
+            
+            // State validation (at least 2 characters)
+            if (state.value.trim().length < 2) {
+                isValid = showError('state') && isValid;
+            } else {
+                showError('state', false);
+            }
+            
+            // Postal code validation (exactly 6 digits)
+            const postalRegex = /^[0-9]{6}$/;
+            if (!postalRegex.test(postalCode.value.trim())) {
+                isValid = showError('postalCode') && isValid;
+            } else {
+                showError('postalCode', false);
+            }
+            
+            return isValid;
         }
 
-        // Save New Address
-        function saveAddress(event) {
+        // Validate and Save Address
+        function validateAndSaveAddress(event) {
             event.preventDefault();
-            const fullName = document.getElementById('fullName').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const state = document.getElementById('state').value;
-            const postalCode = document.getElementById('postalCode').value;
-
-            const addressContainer = document.getElementById('savedAddresses');
-            const newAddress = document.createElement('div');
-            newAddress.className = 'address-option';
-            newAddress.innerHTML = `
-                <input type="radio" name="address" id="address${addressContainer.children.length}">
-                <label for="address${addressContainer.children.length}">
-                    <strong>${fullName}</strong><br>
-                    ${address}, ${city}, ${state}, ${postalCode}<br>
-                    Phone: ${phoneNumber}
-                </label>
-            `;
-            addressContainer.insertBefore(newAddress, addressContainer.lastElementChild);
-            toggleAddressForm();
+            
+            if (validateAddressForm()) {
+                const fullName = document.getElementById('fullName').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
+                const address = document.getElementById('address').value;
+                const city = document.getElementById('city').value;
+                const state = document.getElementById('state').value;
+                const postalCode = document.getElementById('postalCode').value;
+                
+                const addressContainer = document.getElementById('savedAddresses');
+                const newAddress = document.createElement('div');
+                newAddress.className = 'address-option';
+                newAddress.innerHTML = `
+                    <input type="radio" name="address" id="address${addressContainer.children.length}" checked>
+                    <label for="address${addressContainer.children.length}">
+                        <strong>${fullName}</strong><br>
+                        ${address}, ${city}, ${state}, ${postalCode}<br>
+                        Phone: ${phoneNumber}
+                    </label>
+                `;
+                addressContainer.insertBefore(newAddress, addressContainer.lastElementChild);
+                document.getElementById('addressForm').reset();
+                toggleAddressForm();
+            }
         }
 
         // Toggle Payment Form
         function togglePaymentForm(type) {
             const cardForm = document.getElementById('cardForm');
             const upiForm = document.getElementById('upiForm');
+            
             if (type === 'card') {
+                document.getElementById('creditCard').checked = true;
                 cardForm.style.display = cardForm.style.display === 'block' ? 'none' : 'block';
                 upiForm.style.display = 'none';
+                if (cardForm.style.display === 'none') {
+                    document.getElementById('cardDetailsForm').reset();
+                    clearErrors();
+                }
             } else if (type === 'upi') {
+                document.getElementById('upi').checked = true;
                 upiForm.style.display = upiForm.style.display === 'block' ? 'none' : 'block';
                 cardForm.style.display = 'none';
+                if (upiForm.style.display === 'none') {
+                    document.getElementById('upiDetailsForm').reset();
+                    clearErrors();
+                }
             } else {
+                document.getElementById('cod').checked = true;
                 cardForm.style.display = 'none';
                 upiForm.style.display = 'none';
             }
         }
-
-        // Save Card Details
-        function saveCardDetails(event) {
-            event.preventDefault();
-            alert('Card details saved!');
-        }
-
-        // Save UPI Details
-        function saveUpiDetails(event) {
-            event.preventDefault();
-            alert('UPI details saved!');
-        }
-
-        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
-        try {
-            const response = await fetch('/buyer/checkout/place-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.ok) {
-                alert('Order placed successfully!');
-                window.location.href = '/buyer/cart'; // Redirect to orders page
+        
+        // Validate card details
+        function validateCardForm() {
+            const cardNumber = document.getElementById('cardNumber');
+            const expiryDate = document.getElementById('expiryDate');
+            const cvv = document.getElementById('cvv');
+            
+            let isValid = true;
+            
+            // Card number validation (exactly 16 digits)
+            const cardRegex = /^[0-9]{16}$/;
+            if (!cardRegex.test(cardNumber.value.trim())) {
+                isValid = showError('cardNumber') && isValid;
             } else {
-                const error = await response.json();
-                alert(`Failed to place order: ${error.message}`);
+                showError('cardNumber', false);
             }
-        } catch (err) {
-            console.error('Error placing order:', err);
-            alert('An error occurred while placing the order.');
+            
+            // Expiry date validation (MM/YY format)
+            const expiryRegex = /^(0[1-9]|1[0-2])\/[0-9]{2}$/;
+            if (!expiryRegex.test(expiryDate.value.trim())) {
+                isValid = showError('expiryDate') && isValid;
+            } else {
+                showError('expiryDate', false);
+            }
+            
+            // CVV validation (3 or 4 digits)
+            const cvvRegex = /^[0-9]{3,4}$/;
+            if (!cvvRegex.test(cvv.value.trim())) {
+                isValid = showError('cvv') && isValid;
+            } else {
+                showError('cvv', false);
+            }
+            
+            return isValid;
         }
-    });
+
+        // Validate and Save Card Details
+        function validateAndSaveCardDetails(event) {
+            event.preventDefault();
+            
+            if (validateCardForm()) {
+                alert('Card details saved successfully!');
+                document.getElementById('cardDetailsForm').reset();
+                togglePaymentForm('card');
+            }
+        }
+        
+        // Validate UPI ID
+        function validateUpiForm() {
+            const upiId = document.getElementById('upiId');
+            
+            // UPI ID validation (username@provider format)
+            const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
+            if (!upiRegex.test(upiId.value.trim())) {
+                return showError('upiId');
+            } else {
+                return showError('upiId', false);
+            }
+        }
+
+        // Validate and Save UPI Details
+        function validateAndSaveUpiDetails(event) {
+            event.preventDefault();
+            
+            if (validateUpiForm()) {
+                alert('UPI details saved successfully!');
+                document.getElementById('upiDetailsForm').reset();
+                togglePaymentForm('upi');
+            }
+        }
+
+        // Place Order
+        document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+            // Check if a payment method is selected
+            const paymentSelected = document.querySelector('input[name="payment"]:checked');
+            if (!paymentSelected) {
+                alert('Please select a payment method before placing your order.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/buyer/checkout/place-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    alert('Order placed successfully!');
+                    window.location.href = '/buyer/cart'; // Redirect to orders page
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to place order: ${error.message}`);
+                }
+            } catch (err) {
+                console.error('Error placing order:', err);
+                alert('An error occurred while placing the order.');
+            }
+        });
+        
+        // Initialize form displays
+        window.onload = function() {
+            const cardForm = document.getElementById('cardForm');
+            const upiForm = document.getElementById('upiForm');
+            const addressForm = document.getElementById('newAddressForm');
+            
+            cardForm.style.display = 'none';
+            upiForm.style.display = 'none';
+            addressForm.style.display = 'none';
+        };
     </script>
 </body>
 
