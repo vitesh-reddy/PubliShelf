@@ -4,9 +4,9 @@ export const generateToken = (user) => {
   const payload = {
     id: user._id,
     role: user.role,
-    firstname: user.firstname, // Include firstname
-    lastname: user.lastname,   // Include lastname
-    email: user.email,         // Include email
+    firstname: user.firstname, 
+    lastname: user.lastname,   
+    email: user.email,         
   };
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,

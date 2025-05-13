@@ -28,7 +28,6 @@ import Book from "../models/Book.js";
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 
-// Buyer Dashboard (Protected Route)
 router.get("/dashboard", protect, async (req, res) => {
   try {
       const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
@@ -47,7 +46,6 @@ router.get("/dashboard", protect, async (req, res) => {
   }
 });
 
-// Search Page (Protected Route)
 router.get("/search-page", protect, async (req, res) => {
   try {
     const books = await getAllBooks();
@@ -63,11 +61,10 @@ router.get("/search-page", protect, async (req, res) => {
   }
 });
 
-// Search Books (Protected Route)
 router.get("/search", protect, async (req, res) => {
-  const searchQuery = req.query.q; // Get the search query from the URL
+  const searchQuery = req.query.q; 
   try {
-    const books = await searchBooks(searchQuery); // Call the service function
+    const books = await searchBooks(searchQuery); 
     res.render("buyer/search-page", {
       newlyBooks: books,
       books: books,
@@ -80,13 +77,12 @@ router.get("/search", protect, async (req, res) => {
   }
 });
 
-// Filter and Category Search (Protected Route)
 router.get("/filter", protect, async (req, res) => {
   const { category, sort, condition, priceRange } = req.query;
 
   try {
     const filters = { category, sort, condition, priceRange };
-    const books = await filterBooks(filters); // Call the updated filterBooks function
+    const books = await filterBooks(filters); 
 
     res.render("buyer/search-page", {
       newlyBooks: books,
@@ -100,10 +96,9 @@ router.get("/filter", protect, async (req, res) => {
   }
 });
 
-// Checkout Page (Protected Route)
 router.get("/checkout", protect, async (req, res) => {
   try {
-    const buyer = await getBuyerById(req.user.id); // Fetch buyer with populated cart
+    const buyer = await getBuyerById(req.user.id); 
     if (!buyer) return res.status(404).send("Buyer not found");
 
     const cart = buyer.cart;
@@ -114,7 +109,7 @@ router.get("/checkout", protect, async (req, res) => {
         0
       );
       const shipping = subtotal >= 35 ? 0 : 5.99;
-      const tax = subtotal * 0.08; // 8% tax
+      const tax = subtotal * 0.08; 
       const total = subtotal + shipping + tax;
       return { subtotal, shipping, tax, total };
     };
@@ -131,50 +126,47 @@ router.get("/checkout", protect, async (req, res) => {
   }
 });
 
-// Buyer Signup Page (Public Route)
 router.get("/signup", (req, res) => {
   res.render("auth/signup-buyer", { styles: styles });
 });
 
-// Buyer Signup (Public Route)
 router.post("/signup", async (req, res) => {
   const { firstname, lastname, email, password } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Call the service to create a new buyer with the hashed password
+    
     await createBuyer({
       firstname,
       lastname,
       email,
-      password: hashedPassword, // Pass the hashed password to the service
+      password: hashedPassword, 
     });
-    // Redirect to login page upon successful signup
+    
     res.status(201).json({ message: "Buyer account created successfully." });
   } catch (error) {
-    console.error("Error during buyer signup:", error); // Log the error for debugging
+    console.error("Error during buyer signup:", error); 
 
-    // Check for duplicate email error
+    
     if (error.code === 11000)
       return res.status(400).json({ message: "Email already exists." });
 
-    // Handle other errors
+    
     res.status(500).json({
       message: "An unexpected error occurred while creating the buyer account.",
     });
   }
 });
 
-// Product Detail (Protected Route)
 router.get("/product-detail/:id", protect, async (req, res) => {
   try {
     const bookId = req.params.id;
-    const book = await getBookById(bookId); // Fetch book details by ID
+    const book = await getBookById(bookId); 
 
     if (!book) return res.status(404).send("Book not found");
 
-    const buyer = await getBuyerById(req.user.id); // Fetch buyer with cart data
+    const buyer = await getBuyerById(req.user.id); 
     const isInCart = buyer.cart.some(
       (item) => item.book._id.toString() === bookId
     );
@@ -183,7 +175,7 @@ router.get("/product-detail/:id", protect, async (req, res) => {
       buyerName: buyer.firstname,
       styles: styles,
       book,
-      isInCart, // Pass whether the book is in the cart
+      isInCart, 
     });
   } catch (error) {
     console.error("Error loading product details:", error);
@@ -191,10 +183,9 @@ router.get("/product-detail/:id", protect, async (req, res) => {
   }
 });
 
-// Cart Page (Protected Route)
 router.get("/cart", protect, async (req, res) => {
   try {
-    const buyer = await getBuyerById(req.user.id); // Fetch buyer with populated cart
+    const buyer = await getBuyerById(req.user.id); 
     if (!buyer) return res.status(404).send("Buyer not found");
 
     const cart = buyer.cart;
@@ -206,7 +197,7 @@ router.get("/cart", protect, async (req, res) => {
         0
       );
       const shipping = subtotal >= 35 ? 0 : 5.99;
-      const tax = subtotal * 0.08; // 8% tax
+      const tax = subtotal * 0.08; 
       const total = subtotal + shipping + tax;
       return { subtotal, shipping, tax, total };
     };
@@ -234,18 +225,18 @@ router.post("/cart/add", protect, async (req, res) => {
 
     if (!buyer) return res.status(404).json({ message: "Buyer not found" });
 
-    // Check if the book is already in the cart
+    
     const existingCartItem = buyer.cart.find(
       (item) => item.book.toString() === bookId
     );
 
     if (existingCartItem)
-      // If the book is already in the cart, update the quantity
+      
       existingCartItem.quantity += quantity;
-    // Otherwise, add the book to the cart
+    
     else buyer.cart.push({ book: bookId, quantity });
 
-    // Save the updated cart
+    
     await buyer.save();
 
     res.status(200).json({ message: "Book added to cart successfully." });
@@ -265,18 +256,14 @@ router.delete("/cart/remove", protect, async (req, res) => {
 
     if (!buyer) return res.status(404).json({ message: "Buyer not found" });
 
-    // Find the index of the item in the cart
     const cartItemIndex = buyer.cart.findIndex(
-      (item) => item.book._id.toString() === bookId // Ensure proper comparison
+      (item) => item.book._id.toString() === bookId
     );
 
     if (cartItemIndex === -1)
       return res.status(404).json({ message: "Item not found in cart" });
 
-    // Remove the item from the cart
     buyer.cart.splice(cartItemIndex, 1);
-
-    // Save the updated cart
     await buyer.save();
 
     res.status(200).json({ message: "Item removed from cart successfully." });
@@ -298,14 +285,13 @@ router.post("/wishlist/add", protect, async (req, res) => {
       return res.status(404).json({ message: "Buyer not found" });
     }
 
-    // Check if the book is already in the wishlist
+    
     if (buyer.wishlist.includes(bookId)) {
       return res
         .status(400)
         .json({ message: "Book is already in the wishlist" });
     }
 
-    // Add the book to the wishlist
     buyer.wishlist.push(bookId);
     await buyer.save();
 
@@ -325,7 +311,6 @@ router.patch("/cart/update-quantity", protect, async (req, res) => {
 
     if (!buyer) return res.status(404).json({ message: "Buyer not found" });
 
-    // Find the item in the cart and update its quantity
     const cartItem = buyer.cart.find(
       (item) => item.book._id.toString() === bookId
     );
@@ -352,9 +337,8 @@ router.post("/checkout/place-order", protect, async (req, res) => {
     if (!buyer) {
       return res.status(404).json({ message: "Buyer not found" });
     }
-    // console.log(buyer.cart);
+    
 
-    // Add current cart items to orders
     const newOrders = buyer.cart.map((item) => ({
       book: item.book,
       quantity: item.quantity,
@@ -383,15 +367,12 @@ router.post("/checkout/place-order", protect, async (req, res) => {
   }
 });
 
-// Auction Page (Protected Route)
 router.get("/auction-page", protect, async (req, res) => {
   try {
-    // Fetch data using service methods
     const ongoingAuctions = await getOngoingAuctions();
     const futureAuctions = await getFutureAuctions();
     const endedAuctions = await getEndedAuctions();
 
-    // Render the auction-page.ejs file with the fetched data
     res.render("buyer/auction-page", {
       buyerName: req.user.firstname,
       ongoingAuctions,
@@ -404,12 +385,10 @@ router.get("/auction-page", protect, async (req, res) => {
   }
 });
 
-// Auction Item Detail (Protected Route)
 router.get("/auction-item-detail/:id", protect, async (req, res) => {
   try {
     const auctionId = req.params.id;
 
-    // Fetch auction item details using the auctionId
     const book = await getAuctionItemById(auctionId);
     if (!book) return res.status(404).send("Auction item not found");
 
@@ -427,12 +406,10 @@ router.get("/auction-ongoing/:id", protect, async (req, res) => {
   try {
     const auctionId = req.params.id;
 
-    // Fetch the auction item details using the service method
     const book = await getAuctionItemById(auctionId);
 
     if (!book) return res.status(404).send("Auction item not found");
 
-    // Render the auction-ongoing.ejs file with the fetched data
     res.render("buyer/auction-ongoing", {
       buyerName: req.user.firstname,
       buyerId: req.user.id,
@@ -450,8 +427,7 @@ router.post("/auctions/:id/bid", protect, async (req, res) => {
   try {
     const { id: auctionId } = req.params;
     const { bidAmount } = req.body;
-    const bidderId = req.user.id; // Get the logged-in buyer's ID
-    // Use the service method to add the bid
+    const bidderId = req.user.id;
     const updatedBook = await addBid(auctionId, bidderId, bidAmount);
 
     res.status(200).json({
@@ -485,14 +461,12 @@ router.get("/profile", protect, async (req, res) => {
   }
 });
 
-// Update Buyer Profile (Protected Route)
 router.put("/profile", protect, async (req, res) => {
   try {
     const { firstName, lastName, email, currentPassword, newPassword } =
       req.body;
     const buyerId = req.user.id;
 
-    // Call the service to update the buyer profile
     const updatedBuyer = await updateBuyerProfile(buyerId, {
       firstName,
       lastName,

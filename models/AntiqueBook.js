@@ -5,33 +5,33 @@ const biddingHistorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Buyer",
     required: true,
-  }, // Reference to Buyer
+  },
   bidAmount: { type: Number, required: true },
   bidTime: { type: Date, default: Date.now },
 });
 
 const antiqueBookSchema = new mongoose.Schema({
-  title: { type: String, required: true }, // Book Title
-  author: { type: String, required: true }, // Author
-  description: { type: String, required: true }, // Description
-  genre: { type: String, required: true }, // Genre
+  title: { type: String, required: true },
+  author: { type: String, required: true },
+  description: { type: String, required: true },
+  genre: { type: String, required: true },
   condition: {
     type: String,
     required: true,
     enum: ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair"],
-  }, // Condition
-  basePrice: { type: Number, required: true }, // Starting Bid
-  currentPrice: { type: Number, default: 0 }, // Current Price (updated with each bid)
-  biddingHistory: [biddingHistorySchema], // Embedded Bidding History
-  auctionStart: { type: Date, required: true }, // Auction Start Date
-  auctionEnd: { type: Date, required: true }, // Auction End Date
-  image: { type: String }, // Array of image URLs
-  authenticationImage: { type: String }, // Array of document URLs
+  },
+  basePrice: { type: Number, required: true },
+  currentPrice: { type: Number, default: 0 },
+  biddingHistory: [biddingHistorySchema],
+  auctionStart: { type: Date, required: true },
+  auctionEnd: { type: Date, required: true },
+  image: { type: String },
+  authenticationImage: { type: String },
   publisher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Publisher",
     required: true,
-  }, // Reference to Publisher
+  },
   publishedAt: { type: Date, default: Date.now }, 
 });
 

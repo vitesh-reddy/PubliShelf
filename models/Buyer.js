@@ -21,8 +21,8 @@ const buyerSchema = new mongoose.Schema({
         required: true,
       },
       quantity: { type: Number, default: 1 },
-      delivered: { type: Boolean, default: false }, // Delivered flag
-      orderDate: { type: Date, default: Date.now }, // Order date
+      delivered: { type: Boolean, default: false },
+      orderDate: { type: Date, default: Date.now },
     },
   ],
 });

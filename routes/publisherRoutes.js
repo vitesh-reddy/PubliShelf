@@ -20,8 +20,8 @@ import { createAntiqueBook } from "../services/antiqueBookService.js";
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "publishelf/books", // Folder in Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png"], // Allowed file formats
+    folder: "publishelf/books", 
+    allowed_formats: ["jpg", "jpeg", "png"], 
   },
 });
 
@@ -37,22 +37,22 @@ router.get("/dashboard", protect, async (req, res) => {
       return res.status(404).send("Publisher not found.");
     }
 
-    // Fetch recent publications
+    
     const books = await Book.find({ publisher: req.user.id })
       .sort({ publishedAt: -1 })
       .limit(10);
 
-    // Fetch recent auctions
+    
     const auctions = await AntiqueBook.find({ publisher: req.user.id })
       .sort({ auctionStart: -1 })
       .limit(10);
 
-    // Fetch all buyers who have ordered books published by this publisher
+    
     const buyers = await Buyer.find({
       "orders.book": { $in: books.map((book) => book._id) },
     });
 
-    // Extract all orders for the publisher's books
+    
     const orders = [];
     buyers.forEach((buyer) => {
       buyer.orders.forEach((order) => {
@@ -64,7 +64,7 @@ router.get("/dashboard", protect, async (req, res) => {
       });
     });
 
-    // Calculate analytics
+    
     const booksSold = orders.reduce((sum, order) => sum + order.quantity, 0);
     const totalRevenue = orders.reduce((sum, order) => {
       const book = books.find(
@@ -108,7 +108,7 @@ router.get("/dashboard", protect, async (req, res) => {
       topGenres,
     };
 
-    // Fetch recent buyer interactions
+    
     const activities = buyers.flatMap((buyer) =>
       buyer.orders.map((order) => ({
         action: `Ordered ${order.quantity} copies of ${
@@ -118,18 +118,18 @@ router.get("/dashboard", protect, async (req, res) => {
       }))
     );
 
-    // Fetch available books for auction
+    
     const availableBooks = await Book.find({ publisher: req.user.id });
 
     res.render("publisher/dashboard", {
       sales: publisher.books,
       PublisherName: req.user.firstname,
-      publisher: { ...publisher, status: "approved" }, // Pass the publisher object to the template
-      analytics, // Pass the analytics object to the template
-      books, // Pass the books variable to the template
-      auctions, // Pass the auctions variable to the template
-      activities, // Pass the activities variable to the template
-      availableBooks, // Pass the availableBooks variable to the template
+      publisher: { ...publisher, status: "approved" }, 
+      analytics, 
+      books, 
+      auctions, 
+      activities, 
+      availableBooks, 
     });
   } catch (error) {
     console.error("Error fetching publisher dashboard:", error);
@@ -144,13 +144,13 @@ router.get("/signup", (req, res) => {
     const token = authHeader.split(" ")[1];
     try {
       const decoded = verifyToken(token);
-      // Redirect logged-in users to their respective dashboard
+      
       if (decoded.role === "publisher")
         return res.redirect("/publisher/dashboard");
       else if (decoded.role === "buyer")
         return res.redirect("/buyer/dashboard");
     } catch (error) {
-      // If token is invalid, proceed to signup
+      
     }
   }
 
@@ -160,7 +160,7 @@ router.get("/signup", (req, res) => {
 router.post("/signup", async (req, res) => {
   const { firstname, lastname, publishingHouse, email, password } = req.body;
   try {
-    // Create a new publisher
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const newPublisher = await createPublisher({
       firstname,
@@ -169,7 +169,7 @@ router.post("/signup", async (req, res) => {
       email,
       password: hashedPassword,
     });
-    // Redirect to login page upon successful signup
+    
     return res
       .status(201)
       .json({ message: "Publisher account created successfully." });
@@ -180,7 +180,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Sell Antique Book (Protected Route)
+
 router.get("/sell-antique", protect, (req, res) => {
   res.render("publisher/sellAntique");
 });
@@ -242,13 +242,13 @@ router.post(
     try {
       const { title, author, description, genre, price, quantity } = req.body;
 
-      // Check if the file was uploaded
+      
       if (!req.file)
         return res
           .status(400)
           .send("No file uploaded. Please upload a book cover image.");
 
-      // Get the uploaded image URL from Cloudinary
+      
       const imageUrl = req.file.path;
       const newBook = await createBook({
         title,
@@ -257,14 +257,14 @@ router.post(
         genre,
         price,
         quantity,
-        image: imageUrl, // Use the Cloudinary URL
+        image: imageUrl, 
         publisher: req.user.id,
         publishedAt: new Date(),
       });
 
       await addBookToPublisher(req.user.id, newBook._id);
 
-      res.redirect("/publisher/dashboard"); // Redirect to the dashboard after publishing
+      res.redirect("/publisher/dashboard"); 
     } catch (error) {
       console.error("Error publishing book:", error);
       res.status(500).send("An error occurred while publishing the book.");

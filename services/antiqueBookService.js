@@ -6,14 +6,12 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
   if (!book) {
     throw new Error("Antique book not found");
   }
-
-  // Add the new bid to the bidding history
+  
   book.biddingHistory.push({
     bidder: bidderId,
     bidAmount,
   });
-
-  // Update the current price
+  
   book.currentPrice = bidAmount;
 
   await book.save();
@@ -30,7 +28,6 @@ export const createAntiqueBook = async (bookData) => {
   }
 };
 
-// Fetch ongoing auctions
 export const getOngoingAuctions = async () => {
   return await AntiqueBook.find({
     auctionStart: { $lte: new Date() },
@@ -38,14 +35,12 @@ export const getOngoingAuctions = async () => {
   }).sort({ auctionEnd: 1 }).lean();
 };
 
-// Fetch future auctions
 export const getFutureAuctions = async () => {
   return await AntiqueBook.find({
     auctionStart: { $gt: new Date() },
   }).sort({ auctionStart: 1 }).lean();
 };
 
-// Fetch ended auctions
 export const getEndedAuctions = async () => {
   return await AntiqueBook.find({
     auctionEnd: { $lt: new Date() }, 
@@ -54,7 +49,7 @@ export const getEndedAuctions = async () => {
 
 export const getAuctionItemById = async (bookId) => {
   const book = await AntiqueBook.findById(bookId)
-    .populate("biddingHistory.bidder", "firstname lastname email") // Populate the bidder field with only the username
+    .populate("biddingHistory.bidder", "firstname lastname email") 
     .lean()
   if (!book) {
     throw new Error("Antique book not found");

@@ -6,24 +6,20 @@ import { getAllBuyers, getAllOrders } from "../services/buyerService.js";
 
 const router = express.Router();
 
-// Admin Signup (No authentication required)
 router.get("/signup", (req, res) =>
   res.render("auth/signup-admin", { styles: styles })
 );
 
-// Admin Dashboard (Protected Route)
 import Book from "../models/Book.js";
 import Buyer from "../models/Buyer.js";
 
 router.get("/dashboard/:key", checkAdminKey, async (req, res) => {
   try {
-    // Fetch data
     const buyers = await getAllBuyers();
     const orders = await getAllOrders();
     // const auctions = await getAllAuctions();
-    const auctions = []; // Placeholder for auctions, replace with actual data fetching
+    const auctions = []; // Placeholder
 
-    // Calculate analytics
     const totalBuyers = buyers.length;
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
@@ -70,8 +66,7 @@ router.get("/dashboard/:key", checkAdminKey, async (req, res) => {
       activeAuctions,
       genreCounts,
       revenueByGenre,
-    };
-    // Render the dashboard with analytics
+    };  
     res.render("admin/dashboard", {
       admin,
       publishers,
@@ -87,7 +82,7 @@ router.get("/dashboard/:key", checkAdminKey, async (req, res) => {
 router.delete("/publishers/:id/ban", async (req, res) => {
   try {
     const publisherId = req.params.id;
-    await deletePublisherById(publisherId); // Call the service to delete the publisher
+    await deletePublisherById(publisherId); 
     res.status(200).json({ message: "Publisher banned successfully." });
   } catch (error) {
     console.error("Error banning publisher:", error);

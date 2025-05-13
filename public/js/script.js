@@ -13,9 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (count < target) {
         counter.innerText = Math.ceil(count).toLocaleString();
         setTimeout(updateCount, 1);
-      } else {
+      } else 
         counter.innerText = target.toLocaleString();
-      }
     };
 
     updateCount();

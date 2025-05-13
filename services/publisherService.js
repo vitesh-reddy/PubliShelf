@@ -3,7 +3,7 @@ import Publisher from "../models/Publisher.js";
 export const getPublisherById = async (publisherId) => {
   return await Publisher.findById(publisherId).populate({
     path: "books",
-    options: { sort: { publishedAt: -1 } }, // Sort books by publishedAt in descending order
+    options: { sort: { publishedAt: -1 } }, 
   });
 };
 
@@ -20,7 +20,7 @@ export const getPublisherByEmail = async (email) => {
   return await Publisher.findOne({ email });
 };
 
-// Create a new publisher
+
 export const createPublisher = async ({ firstname, lastname, publishingHouse, email, password }) => {
   const newPublisher = new Publisher({
     firstname,
@@ -34,5 +34,5 @@ export const createPublisher = async ({ firstname, lastname, publishingHouse, em
 };
 
 export const deletePublisherById = async (publisherId) => {
-  return await Publisher.findByIdAndDelete(publisherId); // Delete the publisher by ID
+  return await Publisher.findByIdAndDelete(publisherId); 
 };

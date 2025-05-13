@@ -17,7 +17,7 @@ export const addReviewToBook = async (bookId, review) => {
 
   book.reviews.push(review);
 
-  // Update the average rating
+  
   const totalRatings = book.reviews.reduce((sum, review) => sum + review.rating, 0);
   book.rating = totalRatings / book.reviews.length;
 
@@ -32,14 +32,14 @@ export const createBook = async (bookData) => {
 
 export const searchBooks = async (query) => {
   if (!query) {
-    return []; // Return an empty array if no query is provided
+    return []; 
   }
 
   return await Book.find({
     $or: [
-      { title: { $regex: query, $options: "i" } }, // Search by title
-      { author: { $regex: query, $options: "i" } }, // Search by author
-      { genre: { $regex: query, $options: "i" } }, // Search by genre
+      { title: { $regex: query, $options: "i" } }, 
+      { author: { $regex: query, $options: "i" } }, 
+      { genre: { $regex: query, $options: "i" } }, 
     ],
   });
 };
@@ -56,7 +56,7 @@ export const filterBooks = async (filters) => {
   }
   if (priceRange) {
     const [minPrice, maxPrice] = priceRange.split("-").map(Number);
-    query.price = { $gte: minPrice, $lte: maxPrice }; // Adjusted for INR
+    query.price = { $gte: minPrice, $lte: maxPrice }; 
   }
 
   let books = await Book.find(query);

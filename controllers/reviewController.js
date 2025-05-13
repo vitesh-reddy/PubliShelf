@@ -19,7 +19,7 @@ export const addReview = async (req, res) => {
 
     book.reviews.push(review);
 
-    // Update the average rating
+    
     const totalRatings = book.reviews.reduce((sum, review) => sum + review.rating, 0);
     book.rating = totalRatings / book.reviews.length;
 

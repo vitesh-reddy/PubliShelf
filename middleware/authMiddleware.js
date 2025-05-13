@@ -1,14 +1,14 @@
 import { verifyToken } from "../utils/jwt.js";
 
 export const protect = (req, res, next) => {
-  const token = req.cookies.token; // Extract the token from cookies
+  const token = req.cookies.token;
   if (!token) {
     return res.redirect("/auth/login");
   }
 
   try {
-    const decoded = verifyToken(token); // Decode the token
-    req.user = decoded; // Attach user info to the request object
+    const decoded = verifyToken(token);
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("Error verifying token:", error);

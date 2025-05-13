@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import AntiqueBook from "../../models/AntiqueBook.js";
 
 const addAntiqueBook = async () => {
@@ -13,7 +12,7 @@ const addAntiqueBook = async () => {
     auctionEnd: new Date("2025-04-25T10:00:00"),
     images: ["image1.jpg", "image2.jpg"],
     authenticationDocuments: ["doc1.pdf"],
-    publisher: "publisherId", // Replace with actual Publisher ID
+    publisher: "publisherId",
   });
 
   await newAntiqueBook.save();

@@ -8,4 +8,3 @@ router.get("/login", loginGetController);
 router.post("/login", loginPostController);
 
 export default router;
-// login is not working
