@@ -348,12 +348,10 @@ router.post("/checkout/place-order", protect, async (req, res) => {
     buyer.orders.push(...newOrders);
 
     buyer.cart.forEach(async (item) => {
-      console.log(
         await Book.findByIdAndUpdate(
           { _id: item.book._id },
           { $inc: { quantity: -parseInt(item.quantity) } },
           { new: "true" }
-        )
       );
     });
     buyer.cart = [];
