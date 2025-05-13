@@ -12,7 +12,12 @@ import styles from "./public/css/styles.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import Book from "./models/Book.js";
-import { getMetrics, getTopSoldBooks, getTrendingBooks } from "./services/buyerService.js";
+import {
+  getMetrics,
+  getTopSoldBooks,
+  getTrendingBooks,
+} from "./services/buyerService.js";
+import morgan from "morgan";
 
 console.clear();
 
@@ -23,6 +28,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/";
 connectDB(MONGODB_URI);
+
+app.use(morgan("tiny"));
 
 app.use(
   session({
@@ -52,7 +59,7 @@ app.get("/", async (req, res) => {
     const trendingBooks = await getTrendingBooks();
 
     const metrics = await getMetrics();
-      
+
     res.render("index", {
       newlyBooks: newlyBooks,
       mostSoldBooks: mostSoldBooks,
