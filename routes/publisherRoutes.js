@@ -21,7 +21,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "publishelf/books", 
-    allowed_formats: ["jpg", "jpeg", "png"], 
+    allowed_formats: ["jpg", "jpeg", "png", "webp"], 
   },
 });
 
