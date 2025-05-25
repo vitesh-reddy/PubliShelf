@@ -35,7 +35,7 @@ Before starting the application, ensure you have the following installed:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-repo/PubliShelf.git
+   git clone https://github.com/vitesh-reddy/PubliShelf.git
    cd PubliShelf
    ```
 
@@ -46,9 +46,9 @@ Before starting the application, ensure you have the following installed:
    ```
 
 3. **Set up the environment variables:**
-
-   - I've Included the .env file in Repo for Better Experience
-     ```
+```bash
+   Included the .env file in Repo for Better Experience
+```
 ## Starting the Application
 
 1. **Run the application:**
