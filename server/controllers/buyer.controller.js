@@ -1,0 +1,662 @@
+//controllers/buyer.controller.js
+import bcrypt from "bcrypt";
+import {
+  getBuyerById,
+  createBuyer,
+  updateBuyerDetails,
+  getTopSoldBooks,
+  getTrendingBooks,
+  getAllBuyers,
+  updateBuyerCart,
+  updateBuyerWishlist,
+  addOrderToBuyer,
+  getAllOrders,
+  updateCartItemQuantity,
+  placeOrder,
+} from "../services/buyer.services.js";
+import {
+  getAllBooks,
+  getBookById,
+  searchBooks,
+  filterBooks,
+  addReviewToBook,
+  createBook,
+} from "../services/book.services.js";
+import {
+  getOngoingAuctions,
+  getFutureAuctions,
+  getEndedAuctions,
+  getAuctionItemById,
+  addBid,
+  createAntiqueBook,
+} from "../services/antiqueBook.services.js";
+import Buyer from "../models/Buyer.model.js";
+import Book from "../models/Book.model.js";
+
+export const getBuyerDashboard = async (req, res) => {
+  try {
+    const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
+    const mostSoldBooks = await getTopSoldBooks();
+    const trendingBooks = await getTrendingBooks();
+
+    res.status(200).json({
+      success: true,
+      message: "Buyer dashboard data fetched successfully",
+      data: { newlyBooks, mostSoldBooks, trendingBooks }
+    });
+  } catch (error) {
+    console.error("Error loading buyer dashboard:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading dashboard",
+      data: null
+    });
+  }
+};
+
+export const getBuyerSearchPage = async (req, res) => {
+  try {
+    const books = await getAllBooks();
+    res.status(200).json({
+      success: true,
+      message: "Search page data fetched successfully",
+      data: { books }
+    });
+  } catch (error) {
+    console.error("Error loading buyer search page:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading search page",
+      data: null
+    });
+  }
+};
+
+export const searchBooksHandler = async (req, res) => {
+  const { q: searchQuery } = req.query;
+  try {
+    const books = await searchBooks(searchQuery);
+    res.status(200).json({
+      success: true,
+      message: "Search results fetched successfully",
+      data: { books }
+    });
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error during search",
+      data: null
+    });
+  }
+};
+
+export const filterBooksHandler = async (req, res) => {
+  const { category, sort, condition, priceRange } = req.query;
+  try {
+    const filters = { category, sort, condition, priceRange };
+    const books = await filterBooks(filters);
+    res.status(200).json({
+      success: true,
+      message: "Filtered books fetched successfully",
+      data: { books }
+    });
+  } catch (error) {
+    console.error("Error during filter search:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error during filter search",
+      data: null
+    });
+  }
+};
+
+export const getBuyerCheckout = async (req, res) => {
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const cart = buyer.cart;
+
+    const calculateOrderSummary = (cart) => {
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.book.price * item.quantity,
+        0
+      );
+      const shipping = subtotal >= 35 ? 0 : 5.99;
+      const tax = subtotal * 0.08;
+      const total = subtotal + shipping + tax;
+      return { subtotal, shipping, tax, total };
+    };
+
+    const orderSummary = calculateOrderSummary(cart);
+
+    res.status(200).json({
+      success: true,
+      message: "Checkout data fetched successfully",
+      data: { ...orderSummary }
+    });
+  } catch (error) {
+    console.error("Error loading Checkout Page:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading Checkout Page",
+      data: null
+    });
+  }
+};
+
+export const createBuyerSignup = async (req, res) => {
+  const { firstname, lastname, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await createBuyer({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
+    });
+    res.status(201).json({
+      success: true,
+      message: "Buyer account created successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error during buyer signup:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+        data: null
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred while creating the buyer account",
+      data: null
+    });
+  }
+};
+
+export const getProductDetail = async (req, res) => {
+  try {
+    const { id: bookId } = req.params;
+    const book = await getBookById(bookId);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+        data: null
+      });
+    }
+
+    const buyer = await getBuyerById(req.user.id);
+    const isInCart = buyer.cart.some(
+      (item) => item.book._id.toString() === bookId
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Product details fetched successfully",
+      data: { book, isInCart }
+    });
+  } catch (error) {
+    console.error("Error loading product details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading product details",
+      data: null
+    });
+  }
+};
+
+export const getBuyerCart = async (req, res) => {
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const cart = buyer.cart;
+    const wishlist = buyer.wishlist;
+
+    const calculateOrderSummary = (cart) => {
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.book.price * item.quantity,
+        0
+      );
+      const shipping = subtotal >= 35 ? 0 : 5.99;
+      const tax = subtotal * 0.08;
+      const total = subtotal + shipping + tax;
+      return { subtotal, shipping, tax, total };
+    };
+
+    const orderSummary = calculateOrderSummary(cart);
+
+    res.status(200).json({
+      success: true,
+      message: "Cart data fetched successfully",
+      data: { cart, wishlist, ...orderSummary }
+    });
+  } catch (error) {
+    console.error("Error loading cart:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading cart",
+      data: null
+    });
+  }
+};
+
+export const addToCart = async (req, res) => {
+  const { bookId, quantity } = req.body;
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const existingCartItem = buyer.cart.find(
+      (item) => item.book.toString() === bookId
+    );
+
+    if (existingCartItem) {
+      existingCartItem.quantity += quantity;
+    } else {
+      buyer.cart.push({ book: bookId, quantity });
+    }
+
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Book added to cart successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while adding to the cart",
+      data: null
+    });
+  }
+};
+
+export const removeFromCart = async (req, res) => {
+  const { bookId } = req.body;
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const cartItemIndex = buyer.cart.findIndex(
+      (item) => item.book._id.toString() === bookId
+    );
+
+    if (cartItemIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found in cart",
+        data: null
+      });
+    }
+
+    buyer.cart.splice(cartItemIndex, 1);
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Item removed from cart successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error removing item from cart:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while removing the item from the cart",
+      data: null
+    });
+  }
+};
+
+export const addToWishlist = async (req, res) => {
+  const { bookId } = req.body;
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    if (buyer.wishlist.includes(bookId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Book is already in the wishlist",
+        data: null
+      });
+    }
+
+    buyer.wishlist.push(bookId);
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Book added to wishlist successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while adding to the wishlist",
+      data: null
+    });
+  }
+};
+
+export const updateCartQuantity = async (req, res) => {
+  const { bookId, quantity } = req.body;
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const cartItem = buyer.cart.find(
+      (item) => item.book._id.toString() === bookId
+    );
+    if (!cartItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found in cart",
+        data: null
+      });
+    }
+
+    cartItem.quantity = quantity;
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Quantity updated successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error updating quantity:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the quantity",
+      data: null
+    });
+  }
+};
+
+export const placeOrderController = async (req, res) => {
+  try {
+    const buyer = await getBuyerById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const newOrders = buyer.cart.map((item) => ({
+      book: item.book,
+      quantity: item.quantity,
+      orderDate: new Date(),
+      delivered: false,
+    }));
+    buyer.orders.push(...newOrders);
+
+    buyer.cart.forEach(async (item) => {
+      await Book.findByIdAndUpdate(
+        { _id: item.book._id },
+        { $inc: { quantity: -parseInt(item.quantity) } },
+        { new: true }
+      );
+    });
+    buyer.cart = [];
+    await buyer.save();
+    res.status(200).json({
+      success: true,
+      message: "Order placed successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while placing the order",
+      data: null
+    });
+  }
+};
+
+export const getBuyerAuctionPage = async (req, res) => {
+  try {
+    const ongoingAuctions = await getOngoingAuctions();
+    const futureAuctions = await getFutureAuctions();
+    const endedAuctions = await getEndedAuctions();
+
+    res.status(200).json({
+      success: true,
+      message: "Auction page data fetched successfully",
+      data: { ongoingAuctions, futureAuctions, endedAuctions }
+    });
+  } catch (error) {
+    console.error("Error fetching auction data:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching auction data",
+      data: null
+    });
+  }
+};
+
+export const getAuctionItemDetail = async (req, res) => {
+  try {
+    const { id: auctionId } = req.params;
+    const book = await getAuctionItemById(auctionId);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction item not found",
+        data: null
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Auction item details fetched successfully",
+      data: { book }
+    });
+  } catch (error) {
+    console.error("Error loading auction item details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading auction item details",
+      data: null
+    });
+  }
+};
+
+export const getAuctionOngoing = async (req, res) => {
+  try {
+    const { id: auctionId } = req.params;
+    const book = await getAuctionItemById(auctionId);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction item not found",
+        data: null
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Ongoing auction data fetched successfully",
+      data: { book }
+    });
+  } catch (error) {
+    console.error("Error fetching auction item details:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching auction item details",
+      data: null
+    });
+  }
+};
+
+export const placeBid = async (req, res) => {
+  try {
+    const { id: auctionId } = req.params;
+    const { bidAmount } = req.body;
+    const bidderId = req.user.id;
+    const updatedBook = await addBid(auctionId, bidderId, bidAmount);
+
+    res.status(200).json({
+      success: true,
+      message: "Bid placed successfully",
+      data: {
+        currentPrice: updatedBook.currentPrice,
+        biddingHistory: updatedBook.biddingHistory
+      }
+    });
+  } catch (error) {
+    console.error("Error placing bid:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while placing the bid",
+      data: null
+    });
+  }
+};
+
+export const getBuyerProfile = async (req, res) => {
+  try {
+    const user = await Buyer.findById(req.user.id)
+      .populate("orders.book")
+      .populate("wishlist")
+      .lean();
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        data: null
+      });
+    }
+
+    if (user.orders && user.orders.length > 0) {
+      user.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: { user }
+    });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      data: null
+    });
+  }
+};
+
+export const updateBuyerProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, email, currentPassword, newPassword } = req.body;
+    const buyerId = req.user.id;
+
+    const updatedBuyer = await updateBuyerDetails(buyerId, {
+      firstName,
+      lastName,
+      email,
+      currentPassword,
+      newPassword,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: { buyer: updatedBuyer }
+    });
+  } catch (error) {
+    if (error.message === "Incorrect password") {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password",
+        data: null
+      });
+    }
+    if (error.message === "Email already exists") {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+        data: null
+      });
+    }
+    console.error("Error updating profile:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
+  }
+};
+
+export const updateBuyerProfileById = async (req, res) => {
+  const { id: buyerId } = req.params;
+  const { currentPassword, firstname, lastname, email, confirmPassword } = req.body;
+  try {
+    const updatedBuyer = await updateBuyerDetails(buyerId, currentPassword, {
+      firstname,
+      lastname,
+      email,
+      password: await bcrypt.hash(confirmPassword, 10),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: { buyer: updatedBuyer }
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+      data: null
+    });
+  }
+};
