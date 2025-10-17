@@ -1,5 +1,3 @@
-import React from "react";
-
 const FeaturedBooks = ({ newlyBooks, mostSoldBooks, trendingBooks }) => (
   <>
     {/* Newly Added Books */}
@@ -10,9 +8,9 @@ const FeaturedBooks = ({ newlyBooks, mostSoldBooks, trendingBooks }) => (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {newlyBooks.map((book) => (
               <div
-                key={book.id}
+                key={book._id}
                 className="bookCardStyle"
-                onClick={() => (window.location.href = `/buyer/product-detail/${book.id}`)}
+                onClick={() => (window.location.href = `/buyer/product-detail/${book._id}`)}
               >
                 <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
                 <div className="p-3">
