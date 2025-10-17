@@ -13,6 +13,7 @@ const Navbar = () => (
           </Link>
         </div>
         <div className="hidden md:flex items-center space-x-8">
+          <Link to="/" className="navBtnStyle">Home</Link>
           <Link to="/buyer/dashboard" className="navBtnStyle">Bookstores</Link>
           <Link to="/about" className="navBtnStyle">About</Link>
           <Link to="/contact" className="navBtnStyle">Contact Us</Link>
@@ -34,10 +35,11 @@ const Navbar = () => (
               />
             </button>
             <div className="absolute top-full right-1 w-32 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-              <Link to="/#faq-section" className="categoryBtnStyle">FAQ</Link>
-              <Link to="/about" className="categoryBtnStyle">About</Link>
-              <Link to="/contact" className="categoryBtnStyle">Contact Us</Link>
-              <Link to="/auth/login" className="categoryBtnStyle">Bookstores</Link>
+              <Link to="/" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">Home</Link>
+              <Link to="/buyer/dashboard" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">Bookstores</Link>
+              <Link to="/about" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">About</Link>
+              <Link to="/contact" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">Contact Us</Link>
+              <Link to="/#faq-section" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700">FAQ</Link>
             </div>
           </div>
         </div>
