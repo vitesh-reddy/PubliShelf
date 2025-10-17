@@ -1,8 +1,8 @@
 //client/src/services/admin.services.js
 import axiosInstance from "../utils/axiosInstance.util.js";
 
-export const getDashboardData = async () => {
-  const response = await axiosInstance.get("admin/dashboard");
+export const getDashboardData = async (key) => {
+  const response = await axiosInstance.get(`admin/dashboard/${key}`);
   return response.data;
 };
 

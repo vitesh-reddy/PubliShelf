@@ -1,7 +1,7 @@
 //client/src/pages/admin/dashboard/components/PublisherTable.jsx
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import { banPublisher, approvePublisher, rejectPublisher } from "../../../services/admin.services.js";
+import { banPublisher, approvePublisher, rejectPublisher } from "../../../../services/admin.services.js";
 
 const PublisherTable = ({ publishers, onUpdate }) => {
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -129,7 +129,7 @@ const PublisherTable = ({ publishers, onUpdate }) => {
 
       {/* Approve Modal */}
       {showApproveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-gray-900">Approve Publisher</h3>
@@ -161,7 +161,7 @@ const PublisherTable = ({ publishers, onUpdate }) => {
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-gray-900">Reject Publisher</h3>

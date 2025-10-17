@@ -1,22 +1,23 @@
 //client/src/pages/admin/dashboard/Dashboard.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AnalyticsCards from "./components/AnalyticsCards";
 import Charts from "./components/Charts";
 import PublisherTable from "./components/PublisherTable";
 import ActivitiesTable from "./components/ActivitiesTable";
-import { getDashboardData } from "../../../services/admin.services.js";
+import { getDashboardData } from "../../../services/admin.services.js"
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const [data, setData] = useState({ admin: {}, publishers: [], activities: [], analytics: {} });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+    const { key } = useParams();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await getDashboardData();
+      const response = await getDashboardData(key);
       if (response.success) {
         setData(response.data);
       } else {
@@ -35,7 +36,6 @@ const Dashboard = () => {
   }, []);
 
   const handleLogout = () => {
-    // Clear token cookie via backend call or local clear; assume backend /api/auth/logout clears it
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     navigate("/auth/login");
   };
@@ -117,4 +117,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;
