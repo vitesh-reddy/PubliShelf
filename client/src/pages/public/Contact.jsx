@@ -1,133 +1,159 @@
-//client/src/pages/public/Contact.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaPhone, FaEnvelope } from "react-icons/fa";
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
 
 const Contact = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({ name: "", email: "", message: "" });
+  const [successMsg, setSuccessMsg] = useState(false);
+
+  useEffect(() => {
+    const form = document.getElementById("contactForm");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const messageInput = document.getElementById("message");
+    const nameError = document.getElementById("nameError");
+    const emailError = document.getElementById("emailError");
+    const messageError = document.getElementById("messageError");
+    const successMsgElement = document.getElementById("successMsg");
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      const namePattern = /^[A-Za-z\s]+$/;
+      if (!namePattern.test(nameInput.value.trim()) || nameInput.value.trim().length < 2) {
+        nameError.textContent = "Name should contain only letters and be at least 2 characters.";
+        nameError.classList.remove("hidden");
+        valid = false;
+      } else 
+        nameError.classList.add("hidden");
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(emailInput.value.trim())) {
+        emailError.classList.remove("hidden");
+        valid = false;
+      } else
+        emailError.classList.add("hidden");
+
+      if (messageInput.value.trim().length < 10) {
+        messageError.classList.remove("hidden");
+        valid = false;
+      } else
+        messageError.classList.add("hidden");
+
+      if (valid) {
+        successMsgElement.classList.remove("hidden");
+        form.reset();
+        setFormData({ name: "", email: "", message: "" });
+        setTimeout(() => successMsgElement.classList.add("hidden"), 3000);
+      }
+    };
+
+    form.addEventListener("submit", handleSubmit);
+    return () => form.removeEventListener("submit", handleSubmit);
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitted(true);
-      setLoading(false);
-      setFormData({ name: "", email: "", message: "" });
-    }, 1000);
-  };
-
   return (
-    <>
-      {/* Navbar */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
+    <div className="bg-gray-50 font-sans">
+    
+      <Navbar/>
+      <section className="pt-40 pb-12 bg-gradient-to-b from-purple-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">PubliShelf</span>
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors">About</Link>
-              <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors">Contact</Link>
-              <Link to="/#faq-section" className="text-gray-700 hover:text-purple-600 transition-colors">FAQ</Link>
-              <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600 transition-colors">Bookstores</Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link to="/auth/login" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300">Join Now</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Contact Section */}
-      <section className="min-h-screen pt-16 bg-white">
-        <div className="contact-container max-w-7xl mx-auto px-4 py-16">
-          <div className="contact-header text-center mb-16">
-            <h1 className="contact-title text-5xl font-bold text-gray-900 mb-6">Contact Us</h1>
-            <p className="contact-subtitle text-xl text-gray-600 max-w-3xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fade-in">Contact Us</h1>
+            <p className="text-xl text-gray-600 mb-8 animate-fade-in-delay">
               We'd love to hear from you! Reach out to us with any questions or feedback.
             </p>
           </div>
-
-          <div className="contact-content grid md:grid-cols-2 gap-12">
-            <div className="contact-form space-y-6">
-              <h2 className="contact-form-title text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="form-group">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+            <div className="bg-white rounded-lg shadow-md p-8 animate-fade-in">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+              <form id="contactForm" className="space-y-4" noValidate>
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Enter your name"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    minLength="2"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-600 focus:border-purple-600"
                   />
+                  <p id="nameError" className="text-red-500 text-sm mt-1 hidden">
+                    Name should contain only letters and be at least 2 characters.
+                  </p>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Enter your email"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-600 focus:border-purple-600"
                   />
+                  <p id="emailError" className="text-red-500 text-sm mt-1 hidden">
+                    Please enter a valid email address.
+                  </p>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                    Message
+                  </label>
                   <textarea
                     id="message"
                     name="message"
                     rows="4"
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Enter your message"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
+                    minLength="10"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-600 focus:border-purple-600"
+                  ></textarea>
+                  <p id="messageError" className="text-red-500 text-sm mt-1 hidden">
+                    Message should be at least 10 characters long.
+                  </p>
                 </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition"
-                >
-                  {loading ? "Sending..." : "Send Message"}
-                </button>
+                <div>
+                  <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 hover:translate-y-[-2px] transition-all duration-500 linear w-full">
+                    Send Message
+                  </button>
+                </div>
+                <p id="successMsg" className="text-green-600 text-center mt-3 hidden">
+                  Your message has been sent successfully!
+                </p>
               </form>
-              {submitted && <p className="text-green-600 text-center mt-4">Thank you! Your message has been sent.</p>}
             </div>
 
-            <div className="contact-info space-y-6">
-              <h2 className="contact-info-title text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-              <p className="contact-info-text text-gray-600">
-                Have questions or need assistance? We're here to help!
-              </p>
-              <div className="contact-info-details space-y-4">
-                <div className="contact-info-item flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                  <FaMapMarkerAlt className="text-purple-600 text-xl" />
-                  <span className="text-gray-700">IIIT SRI CITY, Gnan Marg Road, SRI CITY, 517541</span>
+            <div className="bg-white rounded-lg shadow-md p-8 animate-fade-in-delay">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
+              <p className="text-gray-600 mb-4">Have questions or need assistance? We're here to help!</p>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <i className="fas fa-map-marker-alt text-purple-600 mr-2"></i>
+                  <span className="text-gray-600">IIIT Sri City, Boys Hostel-3, Gnan Marg Circle</span>
                 </div>
-                <div className="contact-info-item flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                  <FaPhone className="text-purple-600 text-xl" />
-                  <span className="text-gray-700">+91 8714746146</span>
+                <div className="flex items-center">
+                  <i className="fas fa-phone text-purple-600 mr-2"></i>
+                  <span className="text-gray-600">+91 80992 69269</span>
                 </div>
-                <div className="contact-info-item flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                  <FaEnvelope className="text-purple-600 text-xl" />
-                  <span className="text-gray-700">support@publishelf.com</span>
+                <div className="flex items-center">
+                  <i className="fas fa-envelope text-purple-600 mr-2"></i>
+                  <span className="text-gray-600">publishelf07@gmail.com</span>
                 </div>
               </div>
             </div>
@@ -135,43 +161,8 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">PubliShelf</h3>
-              <p className="text-gray-400">Your gateway to endless literary discoveries.</p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><Link to="/about" className="text-gray-400 hover:text-white">About Us</Link></li>
-                <li><Link to="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Connect</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white"><FaTwitter /></a>
-                <a href="#" className="text-gray-400 hover:text-white"><FaFacebook /></a>
-                <a href="#" className="text-gray-400 hover:text-white"><FaInstagram /></a>
-                <a href="#" className="text-gray-400 hover:text-white"><FaLinkedin /></a>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Newsletter</h4>
-              <form className="flex">
-                <input type="email" placeholder="Enter your email" className="px-4 py-2 rounded-l-lg w-full focus:outline-none focus:outline-purple-500" />
-                <button className="bg-purple-600 px-4 py-2 rounded-r-lg hover:bg-purple-700">Subscribe</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </>
+      <Footer/>
+    </div>
   );
 };
 
