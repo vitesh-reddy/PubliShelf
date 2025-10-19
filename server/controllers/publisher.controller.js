@@ -26,26 +26,21 @@ export const getPublisherDashboard = async (req, res) => {
       });
     }
 
-    const books = await Book.find({ publisher: req.user.id })
+        const books = await Book.find({ publisher: req.user.id })
       .sort({ publishedAt: -1 })
-      .limit(10);
-
+    
     const auctions = await AntiqueBook.find({ publisher: req.user.id })
       .sort({ auctionStart: -1 })
-      .limit(10);
-
+    
     const buyers = await Buyer.find({
       "orders.book": { $in: books.map((book) => book._id) },
     });
-
+    
     const orders = [];
     buyers.forEach((buyer) => {
       buyer.orders.forEach((order) => {
-        if (
-          books.some((book) => book._id.toString() === order.book.toString())
-        ) {
+        if (books.some((book) => book._id.toString() === order.book.toString()))
           orders.push(order);
-        }
       });
     });
 
@@ -81,7 +76,8 @@ export const getPublisherDashboard = async (req, res) => {
 
     const topGenres = Object.entries(genreCounts)
       .map(([genre, count]) => ({ genre, count }))
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
 
     const analytics = {
       booksSold,

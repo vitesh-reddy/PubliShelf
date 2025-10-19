@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { signupPublisher } from "../../../../services/publisher.services.js";
+import { signup } from "../../../../services/publisher.services.js";
 
 const PublisherSignup = () => {
   const [formData, setFormData] = useState({
