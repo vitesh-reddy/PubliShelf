@@ -201,10 +201,15 @@ export const getProductDetail = async (req, res) => {
       (item) => item.book._id.toString() === bookId
     );
 
+    const similarBooks = await Book.find({
+      genre: book.genre,
+      _id: { $ne: bookId }
+    }).limit(4);
+
     res.status(200).json({
       success: true,
       message: "Product details fetched successfully",
-      data: { book, isInCart }
+      data: { book, similarBooks, isInCart }
     });
   } catch (error) {
     console.error("Error loading product details:", error);

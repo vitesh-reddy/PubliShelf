@@ -1,13 +1,15 @@
 //client/src/pages/buyer/product-detail/ProductDetail.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { FaStar, FaHeart, FaShoppingCart, FaHome, FaChevronRight } from "react-icons/fa";
+import { FaHeart, FaShoppingCart, FaStar } from "react-icons/fa";
 import { getProductDetail, addToCart, addToWishlist } from "../../../services/buyer.services.js";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [book, setBook] = useState(null);
+  const [similarBooks, setSimilarBooks] = useState([]);
   const [isInCart, setIsInCart] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [buyerName, setBuyerName] = useState("Buyer");
@@ -23,6 +25,7 @@ const ProductDetail = () => {
       const response = await getProductDetail(id);
       if (response.success) {
         setBook(response.data.book);
+        setSimilarBooks(response.data.similarBooks || []); // Assuming API returns similarBooks
         setIsInCart(response.data.isInCart);
       } else {
         setError(response.message);
@@ -52,7 +55,8 @@ const ProductDetail = () => {
     try {
       const response = await addToWishlist(id);
       if (response.success) {
-        alert("Added to wishlist!");
+        alert("Book added to wishlist successfully!");
+        setIsInWishlist(true);
       } else {
         alert(response.message);
       }
@@ -66,25 +70,88 @@ const ProductDetail = () => {
   if (!book) return <div className="min-h-screen flex items-center justify-center">Book not found</div>;
 
   return (
-    <div className="bg-gray-50">
-      {/* Navbar - similar */}
+    <div className="product-detail-page bg-gray-50">
+      {/* Navbar */}
       <nav className="fixed w-full bg-white shadow-sm z-50">
-        {/* ... */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link to="/buyer/dashboard" className="flex items-center">
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
+                  PubliShelf
+                </span>
+              </Link>
+            </div>
+            <div className="flex items-center md:space-x-8 relative">
+              <Link to="/buyer/cart/#wishlist-section" className="text-gray-700 hover:text-purple-600 hidden md:block">
+                <FaHeart className="far fa-heart" />
+              </Link>
+              <Link to="/buyer/cart" className="text-gray-700 hover:text-purple-600 hidden md:block">
+                <FaShoppingCart className="fas fa-shopping-cart" />
+              </Link>
+              <div className="relative group">
+                <button
+                  className="scale-0 md:scale-100 flex items-center space-x-2"
+                  onClick={() => navigate("/buyer/profile")}
+                >
+                  <img
+                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                    alt="Profile"
+                    className="w-5 h-5 rounded-full"
+                  />
+                  <span className="text-gray-700">{buyerName}</span>
+                </button>
+                <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                  <Link to="/buyer/profile" className="categoryBtnStyle">
+                    Your Profile
+                  </Link>
+                  <Link to="/logout" className="categoryBtnStyle">
+                    Logout
+                  </Link>
+                </div>
+              </div>
+              <div className="relative group">
+                <button className="md:hidden flex items-center space-x-2">
+                  <img
+                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                    alt="Profile"
+                    className="w-5 h-5 rounded-full"
+                  />
+                </button>
+                <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
+                  <Link to="/buyer/profile" className="categoryBtnStyle">
+                    Your Profile
+                  </Link>
+                  <Link to="/buyer/cart/#wishlist-section" className="categoryBtnStyle">
+                    Wishlist
+                  </Link>
+                  <Link to="/buyer/cart" className="categoryBtnStyle">
+                    Cart
+                  </Link>
+                  <Link to="/logout" className="categoryBtnStyle">
+                    Logout
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb */}
           <nav className="flex mb-8" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1">
+            <ol className="inline-flex items-center space-x-1 md:space-x-3">
               <li className="inline-flex items-center">
-                <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600 flex items-center">
-                  <FaHome className="mr-2" /> Home
+                <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600">
+                <i class="fas fa-home mr-2"></i>
+                  Home
                 </Link>
               </li>
               <li>
                 <div className="flex items-center">
-                  <FaChevronRight className="text-gray-400 mx-2" />
+                  <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
                   <span className="text-gray-500">{book.title}</span>
                 </div>
               </li>
@@ -96,11 +163,13 @@ const ProductDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
               {/* Image */}
               <div className="space-y-4">
-                <img
-                  src={book.image}
-                  alt={book.title}
-                  className="w-full h-96 object-cover rounded-lg transform transition duration-500 hover:scale-105"
-                />
+                <div className="aspect-w-3 aspect-h-4 rounded-lg overflow-hidden">
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="w-[500px] h-[600px] object-cover transform transition-transform duration-500 hover:scale-[1.01]"
+                  />
+                </div>
               </div>
 
               {/* Info */}
@@ -116,28 +185,52 @@ const ProductDetail = () => {
                   <span className="text-green-600 ml-4">In Stock ({book.quantity})</span>
                 </div>
 
-                <div className="border-t border-b py-4">
+                <div className="border-t border-b border-gray-200 py-4">
                   <div className="flex items-baseline">
                     <span className="text-4xl font-bold text-gray-900">₹{book.price}</span>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <Link to="/buyer/cart" className="block w-full text-center bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700">
-                    Buy Now
-                  </Link>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center border rounded-lg"></div>
+                    <Link
+                      to="/buyer/cart"
+                      className="flex flex-1 justify-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      <p className="text-white"> Buy Now </p>
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
-                    {isInCart ? (
-                      <Link to="/buyer/cart" className="col-span-2 flex items-center justify-center space-x-2 bg-purple-600 text-white py-3 rounded-lg">
-                        <FaShoppingCart /> Go to Cart
-                      </Link>
-                    ) : (
-                      <button onClick={handleAddToCart} className="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 py-3 rounded-lg hover:bg-purple-50">
-                        <FaShoppingCart /> Add to Cart
-                      </button>
-                    )}
-                    <button onClick={handleAddToWishlist} className="flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 hover:text-red-500 py-3 rounded-lg">
-                      <FaHeart className="far fa-heart" /> Add to Wishlist
+                    <div className="relative grid grid-cols-2 gap-4">
+                      {isInCart ? (
+                        <Link
+                          to="/buyer/cart"
+                          className="absolute w-full flex items-center justify-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                        >
+                          <i className="fas fa-shopping-cart text-white" ></i>
+                          <span className="text-white">Go to Cart</span>
+                        </Link>
+                      ) : (
+                        <button
+                          id="addToCartBtn"
+                          onClick={handleAddToCart}
+                          className="absolute w-full flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors"
+                        >
+                          <i className="fas fa-shopping-cart" ></i>
+                          <span>Add to Cart</span>
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      id="addToWishlistBtn"
+                      onClick={handleAddToWishlist}
+                      className={`flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg transition-colors ${
+                        isInWishlist ? "text-red-500" : "hover:text-red-500"
+                      }`}
+                    >
+                      <i className={isInWishlist ? "fas fa-heart" : "far fa-heart"}></i>
+                      <span>Add to Wishlist</span>
                     </button>
                   </div>
                 </div>
@@ -151,54 +244,73 @@ const ProductDetail = () => {
           </div>
 
           {/* Reviews */}
-          <div className="mt-8">
+          <div className="mt-12">
             <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {book.reviews.length > 0 ? (
-                book.reviews.map((review) => (
-                  <div key={review._id} className="bg-white p-6 rounded-xl shadow-lg">
-                    <div className="flex items-start space-x-4">
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${review.buyer.firstname}+${review.buyer.lastname}`}
-                        alt={review.buyer.firstname}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold">{review.buyer.firstname} {review.buyer.lastname}</h4>
-                          <span className="text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex text-yellow-400 my-1">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar key={i} className={i < review.rating ? "fas" : "far"} />
-                          ))}
-                        </div>
-                        <p className="text-gray-600">{review.comment}</p>
+            {book.reviews.length > 0 ? (
+              book.reviews.map((review) => (
+                <div key={review._id} className="bg-white p-6 rounded-xl shadow-lg mb-6">
+                  <div className="flex items-start space-x-4">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${review.buyer.firstname}+${review.buyer.lastname}`}
+                      alt={`${review.buyer.firstname} ${review.buyer.lastname}`}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold">
+                          {review.buyer.firstname} {review.buyer.lastname}
+                        </h4>
+                        <span className="text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
                       </div>
+                      <div className="flex text-yellow-400 my-1">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar key={i} className={i < review.rating ? "fas fa-star" : "far fa-star"} />
+                        ))}
+                      </div>
+                      <p className="text-gray-600">{review.comment}</p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-600 col-span-2">No reviews yet. Be the first to review this book!</p>
-              )}
-            </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600">No reviews yet. Be the first to review this book!</p>
+            )}
           </div>
 
-          {/* Similar Books - hardcoded as in EJS */}
+          {/* Similar Books */}
           <div className="mt-12">
             <h3 className="text-2xl font-bold mb-6">You May Also Like</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {/* hardcoded books */}
-              <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=300" alt="Book" className="w-full h-48 object-cover rounded" />
-                <h4 className="font-semibold mt-2">Atomic Habits</h4>
-                <p className="text-gray-600 text-sm">James Clear</p>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="font-bold text-purple-600">$24.99</span>
-                  <FaHeart className="text-gray-400 hover:text-purple-600" />
+              {similarBooks.map((book) => (
+                <div
+                  key={book._id}
+                  className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer"
+                  onClick={() => navigate(`/buyer/product-detail/${book._id}`)}
+                >
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="w-full h-40 md:h-64 object-cover"
+                  />
+                  <div className="p-3 md:p-4">
+                    <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
+                    <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
+                    </div>
+                    <button
+                      className="absolute bottom-3 right-3 wishlist-btn text-gray-600 hover:text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToWishlist(book._id);
+                      }}
+                    >
+                      
+                      <i className="far fa-heart text-xl" ></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
-              {/* repeat for 3 more */}
+              ))}
             </div>
           </div>
         </div>
