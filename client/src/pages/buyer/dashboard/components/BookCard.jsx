@@ -8,7 +8,7 @@ const BookCard = ({ book, onClick, showSold = false, isTrending = false, idx }) 
         <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
         {isTrending && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs">
-            #{idx}
+            #{idx + 1}
           </div>
         )}
       </div>

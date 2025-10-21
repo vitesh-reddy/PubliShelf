@@ -1,12 +1,4 @@
 // client/src/services/buyer.services.js
-// import axiosInstance from "../utils/axiosInstance.util.js";
-
-// export const signupBuyer = async (userData) => {
-//   const response = await axiosInstance.post("buyer/signup", userData);
-//   return response.data;
-// };
-
-//client/src/services/buyer.services.js
 import axiosInstance from "../utils/axiosInstance.util.js";
 
 export const getDashboard = async () => {
@@ -20,6 +12,7 @@ export const getSearchPage = async () => {
 };
 
 export const searchBooks = async (query) => {
+  console.log(query)
   const response = await axiosInstance.get("buyer/search", { params: { q: query } });
   return response.data;
 };
