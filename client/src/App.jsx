@@ -18,6 +18,7 @@ import ProductDetail from './pages/buyer/product-detail/ProductDetail'
 import Checkout from './pages/buyer/checkout/Checkout'
 import Cart from './pages/buyer/cart/Cart'
 import AuctionPage from './pages/buyer/auction/AuctionPage'
+import AuctionItemDetail from './pages/buyer/auction/AuctionItemDetail'
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/buyer/cart" element={<Cart/> } />
 
         <Route path="/buyer/auction-page" element={<AuctionPage/>} />
+        <Route path="/buyer/auction-item-detail/:id" element={<AuctionItemDetail/> } />
       </Routes>     
     </div>
   )

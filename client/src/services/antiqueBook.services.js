@@ -8,7 +8,7 @@ export const getAuctionPage = async () => {
 
 export const getAuctionItemDetail = async (auctionId) => {
   const response = await axiosInstance.get(`buyer/auction-item-detail/${auctionId}`);
-  return response.data.book;
+  return response.data;
 };
 
 export const getAuctionOngoing = async (auctionId) => {
