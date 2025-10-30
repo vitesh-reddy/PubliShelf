@@ -1,3 +1,0 @@
-setup frontend routes, protection wraps
-css and js in somefiles
-toasts
