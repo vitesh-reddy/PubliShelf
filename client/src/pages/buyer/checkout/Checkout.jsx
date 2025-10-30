@@ -150,20 +150,23 @@ const Checkout = () => {
         }
     };
 
-    const handlePlaceOrder = async () => {
-      setPlacingOrder(true);
+    const handlePlaceOrder = async () => {        
         if (!selectedPayment) {
             alert("Please select a payment method before placing your order.");
             return;
         }
+        if (orderSummary.subtotal <= 0) {
+            alert("Your cart is empty. Please add items before placing an order.");
+            return;
+        }
+        setPlacingOrder(true);
         try {
             const response = await placeOrder();
             if (response.success) {
                 alert("Order placed successfully!");
                 navigate("/buyer/cart");
-            } else {
+            } else
                 alert(response.message);
-            }
         } catch (err) {
             alert("Error placing order");
         }
@@ -173,13 +176,11 @@ const Checkout = () => {
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
 
-    // A common input style to reuse
     const inputStyle = "w-full p-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white transition-all duration-300 ease-in-out focus:border-purple-600 focus:outline-none focus:ring-3 focus:ring-purple-600/10";
-    const errorInputStyle = "border-red-500"; // To be combined with inputStyle
+    const errorInputStyle = "border-red-500";
 
     return (
         <div className="checkout-page">
-            {/* Navbar can be styled with Tailwind here if needed */}
             <nav className="navbar">
                 <div className="navbar-container">
                     <div className="navbar-brand">

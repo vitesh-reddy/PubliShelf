@@ -1,7 +1,7 @@
 //client/src/pages/buyer/cart/Cart.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FaHeart, FaShoppingCart, FaUser, FaMinus, FaPlus, FaTrash, FaStar, FaStarHalfAlt } from "react-icons/fa";
+// import { FaHeart, FaShoppingCart, FaUser, FaMinus, FaPlus, FaTrash, FaStar, FaStarHalfAlt } from "react-icons/fa"; // Removed this line
 import { getCart, updateCartQuantity, removeFromCart } from "../../../services/buyer.services.js";
 
 const Cart = () => {
@@ -36,7 +36,7 @@ const Cart = () => {
     try {
       const response = await updateCartQuantity({ bookId, quantity: newQuantity });
       if (response.success) {
-        fetchCart(); // Refetch to update summary
+        fetchCart();
       } else {
         alert(response.message);
       }
@@ -59,6 +59,43 @@ const Cart = () => {
     }
   };
 
+  const handleAddToCartFromWishlist = async (bookId) => {
+    try {
+      const res = await fetch('/buyer/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId, quantity: 1 })
+      });
+      if (res.ok) {
+        fetchCart();
+        alert("Item added to cart!");
+      } else {
+        alert("Failed to add to cart");
+      }
+    } catch (err) {
+      alert("Error adding to cart");
+    }
+  };
+
+  const handleRemoveFromWishlist = async (bookId) => {
+    try {
+      const res = await fetch('/buyer/wishlist/remove', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId })
+      });
+      if (res.ok) {
+        fetchCart();
+        alert("Item removed from wishlist!");
+      } else {
+        const error = await res.json();
+        alert(`Failed: ${error.message}`);
+      }
+    } catch (err) {
+      alert("Error removing from wishlist");
+    }
+  };
+
   const handleProceedToCheckout = () => {
     if (cartData.cart.length === 0) {
       alert("Your cart is empty");
@@ -72,65 +109,155 @@ const Cart = () => {
 
   return (
     <div className="bg-gray-50">
-      {/* Navbar - similar */}
+      {/* Navbar - Exact EJS Match */}
       <nav className="fixed w-full bg-white shadow-sm z-50">
-        {/* ... */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link to="/buyer/dashboard" className="flex items-center">
+                <span className="font-bold text-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
+                  PubliShelf
+                </span>
+              </Link>
+            </div>
+            <div className="relative flex items-center md:space-x-8">
+              <Link to="/buyer/cart/#wishlist-section" className="hidden text-gray-700 hover:text-purple-600 md:block">
+                <i className="far fa-heart"></i> 
+              </Link>
+              <Link to="/buyer/cart" className="hidden text-gray-700 hover:text-purple-600 md:block">
+                <i className="fas fa-shopping-cart"></i> 
+              </Link>
+              <button
+                onClick={() => (window.location.href = "/logout")}
+                className="hidden px-4 py-2 text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:bg-gradient-to-l hover:-translate-y-[2px] md:block"
+              >
+                logout
+              </button>
+              <div className="relative">
+                <button
+                  onClick={() => (window.location.href = "/buyer/profile")}
+                  className="flex items-center space-x-2 scale-0 md:scale-100"
+                >
+                  <img
+                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                    alt="Profile"
+                    className="w-5 h-5 rounded-full"
+                  />
+                  <span className="text-gray-700">{buyerName}</span>
+                </button>
+              </div>
+              <div className="relative group">
+                <button className="flex items-center space-x-2 md:hidden">
+                  <img
+                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                    alt="Profile"
+                    className="w-5 h-5 rounded-full"
+                  />
+                </button>
+                <div className="absolute top-full right-1 hidden w-48 py-2 bg-white rounded-lg shadow-lg group-hover:block">
+                  <Link to="/buyer/profile" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
+                    Your Profile
+                  </Link>
+                  <Link to="/buyer/cart/#wishlist-section" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
+                    WishList
+                  </Link>
+                  <Link to="/buyer/cart" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
+                    Cart
+                  </Link>
+                  <Link to="/logout" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
+                    Logout
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <div className="max-w-7xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-8 lg:flex-row">
             {/* Cart Section */}
             <div className="lg:w-2/3">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
-                <div className="p-6 border-b">
+              <div className="overflow-hidden bg-white rounded-xl shadow-lg">
+                <div className="p-6 border-b border-gray-300">
                   <h2 className="text-2xl font-bold text-gray-900">Shopping Cart</h2>
-                  <p className="text-gray-500 mt-1">You have {cartData.cart.length} items in your cart</p>
+                  <p id="cart-count-text" className="mt-1 text-gray-500">
+                    You have {cartData.cart.length} items in your cart
+                  </p>
                 </div>
-                <div className="divide-y">
-                  {cartData.cart.map((item) => (
-                    <div key={item._id} className="p-6 flex items-center space-x-4">
-                      <img src={item.book.image} alt={item.book.title} className="w-24 h-32 object-cover rounded-lg" />
+                <div id="cart-items" className="divide-y">
+                  {cartData.cart.map((item, idx) => (
+                    <div
+                      key={item._id + idx}
+                      className="flex items-center p-6 space-x-4 cart-item"
+                      data-book-id={item.book._id}
+                    >
+                      <img
+                        src={item.book.image}
+                        alt={item.book.title}
+                        className="object-cover w-24 h-32 rounded-lg"
+                      />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{item.book.title}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          <Link to={`/buyer/product/${item.book._id}`}>{item.book.title}</Link>
+                        </h3>
                         <p className="text-gray-600">by {item.book.author}</p>
                         <div className="flex items-center mt-2">
                           <div className="flex text-yellow-400">
                             {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={i < Math.floor(item.book.rating) ? "fas" : "far"} />
+                              <i // Changed
+                                key={i}
+                                className={i < Math.floor(item.book.rating || 0) ? "fas fa-star" : "far fa-star"}
+                              ></i>
                             ))}
-                            {item.book.rating % 1 !== 0 && <FaStarHalfAlt />}
+                            {item.book.rating % 1 !== 0 && <i className="fas fa-star-half-alt"></i>} 
                           </div>
-                          <span className="ml-2 text-gray-600">{item.book.rating}</span>
+                          <span className="ml-2 text-gray-600">{item.book.rating || 0}</span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <div className="flex items-center border rounded-lg">
+                        <div className="flex items-center border border-gray-300 rounded-lg">
                           <button
+                            type="button"
+                            className="px-3 py-1 text-gray-600 hover:text-purple-600 decrement-btn"
+                            data-book-id={item.book._id}
                             onClick={() => handleQuantityChange(item.book._id, item.quantity - 1)}
-                            className="px-3 py-1 text-gray-600 hover:text-purple-600"
                           >
-                            <FaMinus />
+                            <i className="fas fa-minus"></i> 
                           </button>
                           <input
                             type="number"
                             value={item.quantity}
                             min="1"
                             max={item.book.quantity}
+                            className="w-12 text-center border-x border-gray-300 focus:outline-none focus:ring-0 quantity-input"
+                            data-book-id={item.book._id}
                             onChange={(e) => handleQuantityChange(item.book._id, parseInt(e.target.value))}
-                            className="w-12 text-center border-x focus:outline-none"
                           />
                           <button
+                            type="button"
+                            className="px-3 py-1 text-gray-600 hover:text-purple-600 increment-btn"
+                            data-book-id={item.book._id}
                             onClick={() => handleQuantityChange(item.book._id, item.quantity + 1)}
-                            className="px-3 py-1 text-gray-600 hover:text-purple-600"
                           >
-                            <FaPlus />
+                            <i className="fas fa-plus"></i> 
                           </button>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-gray-900">₹{item.book.price}</p>
-                          <button onClick={() => handleRemoveFromCart(item.book._id)} className="text-red-500 hover:text-red-600 text-sm">
-                            <FaTrash /> Remove
+                          <p className="text-lg font-bold text-gray-900 unit-price" data-unit-price={item.book.price}>
+                            ₹{item.book.price}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Item total: ₹<span className="line-total">{(item.book.price * item.quantity).toFixed(2)}</span>
+                          </p>
+                          <button
+                            type="button"
+                            className="text-sm text-red-500 hover:text-red-600 remove-from-cart-btn"
+                            data-book-id={item.book._id}
+                            onClick={() => handleRemoveFromCart(item.book._id)}
+                          >
+                            Remove
                           </button>
                         </div>
                       </div>
@@ -140,34 +267,61 @@ const Cart = () => {
               </div>
 
               {/* Wishlist Section */}
-              <div id="wishlist-section" className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="p-6 border-b">
+              <div id="wishlist-section" className="mt-8 overflow-hidden bg-white rounded-xl shadow-lg">
+                <div className="p-6 border-b border-gray-300">
                   <h2 className="text-2xl font-bold text-gray-900">Wishlist</h2>
-                  <p className="text-gray-500 mt-1">You have {cartData.wishlist.length} items in your wishlist</p>
+                  <p className="mt-1 text-gray-500">You have {cartData.wishlist.length} items in your wishlist</p>
                 </div>
                 <div className="divide-y">
-                  {cartData.wishlist.map((item) => (
-                    <div key={item._id} className="p-6 flex items-center space-x-4">
-                      <img src={item.image} alt={item.title} className="w-24 h-32 object-cover rounded-lg" />
+                  {cartData.wishlist.map((item, idx) => (
+                    <div
+                      key={item._id + idx}
+                      className="flex items-center p-6 space-x-4 wishlist-item border-b border-gray-300"
+                      data-book-id={item._id}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="object-cover w-24 h-32 rounded-lg"
+                      />
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
                         <p className="text-gray-600">by {item.author}</p>
                         <div className="flex items-center mt-2">
                           <div className="flex text-yellow-400">
                             {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={i < Math.floor(item.rating) ? "fas" : "far"} />
+                              <i // Changed
+                                key={i}
+                                className={i < Math.floor(item.rating || 0) ? "fas fa-star" : "far fa-star"}
+                              ></i>
                             ))}
-                            {item.rating % 1 !== 0 && <FaStarHalfAlt />}
+                            {item.rating % 1 !== 0 && <i className="fas fa-star-half-alt"></i>} 
                           </div>
-                          <span className="ml-2 text-gray-600">{item.rating}</span>
+                          <span className="ml-2 text-gray-600">{item.rating || 0}</span>
                         </div>
                       </div>
-                      <div className="text-right space-y-2">
+                      <div className="space-y-2 text-right">
                         <p className="text-lg font-bold text-gray-900">₹{item.price}</p>
-                        <button className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                        <button
+                          type="button"
+                          className="w-full px-4 py-2 text-white transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 add-to-cart-btn"
+                          data-book-id={item._id}
+                          data-title={item.title}
+                          data-author={item.author}
+                          data-price={item.price}
+                          data-image={item.image}
+                          data-rating={item.rating || 0}
+                          onClick={() => handleAddToCartFromWishlist(item._id)}
+                        >
                           Add to Cart
                         </button>
-                        <button className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                        <button
+                          className="text-sm text-red-500 hover:text-red-600 remove-from-wishlist-btn"
+                          data-book-id={item._id}
+                          onClick={() => handleRemoveFromWishlist(item._id)}
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -177,26 +331,69 @@ const Cart = () => {
 
             {/* Order Summary */}
             <div className="lg:w-1/3">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-gray-600">Subtotal ({cartData.cart.length} items) <span>₹{cartData.subtotal.toFixed(2)}</span></div>
-                  <div className="flex justify-between text-gray-600">Shipping <span>₹{cartData.shipping.toFixed(2)}</span></div>
-                  <div className="flex justify-between text-gray-600">Tax <span>₹{cartData.tax.toFixed(2)}</span></div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">Total <span>₹{cartData.total.toFixed(2)}</span></div>
+              <div className="sticky top-24 overflow-hidden bg-white rounded-xl shadow-lg">
+                <div className="p-6 border-b border-gray-300">
+                  <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
                 </div>
-                <button onClick={handleProceedToCheckout} disabled={cartData.cart.length === 0} className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                  Proceed to Checkout
-                </button>
-                <div className="text-center text-sm text-gray-500 mt-4">
-                  <p>Free shipping on orders over ₹35</p>
-                  <p className="mt-1">Expected delivery: 3-5 business days</p>
+                <div
+                  id="order-summary"
+                  className="p-6 space-y-4"
+                  data-tax-rate={cartData.subtotal > 0 ? cartData.tax / cartData.subtotal : 0}
+                  data-shipping-charge="35"
+                  data-shipping-threshold="35"
+                >
+                  <div className="flex justify-between text-gray-600">
+                    <span>
+                      Subtotal (<span id="summary-count">{cartData.cart.length}</span> items)
+                    </span>
+                    <span id="summary-subtotal">₹{cartData.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Shipping</span>
+                    <span id="summary-shipping">₹{cartData.shipping.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Tax</span>
+                    <span id="summary-tax">₹{cartData.tax.toFixed(2)}</span>
+                  </div>
+                  <div className="pt-4 border-t border-gray-300">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total</span>
+                      <span id="summary-total">₹{cartData.total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <button
+                    id="proceedToCheckoutBtn"
+                    onClick={handleProceedToCheckout}
+                    className={`w-full py-3 text-white transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 ${
+                      cartData.cart.length === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={cartData.cart.length === 0}
+                  >
+                    Proceed to Checkout
+                  </button>
+                  <div className="text-sm text-center text-gray-500">
+                    <p>Free shipping on orders over ₹35</p>
+                    <p className="mt-1">Expected delivery: 3-5 business days</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Inline styles from EJS */}
+      <style jsx>{`
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          margin: 0;
+          -webkit-appearance: none;
+        }
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
     </div>
   );
 };
