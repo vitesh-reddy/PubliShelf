@@ -5,37 +5,32 @@ export const loginPostController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required",
-        data: null
-      });
-    }
-
     const result = await loginUser(email, password);
 
-    if (result.code !== 0) {
-      const status = result.code === 401 ? 401 : 403;
-      const message = result.code === 401 ? "Invalid password" : "User not found";
-      return res.status(status).json({
+    if (result.code === 403) {
+      return res.status(403).json({
         success: false,
-        message,
+        message: "User not found",
         data: null
       });
     }
 
-    // Set JWT cookie
+    if (result.code === 401) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password",
+        data: null
+      });
+    }
+
     res.cookie("token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours; align with JWT_EXPIRES_IN
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    console.log(result.user.firstname, result.user.lastname, "logged in as", result.user.role);
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       data: { user: result.user }
@@ -44,7 +39,7 @@ export const loginPostController = async (req, res) => {
     console.error("Error in loginPostController:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error. Please try again later.",
       data: null
     });
   }

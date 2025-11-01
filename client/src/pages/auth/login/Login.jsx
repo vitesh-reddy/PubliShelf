@@ -28,12 +28,14 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await login({ email, password });
+      console.log(response);
       if (response.success) {
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
         }
         window.location.href = `/${response.data.user.role}/dashboard`;
       } else {
+        console.log(response);
         setError(response.message || "Unexpected error occurred. Please try again.");
       }
     } catch (err) {

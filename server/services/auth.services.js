@@ -5,24 +5,22 @@ import Publisher from "../models/Publisher.model.js";
 import { generateToken } from "../utils/jwt.js";
 
 export const loginUser = async (email, password) => {
-  try {    
+  try {
     const buyerUser = await Buyer.findOne({ email });
     const publisherUser = await Publisher.findOne({ email });
-    let user = undefined;
+
+    let user = null;
     if (buyerUser) user = { ...buyerUser.toObject(), role: "buyer" };
-    else if (publisherUser) user = { ...publisherUser.toObject(), role: "publisher" };    
-    else return { token: null, user: null, code: 403}; 
-    
+    else if (publisherUser) user = { ...publisherUser.toObject(), role: "publisher" };
+    if (!user)
+      return { token: null, user: null, code: 403 };
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return { token: null, user: null, code: 401};
-    }
-        
+    if (!isPasswordValid) 
+      return { token: null, user: null, code: 401 };
+
     const token = generateToken(user);
 
-    console.log(user.firstname, user.lastname, "logged in as", user.role);
-    
     return { token, user, code: 0 };
   } catch (error) {
     console.error("Error logging in user:", error);
