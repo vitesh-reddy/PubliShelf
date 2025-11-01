@@ -6,7 +6,7 @@ export const getDashboard = async () => {
   return response.data;
 };
 
-export const signup = async (userData) => {
+export const signupPublisher = async (userData) => {
   const response = await axiosInstance.post("publisher/signup", userData);
   return response.data;
 };

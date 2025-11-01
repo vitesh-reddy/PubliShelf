@@ -1,17 +1,11 @@
 //controllers/publisher.controller.js
-import {
-  getPublisherById,
-  addBookToPublisher,
-  getAllPublishers,
-  getPublisherByEmail,
-  createPublisher,
-  deletePublisherById,
-} from "../services/publisher.services.js";
+import { getPublisherById, addBookToPublisher, createPublisher } from "../services/publisher.services.js";
 import { createBook } from "../services/book.services.js";
 import { createAntiqueBook } from "../services/antiqueBook.services.js";
 import Book from "../models/Book.model.js";
 import Buyer from "../models/Buyer.model.js";
 import AntiqueBook from "../models/AntiqueBook.model.js";
+import bcrypt from "bcrypt";
 
 export const getPublisherDashboard = async (req, res) => {
   try {

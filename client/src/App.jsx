@@ -25,11 +25,9 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="auth">
-          <Route path="login" element={<Login />} />
-          <Route path="signup/buyer" element={<BuyerSignup />} />
-          <Route path="signup/publisher" element={<PublisherSignup />} />
-        </Route>
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/buyer/signup" element={<BuyerSignup />} />
+        <Route path="/publisher/signup" element={<PublisherSignup />} />
 
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About/>} />

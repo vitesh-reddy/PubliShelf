@@ -27,7 +27,7 @@ export const getCheckout = async () => {
   return response.data;
 };
 
-export const signup = async (userData) => {
+export const signupBuyer = async (userData) => {
   const response = await axiosInstance.post("buyer/signup", userData);
   return response.data;
 };

@@ -1,9 +1,7 @@
 //client/src/pages/auth/signup/buyer/BuyerSignup.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { signup } from "../../../../services/publisher.services";
-// import { signup } from "../../../services/buyer.services.js";
+import { signupBuyer } from "../../../../services/buyer.services.js";
 
 const BuyerSignup = () => {
   const [formData, setFormData] = useState({
@@ -27,39 +25,50 @@ const BuyerSignup = () => {
     e.preventDefault();
     setError("");
 
+    const { firstname, lastname, email, password, confirmPassword } = formData;
+    const trimmedFirstname = firstname.trim();
+    const trimmedLastname = lastname.trim();
+    const trimmedEmail = email.trim();
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedFirstname || !trimmedLastname) {
+      setError("Please enter your first and last name.");
+      return;
+    }
+    if (!emailPattern.test(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (password.length < 3) {
+      setError("Password must be at least 3 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     if (!termsAccepted) {
       setError("You must agree to the Terms of Service and Privacy Policy.");
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (!formData.firstname.trim() || !formData.lastname.trim() || !formData.email.trim() || !formData.password) {
-      setError("All fields are required.");
-      return;
-    }
-
     setIsLoading(true);
-
     try {
-      const response = await signupPublisher({
-        firstname: formData.firstname.trim(),
-        lastname: formData.lastname.trim(),
-        email: formData.email.trim(),
-        password: formData.password
+      const response = await signupBuyer({
+        firstname: trimmedFirstname,
+        lastname: trimmedLastname,
+        email: trimmedEmail,
+        password
       });
-
       if (response.success) {
-        navigate("/auth/login");
+        window.location.href = "/auth/login";
       } else {
-        setError(response.message || "Signup failed");
+        setError(response.message || "An unexpected error occurred.");
       }
-    } catch (err) {
+    } catch (error) {
+      console.error("Error during signup:", error);
       setError("An error occurred. Please try again later.");
-      console.error("Signup error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +94,7 @@ const BuyerSignup = () => {
         </div>
 
         {/* Signup Form */}
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
+        <form id="signupForm" onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg space-y-6 animate-fade-in">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
@@ -118,12 +127,12 @@ const BuyerSignup = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block font-medium text-gray-700 text-sm">
               Email address
             </label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaEnvelope className="text-gray-400" />
+                <i className="fas fa-envelope text-gray-400"></i>
               </div>
               <input
                 id="email"
@@ -144,24 +153,27 @@ const BuyerSignup = () => {
             </label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400" />
+                <i className="fas fa-lock text-gray-400"></i>
               </div>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="••••••••"
               />
               <button
                 type="button"
+                id="togglePassword"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
-                {showPassword ? <FaEyeSlash className="text-gray-400 hover:text-gray-600 cursor-pointer" /> : <FaEye className="text-gray-400 hover:text-gray-600 cursor-pointer" />}
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"} hover:text-gray-600 cursor-pointer text-gray-400`}
+                ></i>
               </button>
             </div>
           </div>
@@ -172,7 +184,7 @@ const BuyerSignup = () => {
             </label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400" />
+                <i className="fas fa-lock text-gray-400"></i>
               </div>
               <input
                 id="confirmPassword"
@@ -197,7 +209,7 @@ const BuyerSignup = () => {
               onChange={(e) => setTermsAccepted(e.target.checked)}
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
             />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="terms" className="block text-sm ml-2 text-gray-700">
               I agree to the{" "}
               <a href="#" className="text-purple-600 hover:text-purple-500">
                 Terms of Service
@@ -209,12 +221,20 @@ const BuyerSignup = () => {
             </label>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p id="errorMessage" className="text-red-500 text-sm">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
+            id="signupButton"
             disabled={isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50"
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white 
+              ${isLoading ? "bg-purple-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"} 
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 
+              transition-all duration-300 transform hover:-translate-y-0.5`}
           >
             {isLoading ? "Creating Account..." : "Create Account"}
           </button>

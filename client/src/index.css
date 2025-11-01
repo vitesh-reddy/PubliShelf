@@ -74,6 +74,9 @@ html {
   }
 }
 
+button {
+    cursor: pointer;
+}
 
 /* Main Content */
 .main-content {
