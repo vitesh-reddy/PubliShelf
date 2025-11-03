@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getAuctionOngoing, placeBidApi } from "../../../services/antiqueBook.services.js";
+import { useUser } from '../../../store/hooks';
 
 // Reusable Countdown & Progress Component (same logic as EJS)
 const CountdownProgress = ({ auctionStart, auctionEnd, isActive }) => {
@@ -81,6 +82,9 @@ const CountdownProgress = ({ auctionStart, auctionEnd, isActive }) => {
 const AuctionOngoing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = useUser();
+  const buyerName = user.firstname ? `${user.firstname} ${user.lastname || ''}`.trim() : "Buyer";
+  
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -88,7 +92,6 @@ const AuctionOngoing = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [modalBidAmount, setModalBidAmount] = useState(0);
   const [formError, setFormError] = useState("");
-  const [buyerName] = useState("Buyer Name"); // Replace with actual buyer name from auth if needed
 
   useEffect(() => {
 

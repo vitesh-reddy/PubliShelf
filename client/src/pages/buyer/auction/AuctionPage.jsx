@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getAuctionPage } from "../../../services/antiqueBook.services.js";
+import { useUser } from '../../../store/hooks';
 
 // 1. A new, reusable Countdown component using React hooks
 const Countdown = ({ target, type }) => {
@@ -46,10 +47,12 @@ const Countdown = ({ target, type }) => {
 };
 
 const AuctionPage = () => {
+  const user = useUser();
+  const buyerName = user.firstname ? `${user.firstname} ${user.lastname || ''}`.trim() : "Buyer";
+  
   const [auctions, setAuctions] = useState({ ongoingAuctions: [], futureAuctions: [], endedAuctions: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [buyerName, setBuyerName] = useState("Buyer");
   const navigate = useNavigate();
 
   useEffect(() => {

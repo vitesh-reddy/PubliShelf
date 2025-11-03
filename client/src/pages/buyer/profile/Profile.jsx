@@ -1,17 +1,27 @@
 // client/src/pages/buyer/profile/Profile.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile, updateProfileById } from "../../../services/buyer.services.js";
+import { updateProfileById } from "../../../services/buyer.services.js";
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../../store/slices/userSlice';
+import { clearAuth } from '../../../store/slices/authSlice';
+import { clearUser } from '../../../store/slices/userSlice';
+import { clearCart } from '../../../store/slices/cartSlice';
+import { clearWishlist } from '../../../store/slices/wishlistSlice';
+import { useUser, useCart, useWishlist } from '../../../store/hooks';
 
 const BuyerProfile = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const user = useUser();
+  const { items: cartItems } = useCart();
+  const { items: wishlistItems } = useWishlist();
+  const { orders } = useUser();
+  
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [formData, setFormData] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
+    firstname: user.firstname || "",
+    lastname: user.lastname || "",
+    email: user.email || "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -24,34 +34,6 @@ const BuyerProfile = () => {
   });
   const saveBtnRef = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const response = await getProfile();
-      if (response.success) {
-        setUser(response.data.user);
-        setFormData({
-          firstname: response.data.user.firstname,
-          lastname: response.data.user.lastname,
-          email: response.data.user.email,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError("Failed to fetch profile");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,7 +68,6 @@ const BuyerProfile = () => {
 
     try {
       saveBtnRef.current.innerText = "Saving...";
-      // saveBtnRef.current.classList.add("saving"); // No longer needed, using disabled state
       saveBtnRef.current.disabled = true;
 
       const response = await updateProfileById({
@@ -104,19 +85,36 @@ const BuyerProfile = () => {
         setFormErrors({ ...formErrors, generalError: response.message });
       } else {
         alert("Profile updated successfully.");
+        dispatch(updateUser({
+          firstname: formData.firstname.trim(),
+          lastname: formData.lastname.trim(),
+          email: formData.email.trim(),
+        }));
         setShowEditDialog(false);
-        fetchProfile();
+        // Reset password fields
+        setFormData({
+          ...formData,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       }
     } catch (err) {
+      // Revert on error
+      dispatch(updateUser(previousUserData));
       setFormErrors({ ...formErrors, generalError: "Something went wrong. Please try again." });
     } finally {
       saveBtnRef.current.innerText = "Save Changes";
-      // saveBtnRef.current.classList.remove("saving"); // No longer needed
       saveBtnRef.current.disabled = false;
     }
   };
 
   const handleLogout = () => {
+    // Clear all Redux stores
+    dispatch(clearAuth());
+    dispatch(clearUser());
+    dispatch(clearCart());
+    dispatch(clearWishlist());
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     navigate("/auth/login");
   };
@@ -135,8 +133,11 @@ const BuyerProfile = () => {
     return `Member since ${new Date(date).toLocaleString("en-US", { month: "long", year: "numeric" })}`;
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  console.log(user);
+  if (!user || !user._id) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+
+  const wishlist = wishlistItems || [];
+
 
   return (
     <div className="bg-[#fafafa] text-[#333] leading-[1.6] overflow-x-hidden font-['Poppins',_sans-serif]">
@@ -149,19 +150,19 @@ const BuyerProfile = () => {
                 {user.firstname ? user.firstname[0].toUpperCase() : "U"}
               </span>
             </div>
-            <h2 className="text-[#6b48ff] mb-[10px]">
+            <h2 className="text-3xl font-bold text-[#6b48ff] mb-[10px]">
               {user.firstname} {user.lastname}
             </h2>
             <p className="text-[#666] text-[14px]">{getTimeAgo(user.createdAt)}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-[15px] my-[20px] p-[15px] bg-[#f5f5f5] rounded-[10px]">
+          <div className="grid grid-cols-2 gap-[15px] mt-[5px] mb-[20px] p-[15px] bg-[#f5f5f5] rounded-[10px]">
             <div className="text-center p-[10px] bg-white rounded-[8px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105">
-              <span className="block text-[#8a4af3] font-semibold text-[18px]">{user.orders.length}</span>
+              <span className="block text-[#8a4af3] font-semibold text-[18px]">{orders.length}</span>
               Orders
             </div>
             <div className="text-center p-[10px] bg-white rounded-[8px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105">
-              <span className="block text-[#8a4af3] font-semibold text-[18px]">{user.wishlist.length}</span>
+              <span className="block text-[#8a4af3] font-semibold text-[18px]">{wishlist.length}</span>
               Wishlist
             </div>
           </div>
@@ -204,16 +205,16 @@ const BuyerProfile = () => {
               Your Orders
               <span className="absolute bottom-0 left-0 w-[60px] h-[4px] bg-[linear-gradient(135deg,#8a4af3,#6b48ff)] rounded-[2px]"></span>
             </h3>
-            {user.orders && user.orders.length > 0 ? (
-              user.orders
+            {orders && orders.length > 0 ? (
+              orders
                 .filter((order) => order.book)
                 .map((order) => (
                   <div
                     key={order._id}
-                    className="flex bg-white rounded-[12px] shadow-[0_4px_15px_rgba(0,0,0,0.1)] p-[20px] mb-[20px] gap-[25px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] animate-[slideIn_0.5s_ease-out] border border-[rgba(138,74,243,0.1)] hover:translate-x-[8px] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)]"
+                    className="flex justify-between bg-white rounded-[12px] shadow-[0_4px_15px_rgba(0,0,0,0.1)] p-[20px] mb-[20px] gap-[25px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] animate-[slideIn_0.5s_ease-out] border border-[rgba(138,74,243,0.1)] hover:translate-x-[8px] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)]"
                   >
                     <div className="py-[10px] px-0">
-                      <h4 className="text-[#8a4af3] mb-[12px] text-[18px]">{order.book.title}</h4>
+                      <h4 className="text-[#8a4af3] mb-[12px] text-[18px] font-semibold">{order.book.title}</h4>
                       <p className="my-[8px] mx-0 text-[14px]">
                         <strong className="text-[#6b48ff]">Author:</strong> {order.book.author}
                       </p>
@@ -234,16 +235,16 @@ const BuyerProfile = () => {
                           year: "numeric",
                         })}
                       </p>
-                      <p className="my-[8px] mx-0 text-[14px]">
+                      <p className="my-[8px] mx-0 text-[14px] line-clamp-3">
                         <strong className="text-[#6b48ff]">Description:</strong>{" "}
                         {order.book.description || "No description available"}
                       </p>
                     </div>
-                    <div>
+                    <div className="min-w-[23%] space-y-2">
                       <img
                         src={order.book.image || "https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg"}
                         alt={order.book.title}
-                        className="w-[175px] h-[250px] object-cover rounded-[8px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105"
+                        className="w-[175px] h-[250px] mx-auto object-cover rounded-[8px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105"
                       />
                       <div className="flex flex-col gap-[10px] justify-center items-stretch max-md:flex-row max-md:flex-wrap">
                         <span className="w-full text-center p-[12px] rounded-[6px] text-[14px] bg-[#f5f5f5] text-[#6b48ff] font-semibold">
@@ -263,9 +264,9 @@ const BuyerProfile = () => {
               Your Wishlist
               <span className="absolute bottom-0 left-0 w-[60px] h-[4px] bg-[linear-gradient(135deg,#8a4af3,#6b48ff)] rounded-[2px]"></span>
             </h3>
-            {user.wishlist && user.wishlist.length > 0 ? (
+            {wishlist && wishlist.length > 0 ? (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-[20px] mt-[20px]">
-                {user.wishlist.map((book) => (
+                {wishlist.map((book) => (
                   <div
                     key={book._id}
                     className="text-center p-[15px] bg-white rounded-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[5px] hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
@@ -273,7 +274,7 @@ const BuyerProfile = () => {
                     <img
                       src={book.image || "https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg"}
                       alt={book.title}
-                      className="w-[100px] h-[130px] object-cover mb-[10px] rounded-[6px]"
+                      className="mx-auto w-[100px] h-[130px] object-cover mb-[10px] rounded-[6px]"
                     />
                     <h4 className="text-[#8a4af3] text-[14px] mb-[5px]">{book.title}</h4>
                     <p className="text-[12px] text-[#666]">{book.author}</p>
@@ -400,11 +401,11 @@ const BuyerProfile = () => {
             </div>
             <p
               id="errorMessage"
-              className={`text-[#e63946] text-[12px] mt-[5px] ${formErrors.generalError ? "block" : "hidden"}`}
+              className={`text-[#e63946] text-[14px] mt-[5px] ${formErrors.generalError ? "block" : "hidden"}`}
             >
               {formErrors.generalError}
             </p>
-            <div className="flex gap-[10px] mt-[20px]">
+            <div className="flex gap-[10px] mt-[6px]">
               <button
                 type="button"
                 className="flex-1 border-none rounded-[8px] cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] font-semibold uppercase tracking-[0.5px] p-[12px] text-[14px] bg-[#eee] text-[#666]"

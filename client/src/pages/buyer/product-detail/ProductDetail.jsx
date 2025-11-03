@@ -3,17 +3,27 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { FaHeart, FaShoppingCart, FaStar } from "react-icons/fa";
 import { getProductDetail, addToCart, addToWishlist } from "../../../services/buyer.services.js";
+import { useDispatch } from 'react-redux';
+import { addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
+import { addToWishlist as addToWishlistInStore } from '../../../store/slices/wishlistSlice';
+import { useUser, useCart, useWishlist } from '../../../store/hooks';
 
 const ProductDetail = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
+  const user = useUser();
+  const { items: cartItems } = useCart();
+  const { items: wishlistItems } = useWishlist();
+  
   const [book, setBook] = useState(null);
   const [similarBooks, setSimilarBooks] = useState([]);
-  const [isInCart, setIsInCart] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [buyerName, setBuyerName] = useState("Buyer");
   const navigate = useNavigate();
+  
+  // Check if book is in cart/wishlist from Redux store
+  const isInCart = cartItems.some(item => item.book?._id === id);
+  const isInWishlist = wishlistItems.some(item => item._id === id);
 
   useEffect(() => {
     fetchBook();
@@ -25,8 +35,7 @@ const ProductDetail = () => {
       const response = await getProductDetail(id);
       if (response.success) {
         setBook(response.data.book);
-        setSimilarBooks(response.data.similarBooks || []); // Assuming API returns similarBooks
-        setIsInCart(response.data.isInCart);
+        setSimilarBooks(response.data.similarBooks || []);
       } else {
         setError(response.message);
       }
@@ -38,12 +47,20 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
+    if (isInCart) {
+      alert("Book is already in your cart!");
+      return;
+    }
+    
+    // Optimistic update: add to store immediately
+    dispatch(addToCartInStore({ book, quantity: 1 }));
+    
     try {
       const response = await addToCart({ bookId: id, quantity: 1 });
       if (response.success) {
         alert("Book added to cart successfully!");
-        setIsInCart(true);
       } else {
+        // Revert on failure - for now just show message
         alert(response.message);
       }
     } catch (err) {
@@ -52,12 +69,20 @@ const ProductDetail = () => {
   };
 
   const handleAddToWishlist = async () => {
+    if (isInWishlist) {
+      alert("Book is already in your wishlist!");
+      return;
+    }
+    
+    // Optimistic update: add to store immediately
+    dispatch(addToWishlistInStore(book));
+    
     try {
       const response = await addToWishlist(id);
       if (response.success) {
         alert("Book added to wishlist successfully!");
-        setIsInWishlist(true);
       } else {
+        // Revert on failure - for now just show message
         alert(response.message);
       }
     } catch (err) {
@@ -99,7 +124,7 @@ const ProductDetail = () => {
                     alt="Profile"
                     className="w-5 h-5 rounded-full"
                   />
-                  <span className="text-gray-700">{buyerName}</span>
+                  <span className="text-gray-700">{user.firstname || "Buyer"}</span>
                 </button>
                 <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
                   <Link to="/buyer/profile" className="categoryBtnStyle">

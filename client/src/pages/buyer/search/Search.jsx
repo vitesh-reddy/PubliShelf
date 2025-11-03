@@ -2,8 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { searchBooks, addToWishlist } from "../../../services/buyer.services.js";
 import BookGrid from "./components/BookGrid.jsx";
+import { useDispatch } from 'react-redux';
+import { addToWishlist as addToWishlistInStore } from '../../../store/slices/wishlistSlice';
+import { useUser, useWishlist } from '../../../store/hooks';
 
 const SearchPage = () => {
+  const dispatch = useDispatch();
+  const user = useUser();
+  const { items: wishlistItems } = useWishlist();
+  
   const [books, setBooks] = useState([]);
   const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +18,6 @@ const SearchPage = () => {
   const [currentCategory, setCurrentCategory] = useState("All Books");
   const [currentPriceFilter, setCurrentPriceFilter] = useState("all");
   const [currentSort, setCurrentSort] = useState("relevance");
-  const [buyerName, setBuyerName] = useState("Buyer");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const navigate = useNavigate();
@@ -76,17 +82,27 @@ const SearchPage = () => {
   };
 
   const handleWishlistAdd = async (bookId, buttonRef) => {
+    // Find the book from the books array
+    const bookToAdd = books.find(b => b._id === bookId);
+    if (!bookToAdd) return;
+    
+    // Check if already in wishlist
+    const isAlreadyInWishlist = wishlistItems.some(item => item._id === bookId);
+    if (isAlreadyInWishlist) {
+      alert("Book is already in your wishlist!");
+      return;
+    }
+    
+    // Optimistic update
+    dispatch(addToWishlistInStore(bookToAdd));
+    buttonRef.current.querySelector("i").classList.replace("far", "fas");
+    buttonRef.current.classList.add("text-red-500");
+    
     try {
       const response = await addToWishlist(bookId);
-      console.log(response)
-      console.log(response.success  )
-      if (response.success) {
-        console.log("hiii ra unga")
-        buttonRef.current.querySelector("i").classList.replace("far", "fas");
-        buttonRef.current.classList.add("text-red-500");
-        console.log("bww")
-      } else 
+      if (!response.success) {
         alert(`Failed to add to wishlist: ${response.message}`);
+      }
     } catch { 
       alert("Error adding to wishlist"); 
     }
@@ -117,7 +133,7 @@ const SearchPage = () => {
               <div className="relative group">
                 <button className="flex items-center space-x-2" onClick={() => setShowMobileMenu(!showMobileMenu)}>
                   <img src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000" alt="Profile" className="w-5 h-5 rounded-full"/>
-                  <span className="text-gray-700 md:scale-100 scale-0">{buyerName}</span>
+                  <span className="text-gray-700 md:scale-100 scale-0">{user.firstname || "Buyer"}</span>
                 </button>
                 <div className={`absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 ${showMobileMenu ? "block" : "hidden group-hover:block"}`}>
                   <Link to="/buyer/profile" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">Your Profile</Link>

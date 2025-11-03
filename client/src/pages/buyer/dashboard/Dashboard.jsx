@@ -3,13 +3,24 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getDashboard } from "../../../services/buyer.services.js";
 import BookCard from "./components/BookCard.jsx";
+import { useDispatch } from 'react-redux';
+import { clearAuth } from '../../../store/slices/authSlice';
+import { clearUser } from '../../../store/slices/userSlice';
+import { clearCart } from '../../../store/slices/cartSlice';
+import { clearWishlist } from '../../../store/slices/wishlistSlice';
+import { useUser, useCart } from '../../../store/hooks';
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const user = useUser();
+  console.log("buyer dashboard", user);
+  const { totalItems } = useCart();
+  const buyerName = user.firstname || "Buyer";
+  
   const [data, setData] = useState({ newlyBooks: [], mostSoldBooks: [], trendingBooks: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [buyerName, setBuyerName] = useState("Buyer"); // Assume from auth context
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +43,11 @@ const Dashboard = () => {
   }, []);
 
   const handleLogout = () => {
+    // Clear all stores
+    dispatch(clearAuth());
+    dispatch(clearUser());
+    dispatch(clearCart());
+    dispatch(clearWishlist());
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     navigate("/auth/login");
   };

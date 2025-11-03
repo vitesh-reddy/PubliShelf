@@ -1,4 +1,4 @@
-//services/auth.services.js
+// services/auth.services.js
 import bcrypt from "bcrypt";
 import Buyer from "../models/Buyer.model.js";
 import Publisher from "../models/Publisher.model.js";
@@ -6,24 +6,41 @@ import { generateToken } from "../utils/jwt.js";
 
 export const loginUser = async (email, password) => {
   try {
-    const buyerUser = await Buyer.findOne({ email });
-    const publisherUser = await Publisher.findOne({ email });
+    // Try to find a buyer first (only one DB hit if found)
+    const buyerDoc = await Buyer.findOne({ email })
+      .populate("cart.book")
+      .populate("wishlist")
+      .populate("orders.book")
+      .lean();
 
-    let user = null;
-    if (buyerUser) user = { ...buyerUser.toObject(), role: "buyer" };
-    else if (publisherUser) user = { ...publisherUser.toObject(), role: "publisher" };
-    if (!user)
-      return { token: null, user: null, code: 403 };
+    if (buyerDoc) {
+      const isPasswordValid = await bcrypt.compare(password, buyerDoc.password);
+      if (!isPasswordValid) return { token: null, user: null, code: 401 };
+      const { password: _pw, ...userWithoutPassword } = buyerDoc;
+      const user = { ...userWithoutPassword, role: "buyer" };
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) 
-      return { token: null, user: null, code: 401 };
+      const token = generateToken(user);
+      return { token, user, code: 0 };
+    }
 
-    const token = generateToken(user);
+    const publisherDoc = await Publisher.findOne({ email })
+      .populate("books")
+      .lean();
 
-    return { token, user, code: 0 };
+    if (publisherDoc) {
+      const isPasswordValid = await bcrypt.compare(password, publisherDoc.password);
+      if (!isPasswordValid) return { token: null, user: null, code: 401 };
+
+      const { password: _pw, ...userWithoutPassword } = publisherDoc;
+      const user = { ...userWithoutPassword, role: "publisher" };
+
+      const token = generateToken(user);
+      return { token, user, code: 0 };
+    }
+
+    return { token: null, user: null, code: 403 };
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("Error logging in user:", error);  
     throw new Error("Error logging in user");
   }
 };

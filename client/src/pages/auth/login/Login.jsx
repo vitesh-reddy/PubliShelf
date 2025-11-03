@@ -1,8 +1,15 @@
 //client/src/pages/auth/login/Login.jsx
 import { useState, useEffect } from "react";
 import { login } from "../../../services/auth.services.js";
+import { useDispatch } from 'react-redux';
+import { setAuth } from '../../../store/slices/authSlice';
+import { setUser } from '../../../store/slices/userSlice';
+import { setCart } from '../../../store/slices/cartSlice';
+import { setWishlist } from '../../../store/slices/wishlistSlice';
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +17,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,14 +36,23 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await login({ email, password });
-      console.log(response);
       if (response.success) {
+        const userData = response.data.user;
+        console.log("login userdata", userData)
+        
+        // Populate all stores on login
+        dispatch(setAuth({ role: userData.role }));
+        dispatch(setUser({...userData}));
+        dispatch(setCart(userData.cart || []));
+        console.log("login", userData.cart);
+        dispatch(setWishlist(userData.wishlist || []));
+        
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
         }
-        window.location.href = `/${response.data.user.role}/dashboard`;
+        
+        navigate(`/${userData.role}/dashboard`);
       } else {
-        console.log(response);
         setError(response.message || "Unexpected error occurred. Please try again.");
       }
     } catch (err) {
