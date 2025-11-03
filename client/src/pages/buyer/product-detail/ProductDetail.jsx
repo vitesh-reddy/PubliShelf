@@ -188,11 +188,11 @@ const ProductDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
               {/* Image */}
               <div className="space-y-4">
-                <div className="aspect-w-3 aspect-h-4 rounded-lg overflow-hidden">
+                <div className="w-[500px] h-[600px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
                     src={book.image}
                     alt={book.title}
-                    className="w-[500px] h-[600px] object-cover transform transition-transform duration-500 hover:scale-[1.01]"
+                    className="max-w-full min-h-[90%] max-h-[98%] object-contain transform transition-transform duration-500 hover:scale-[1.01]"
                   />
                 </div>
               </div>
@@ -312,17 +312,22 @@ const ProductDetail = () => {
                   className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer"
                   onClick={() => navigate(`/buyer/product-detail/${book._id}`)}
                 >
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                    className="w-full h-40 md:h-64 object-cover"
-                  />
+                  <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
+                    <img
+                      src={book.image}
+                      alt={book.title}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+
                   <div className="p-3 md:p-4">
                     <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
                     <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
                     </div>
+
                     <button
                       className="absolute bottom-3 right-3 wishlist-btn text-gray-600 hover:text-red-500"
                       onClick={(e) => {
@@ -330,8 +335,7 @@ const ProductDetail = () => {
                         handleAddToWishlist(book._id);
                       }}
                     >
-                      
-                      <i className="far fa-heart text-xl" ></i>
+                      <i className="far fa-heart text-xl"></i>
                     </button>
                   </div>
                 </div>

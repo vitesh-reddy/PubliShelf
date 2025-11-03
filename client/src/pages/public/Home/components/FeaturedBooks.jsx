@@ -12,7 +12,7 @@ const FeaturedBooks = ({ newlyBooks, mostSoldBooks, trendingBooks }) => (
                 className="bookCardStyle"
                 onClick={() => (window.location.href = `/buyer/product-detail/${book._id}`)}
               >
-                <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
+                <img src={book.image} alt={book.title} className="w-full h-64 object-contain" />
                 <div className="p-3">
                   <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
                   <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
@@ -39,7 +39,7 @@ const FeaturedBooks = ({ newlyBooks, mostSoldBooks, trendingBooks }) => (
                 className="bookCardStyle"
                 onClick={() => (window.location.href = `/buyer/product-detail/${book._id}`)}
               >
-                <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
+                <img src={book.image} alt={book.title} className="w-full h-64 object-contain" />
                 <div className="p-3">
                   <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
                   <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
@@ -68,7 +68,7 @@ const FeaturedBooks = ({ newlyBooks, mostSoldBooks, trendingBooks }) => (
                 onClick={() => (window.location.href = `/buyer/product-detail/${book._id}`)}
               >
                 <div className="relative">
-                  <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
+                  <img src={book.image} alt={book.title} className="w-full h-64 object-contain" />
                   <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs">
                     #{idx}
                   </div>

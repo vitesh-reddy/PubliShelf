@@ -3,9 +3,10 @@ import React from "react";
 
 const BookCard = ({ book, onClick, showSold = false, isTrending = false, idx }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-[5px] hover:shadow-lg cursor-pointer" onClick={onClick}>
-      <div className="relative">
-        <img src={book.image} alt={book.title} className="w-full h-64 object-cover" />
+    <div onClick={onClick}
+     className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-[5px] hover:shadow-lg cursor-pointer">
+      <div className="relative w-full h-64 bg-gray-100 flex items-center justify-center">
+        <img src={book.image} alt={book.title} className="max-h-full max-w-full object-contain" />
         {isTrending && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs">
             #{idx + 1}
@@ -19,7 +20,9 @@ const BookCard = ({ book, onClick, showSold = false, isTrending = false, idx }) 
           {showSold && (
             <span className="text-purple-600 text-sm">Total Sold: {book.totalSold}</span>
           )}
-          {!showSold && isTrending && <span className="text-purple-600 text-sm">Trending</span>}
+          {!showSold && isTrending && (
+            <span className="text-purple-600 text-sm">Trending</span>
+          )}
           <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
         </div>
       </div>

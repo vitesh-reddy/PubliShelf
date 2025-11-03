@@ -178,7 +178,7 @@ const PublisherDashboard = () => {
                     <img
                       src={book.image}
                       alt={book.title}
-                      className="w-full h-[350px] object-cover"
+                      className="w-full h-[350px] object-contain"
                     />
                     <div className="p-4">
                       <h3 className="text-lg font-semibold mb-1">{book.title}</h3>

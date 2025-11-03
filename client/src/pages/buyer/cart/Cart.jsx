@@ -168,7 +168,7 @@ const Cart = () => {
                     You have {cartItems.length} items in your cart
                   </p>
                 </div>
-                <div id="cart-items" className="divide-y">
+                <div id="cart-items" className="divide-y divide-gray-300">
                   {cartItems.map((item, idx) => (
                     <div
                       key={item._id + idx}
@@ -178,7 +178,7 @@ const Cart = () => {
                       <img
                         src={item.book.image}
                         alt={item.book.title}
-                        className="object-cover w-24 h-32 rounded-lg"
+                        className="object-contain w-24 h-32 rounded-lg"
                       />
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-gray-900">
@@ -187,13 +187,19 @@ const Cart = () => {
                         <p className="text-gray-600">by {item.book.author}</p>
                         <div className="flex items-center mt-2">
                           <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                              <i // Changed
-                                key={i}
-                                className={i < Math.floor(item.book.rating || 0) ? "fas fa-star" : "far fa-star"}
-                              ></i>
-                            ))}
-                            {item.book.rating % 1 !== 0 && <i className="fas fa-star-half-alt"></i>} 
+                            {[...Array(5)].map((_, i) => {
+                              const rating = item.rating || 0;
+                              const floorRating = Math.floor(rating);
+                              const hasHalf = rating % 1 >= 0.5 && i === floorRating;
+
+                              let starClass = "far fa-star";
+                              if (i < floorRating)
+                                starClass = "fas fa-star";
+                              else if (hasHalf)
+                                starClass = "fas fa-star-half-alt";
+
+                              return <i key={i} className={starClass}></i>;
+                            })}
                           </div>
                           <span className="ml-2 text-gray-600">{item.book.rating || 0}</span>
                         </div>
@@ -264,20 +270,26 @@ const Cart = () => {
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="object-cover w-24 h-32 rounded-lg"
+                        className="object-contain w-24 h-32 rounded-lg"
                       />
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
                         <p className="text-gray-600">by {item.author}</p>
                         <div className="flex items-center mt-2">
                           <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                              <i // Changed
-                                key={i}
-                                className={i < Math.floor(item.rating || 0) ? "fas fa-star" : "far fa-star"}
-                              ></i>
-                            ))}
-                            {item.rating % 1 !== 0 && <i className="fas fa-star-half-alt"></i>} 
+                            {[...Array(5)].map((_, i) => {
+                              const rating = item.rating || 0;
+                              const floorRating = Math.floor(rating);
+                              const hasHalf = rating % 1 >= 0.5 && i === floorRating;
+
+                              let starClass = "far fa-star";
+                              if (i < floorRating)
+                                starClass = "fas fa-star";
+                              else if (hasHalf)
+                                starClass = "fas fa-star-half-alt";
+
+                              return <i key={i} className={starClass}></i>;
+                            })}
                           </div>
                           <span className="ml-2 text-gray-600">{item.rating || 0}</span>
                         </div>

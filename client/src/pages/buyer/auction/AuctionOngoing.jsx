@@ -285,7 +285,7 @@ const AuctionOngoing = () => {
                   <img
                     src={book.image || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600"}
                     alt={book.title}
-                    className="mx-auto w-[70%] h-[500px] object-cover transform transition-transform duration-500 hover:scale-[1.01]"
+                    className="mx-auto w-[70%] h-[500px] object-contain transform transition-transform duration-500 hover:scale-[1.01]"
                   />
                   {isActive && (
                     <span className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse">
@@ -303,7 +303,7 @@ const AuctionOngoing = () => {
                         key={index}
                         src={img}
                         alt={`Document ${index + 1}`}
-                        className="h-24 w-24 rounded-lg object-cover snap-center cursor-pointer hover:opacity-90 transition-opacity"
+                        className="h-24 w-24 rounded-lg object-contain snap-center cursor-pointer hover:opacity-90 transition-opacity"
                       />
                     ))}
                   </div>

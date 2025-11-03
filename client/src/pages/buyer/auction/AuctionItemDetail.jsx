@@ -179,7 +179,7 @@ const AuctionItemDetail = () => {
                   <img
                     src={book.image || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600"}
                     alt={book.title}
-                    className="mx-auto w-[70%] h-[500px] object-cover transform transition-transform duration-500 hover:scale-101"
+                    className="mx-auto w-[70%] h-[500px] object-contain transform transition-transform duration-500 hover:scale-101"
                   />
                 </div>
               </div>

@@ -174,7 +174,7 @@ const AuctionPage = () => {
                     className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl"
                   >
                     <div className="relative">
-                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-cover" />
+                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-contain" />
                     </div>
                     <div className="px-4 py-2">
                       <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
@@ -216,7 +216,7 @@ const AuctionPage = () => {
                     className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl"
                   >
                     <div className="relative">
-                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-cover" />
+                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-contain" />
                     </div>
                     <div className="px-4 py-2">
                       <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
@@ -256,7 +256,7 @@ const AuctionPage = () => {
                     className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 ease hover:translate-y-[-4px] hover:shadow-xl"
                   >
                     <div className="relative">
-                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-cover" />
+                      <img src={book.image} alt={book.title} className="w-full h-[260px] object-contain" />
                     </div>
                     <div className="px-4 py-2">
                       <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
