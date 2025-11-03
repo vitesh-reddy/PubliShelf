@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getAuctionItemDetail } from "../../../services/antiqueBook.services.js";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Countdown = ({ target, status }) => {
   const [timeLeft, setTimeLeft] = useState("");
@@ -77,72 +79,9 @@ const AuctionItemDetail = () => {
   const status = getAuctionStatus();
 
   return (
-    <div className="bg-gray-50">
-      {/* Navbar - Exact EJS Match */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/buyer/dashboard" className="flex items-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                  PubliShelf
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center md:space-x-8 relative">
-              <Link to="/buyer/cart/#wishlist-section" className="text-gray-700 hover:text-purple-600 hidden md:block">
-                <i className="far fa-heart"></i>
-              </Link>
-              <Link to="/buyer/cart" className="text-gray-700 hover:text-purple-600 hidden md:block">
-                <i className="fas fa-shopping-cart"></i>
-              </Link>
-              <button
-                onClick={() => (window.location.href = "/logout")}
-                className="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300 hidden md:block"
-              >
-                Logout
-              </button>
-              <div className="relative">
-                <button
-                  className="scale-0 md:scale-100 flex items-center space-x-2"
-                  onClick={() => (window.location.href = "/buyer/profile")}
-                >
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <span className="text-gray-700">Buyer</span>
-                </button>
-              </div>
-              <div className="relative group">
-                <button className="md:hidden flex items-center space-x-2">
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                </button>
-                <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                  <Link to="/buyer/profile" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">
-                    Your Profile
-                  </Link>
-                  <Link to="/buyer/cart/#wishlist-section" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">
-                    Wishlist
-                  </Link>
-                  <Link to="/buyer/cart" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">
-                    Cart
-                  </Link>
-                  <Link to="/logout" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">
-                    Logout
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Navbar />
+      
       <div className="pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb */}
@@ -339,28 +278,8 @@ const AuctionItemDetail = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                PubliShelf
-              </span>
-              <p className="text-sm mt-2">© 2025 PubliShelf. All rights reserved.</p>
-            </div>
-            <div className="flex space-x-6">
-              <button id="tnc-link" className="text-gray-300 hover:text-purple-400 text-sm">
-                Terms and Conditions
-              </button>
-              <button id="privacy-link" className="text-gray-300 hover:text-purple-400 text-sm">
-                Privacy Policy
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
 
+      <Footer />
     </div>
   )
 };

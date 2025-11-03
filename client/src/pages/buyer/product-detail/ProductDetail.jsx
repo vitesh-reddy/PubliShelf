@@ -6,12 +6,13 @@ import { getProductDetail, addToCart, addToWishlist } from "../../../services/bu
 import { useDispatch } from 'react-redux';
 import { addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
 import { addToWishlist as addToWishlistInStore } from '../../../store/slices/wishlistSlice';
-import { useUser, useCart, useWishlist } from '../../../store/hooks';
+import { useCart, useWishlist } from '../../../store/hooks';
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
 
 const ProductDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const user = useUser();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   
@@ -95,73 +96,8 @@ const ProductDetail = () => {
   if (!book) return <div className="min-h-screen flex items-center justify-center">Book not found</div>;
 
   return (
-    <div className="product-detail-page bg-gray-50">
-      {/* Navbar */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/buyer/dashboard" className="flex items-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                  PubliShelf
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center md:space-x-8 relative">
-              <Link to="/buyer/cart/#wishlist-section" className="text-gray-700 hover:text-purple-600 hidden md:block">
-                <FaHeart className="far fa-heart" />
-              </Link>
-              <Link to="/buyer/cart" className="text-gray-700 hover:text-purple-600 hidden md:block">
-                <FaShoppingCart className="fas fa-shopping-cart" />
-              </Link>
-              <div className="relative group">
-                <button
-                  className="scale-0 md:scale-100 flex items-center space-x-2"
-                  onClick={() => navigate("/buyer/profile")}
-                >
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <span className="text-gray-700">{user.firstname || "Buyer"}</span>
-                </button>
-                <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                  <Link to="/buyer/profile" className="categoryBtnStyle">
-                    Your Profile
-                  </Link>
-                  <Link to="/logout" className="categoryBtnStyle">
-                    Logout
-                  </Link>
-                </div>
-              </div>
-              <div className="relative group">
-                <button className="md:hidden flex items-center space-x-2">
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                </button>
-                <div className="absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
-                  <Link to="/buyer/profile" className="categoryBtnStyle">
-                    Your Profile
-                  </Link>
-                  <Link to="/buyer/cart/#wishlist-section" className="categoryBtnStyle">
-                    Wishlist
-                  </Link>
-                  <Link to="/buyer/cart" className="categoryBtnStyle">
-                    Cart
-                  </Link>
-                  <Link to="/logout" className="categoryBtnStyle">
-                    Logout
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen product-detail-page bg-gray-50">
+      <Navbar />
 
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -344,6 +280,8 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

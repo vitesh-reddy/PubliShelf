@@ -1,9 +1,12 @@
-//client/src/pages/buyer/search/components/BookGrid.jsx
+// client/src/pages/buyer/search/components/BookGrid.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useWishlist } from "../../../../store/hooks";
 
 const BookGrid = ({ books, onWishlistAdd }) => {
+  const { items: wishListItems } = useWishlist();
   const navigate = useNavigate();
+
   return (
     <div id="bookGrid" className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {books.length === 0 ? (
@@ -11,41 +14,58 @@ const BookGrid = ({ books, onWishlistAdd }) => {
           No books found for selected filters.
         </div>
       ) : (
-        books.map((book) => (
-          <div
-            key={book._id}
-            className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer bookCardStyle"
-            onClick={() =>navigate(`/buyer/product-detail/${book._id}`)}
-          >
-            <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
-              <img
-                src={book.image}
-                alt={book.title}
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
+        books.map((book) => {
+          const isInWishlist = wishListItems.some(
+            (item) =>
+              item.book?._id === book._id || item._id === book._id
+          );
 
-            <div className="p-3 md:p-4">
-              <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
-              <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-purple-600 text-sm">
-                  ₹{book.price}
-                </span>
-                <button
-                  className="bottom-3 right-3 wishlist-btn text-gray-600 hover:text-red-500"
-                  data-book-id={book._id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onWishlistAdd(book._id, e);
-                  }}
-                >
-                  <i className="far fa-heart text-xl"></i>
-                </button>
+          return (
+            <div
+              key={book._id}
+              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer bookCardStyle"
+              onClick={() => navigate(`/buyer/product-detail/${book._id}`)}
+            >
+              {/* Image */}
+              <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
+                <img
+                  src={book.image}
+                  alt={book.title}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+
+              {/* Details */}
+              <div className="p-3 md:p-4 relative">
+                <h3 className="text-lg font-semibold mb-1 truncate">
+                  {book.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-purple-600 text-sm">
+                    ₹{book.price}
+                  </span>
+
+                  {/* Wishlist Button */}
+                  <button
+                    className="absolute bottom-3 right-3 z-20 text-gray-600 hover:text-red-500 transition-colors duration-200"
+                    data-book-id={book._id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onWishlistAdd(book._id, e);
+                    }}
+                  >
+                    <i
+                      className={`fa-heart text-xl ${
+                        isInWishlist ? "fas text-red-500" : "far text-gray-600"
+                      }`}
+                    ></i>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

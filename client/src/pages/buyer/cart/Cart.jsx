@@ -1,20 +1,18 @@
 //client/src/pages/buyer/cart/Cart.jsx
-import React, { useState, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { updateCartQuantity, removeFromCart } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore } from '../../../store/slices/cartSlice';
 import { removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
-import { useUser, useCart, useWishlist } from '../../../store/hooks';
+import { useCart, useWishlist } from '../../../store/hooks';
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const user = useUser();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
-  const buyerName = user.firstname || "Buyer";
-  
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Calculate totals from cart items
@@ -90,71 +88,8 @@ const Cart = () => {
   };
 
   return (
-    <div className="bg-gray-50">
-      {/* Navbar - Exact EJS Match */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/buyer/dashboard" className="flex items-center">
-                <span className="font-bold text-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                  PubliShelf
-                </span>
-              </Link>
-            </div>
-            <div className="relative flex items-center md:space-x-8">
-              <Link to="/buyer/cart/#wishlist-section" className="hidden text-gray-700 hover:text-purple-600 md:block">
-                <i className="far fa-heart"></i> 
-              </Link>
-              <Link to="/buyer/cart" className="hidden text-gray-700 hover:text-purple-600 md:block">
-                <i className="fas fa-shopping-cart"></i> 
-              </Link>
-              <button
-                onClick={() => (window.location.href = "/logout")}
-                className="hidden px-4 py-2 text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:bg-gradient-to-l hover:-translate-y-[2px] md:block"
-              >
-                logout
-              </button>
-              <div className="relative">
-                <button
-                  onClick={() => (window.location.href = "/buyer/profile")}
-                  className="flex items-center space-x-2 scale-0 md:scale-100"
-                >
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <span className="text-gray-700">{buyerName}</span>
-                </button>
-              </div>
-              <div className="relative group">
-                <button className="flex items-center space-x-2 md:hidden">
-                  <img
-                    src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full"
-                  />
-                </button>
-                <div className="absolute top-full right-1 hidden w-48 py-2 bg-white rounded-lg shadow-lg group-hover:block">
-                  <Link to="/buyer/profile" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
-                    Your Profile
-                  </Link>
-                  <Link to="/buyer/cart/#wishlist-section" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
-                    WishList
-                  </Link>
-                  <Link to="/buyer/cart" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
-                    Cart
-                  </Link>
-                  <Link to="/logout" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 transition-colors">
-                    Logout
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Navbar />
 
       <div className="pt-16">
         <div className="max-w-7xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
@@ -388,6 +323,8 @@ const Cart = () => {
           -moz-appearance: textfield;
         }
       `}</style>
+
+      <Footer />
     </div>
   );
 };

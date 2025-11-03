@@ -9,6 +9,8 @@ import { clearUser } from '../../../store/slices/userSlice';
 import { clearCart } from '../../../store/slices/cartSlice';
 import { clearWishlist } from '../../../store/slices/wishlistSlice';
 import { useUser, useCart, useWishlist } from '../../../store/hooks';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const BuyerProfile = () => {
   const dispatch = useDispatch();
@@ -140,8 +142,10 @@ const BuyerProfile = () => {
 
 
   return (
-    <div className="bg-[#fafafa] text-[#333] leading-[1.6] overflow-x-hidden font-['Poppins',_sans-serif]">
-      <div className="max-w-[1400px] my-[20px] mx-auto px-[20px] grid grid-cols-[350px_1fr] gap-[25px] max-lg:grid-cols-[300px_1fr] max-md:grid-cols-1">
+    <div className="flex flex-col min-h-screen bg-[#fafafa] text-[#333] leading-[1.6] overflow-x-hidden font-['Poppins',_sans-serif]">
+      <Navbar />
+      
+      <div className="max-w-[1400px] mt-20 mb-[20px] mx-auto px-[20px] grid grid-cols-[350px_1fr] gap-[25px] max-lg:grid-cols-[300px_1fr] max-md:grid-cols-1">
         {/* Profile Card */}
         <div className="bg-white rounded-[16px] shadow-[0_4px_15px_rgba(0,0,0,0.1)] p-[30px] sticky top-[20px] translate-y-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] border border-[rgba(138,74,243,0.1)] hover:-translate-y-[8px] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] max-md:static">
           <div className="text-center pb-[20px] relative">
@@ -425,6 +429,8 @@ const BuyerProfile = () => {
           </form>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -1,7 +1,9 @@
 //client/src/pages/buyer/checkout/Checkout.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getCheckout, placeOrder } from "../../../services/buyer.services.js";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Checkout = () => {
     const [orderSummary, setOrderSummary] = useState({ subtotal: 0, shipping: 0, tax: 0, total: 0 });
@@ -180,16 +182,8 @@ const Checkout = () => {
     const errorInputStyle = "border-red-500";
 
     return (
-        <div className="checkout-page">
-            <nav className="navbar">
-                <div className="navbar-container">
-                    <div className="navbar-brand">
-                        <Link to="/buyer/dashboard" className="navbar-logo">
-                            <span>PubliShelf</span>
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+        <div className="flex flex-col min-h-screen checkout-page">
+            <Navbar />
 
             <div className="bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
                 <div className="max-w-[800px] mx-auto p-5 md:p-5">
@@ -401,6 +395,8 @@ const Checkout = () => {
                     </div>
                 </div>
             </div>
+
+            <Footer />
         </div>
     );
 };
