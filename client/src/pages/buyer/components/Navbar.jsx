@@ -67,7 +67,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
+    <nav className="font-sans fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -103,23 +103,21 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Search */}
-            {showSearchBar && (
-              <div className="relative hidden md:block">
-                <form onSubmit={handleSearch}>
-                  <input
-                    type="text"
-                    name="q"
-                    value={query}
-                    placeholder="Search books..."
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="w-[35vw] lg:w-[24vw] xl:w-[20vw] px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-600 outline-none"
-                  />
-                  <button type="submit" className="absolute right-3 top-[9px] text-gray-400">
-                    <i className="fas fa-search"></i>
-                  </button>
-                </form>
-              </div>
-            )}
+            <div className={`relative hidden md:block ${showSearchBar ? "opacity-100" : "opacity-0 max-w-[125px]"}`}>
+              <form onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  name="q"
+                  value={query}
+                  placeholder="Search books..."
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-[35vw] lg:w-[24vw] xl:w-[20vw] px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-600 outline-none"
+                />
+                <button type="submit" className="absolute right-3 top-[9px] text-gray-400">
+                  <i className="fas fa-search"></i>
+                </button>
+              </form>
+            </div>            
 
             {/* Wishlist & Cart (Desktop) */}
             <Link to="/buyer/cart/#wishlist-section" className="relative hidden md:flex text-gray-700 hover:text-purple-600">
