@@ -44,3 +44,50 @@ export const loginPostController = async (req, res) => {
     });
   }
 };
+
+export const getMeController = async (req, res) => {
+  try {
+    // req.user is set by the protect middleware after verifying token
+    console.log("auth controller getme", req?.body , req?.user);
+    return res.status(200).json({
+      success: true,
+      message: "User verified",
+      data: { 
+        user: {
+          id: req.user.id,
+          role: req.user.role
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error in getMeController:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+      data: null
+    });
+  }
+};
+
+export const logoutController = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error in logoutController:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+      data: null
+    });
+  }
+};

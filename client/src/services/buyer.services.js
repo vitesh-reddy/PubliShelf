@@ -1,3 +1,23 @@
+// Address CRUD
+export const getBuyerAddresses = async () => {
+  const response = await axiosInstance.get("buyer/addresses");
+  return response.data;
+};
+
+export const addBuyerAddress = async (addressData) => {
+  const response = await axiosInstance.post("buyer/addresses", addressData);
+  return response.data;
+};
+
+export const updateBuyerAddress = async (id, addressData) => {
+  const response = await axiosInstance.put(`buyer/addresses/${id}`, addressData);
+  return response.data;
+};
+
+export const deleteBuyerAddress = async (id) => {
+  const response = await axiosInstance.delete(`buyer/addresses/${id}`);
+  return response.data;
+};
 // client/src/services/buyer.services.js
 import axiosInstance from "../utils/axiosInstance.util.js";
 
@@ -19,11 +39,6 @@ export const searchBooks = async (query) => {
 
 export const filterBooks = async (filters) => {
   const response = await axiosInstance.get("buyer/filter", { params: filters });
-  return response.data;
-};
-
-export const getCheckout = async () => {
-  const response = await axiosInstance.get("buyer/checkout");
   return response.data;
 };
 

@@ -6,6 +6,7 @@ import { clearUser } from "../../../store/slices/userSlice";
 import { clearCart } from "../../../store/slices/cartSlice";
 import { clearWishlist } from "../../../store/slices/wishlistSlice";
 import { useUser, useCart, useWishlist } from "../../../store/hooks";
+import { logout } from "../../../services/auth.services";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -17,22 +18,26 @@ const Navbar = () => {
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const [query, setQuery] = useState(q || "");
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const profileMenuRef = useRef(null);
   const buyerName = user.firstname || "Buyer";
+  const buyerFullName = (user.firstname + user.lastname) || null;
 
   const isOnAuctionPage = location.pathname.includes("/auction");
   const buttonDestination = isOnAuctionPage ? "/buyer/dashboard" : "/buyer/auction-page";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
     dispatch(clearAuth());
     dispatch(clearUser());
     dispatch(clearCart());
     dispatch(clearWishlist());
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     navigate("/auth/login");
   };
 
@@ -44,15 +49,14 @@ const Navbar = () => {
   const showSearchBar = !["/buyer/cart", "/buyer/checkout", "/buyer/profile"].includes(location.pathname);
 
   useEffect(() => {
-    setShowProfileMenu(false);
     setIsMobileMenuOpen(false);
     setIsSearchOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    const closeOnEscape = (e) => e.key === "Escape" && (setIsMobileMenuOpen(false), setIsSearchOpen(false), setShowProfileMenu(false));
+    const closeOnEscape = (e) => e.key === "Escape" && (setIsMobileMenuOpen(false), setIsSearchOpen(false));
     const closeOnClick = (e) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) setShowProfileMenu(false);
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target));
     };
     document.addEventListener("keydown", closeOnEscape);
     document.addEventListener("mousedown", closeOnClick);
@@ -137,20 +141,18 @@ const Navbar = () => {
 
             {/* Profile (Desktop) */}
             <div className="relative group hidden md:block" ref={profileMenuRef}>
-              <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center space-x-2">
+              <button className="flex items-center gap-2">
                 <img
-                  src="https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"
+                  src={(buyerFullName != null) ? `https://ui-avatars.com/api/?name=${buyerFullName}&background=9810fa&color=fff&bold=true&size=128` : "https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"}
                   alt="Profile"
-                  className="w-5 h-5 rounded-full"
+                  className={` ${(buyerFullName != null) ? "size-7" : "size-5"} rounded-full`}
                 />
                 <span className="text-gray-700 md:scale-100 scale-0">{buyerName}</span>
               </button>
               <div
-                className={`absolute top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 transition-all duration-200 ${
-                  showProfileMenu ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
+                className="absolute hidden group-hover:block top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 transition-all duration-200"
               >
-                <Link to="/buyer/profile" className="block px-4 py-2 text-gray-700 hover:bg-purple-50">
+                <Link to="/buyer/profile" className=" block px-4 py-2 text-gray-700 hover:bg-purple-50">
                   Your Profile
                 </Link>
                 <button

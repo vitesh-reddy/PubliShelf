@@ -9,6 +9,7 @@ import { clearUser } from '../../../store/slices/userSlice';
 import { clearCart } from '../../../store/slices/cartSlice';
 import { clearWishlist } from '../../../store/slices/wishlistSlice';
 import { useUser, useCart, useWishlist } from '../../../store/hooks';
+import { logout } from "../../../services/auth.services";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -111,13 +112,17 @@ const BuyerProfile = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
     // Clear all Redux stores
     dispatch(clearAuth());
     dispatch(clearUser());
     dispatch(clearCart());
     dispatch(clearWishlist());
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     navigate("/auth/login");
   };
 
@@ -270,9 +275,9 @@ const BuyerProfile = () => {
             </h3>
             {wishlist && wishlist.length > 0 ? (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-[20px] mt-[20px]">
-                {wishlist.map((book) => (
+                {wishlist.map((book, idx) => (
                   <div
-                    key={book._id}
+                    key={book._id + idx}
                     className="text-center p-[15px] bg-white rounded-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[5px] hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
                   >
                     <img

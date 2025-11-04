@@ -1,3 +1,60 @@
+// Address CRUD
+export const getBuyerAddresses = async (req, res) => {
+  try {
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    res.status(200).json({ success: true, addresses: buyer.addresses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching addresses" });
+  }
+};
+
+export const addBuyerAddress = async (req, res) => {
+  try {
+    const { name, address, phone } = req.body;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    const newAddr = { name, address, phone };
+    buyer.addresses.push(newAddr);
+    await buyer.save();
+    // Return the last address (with _id)
+    const createdAddr = buyer.addresses[buyer.addresses.length - 1];
+    res.status(201).json({ success: true, address: createdAddr });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error adding address" });
+  }
+};
+
+export const updateBuyerAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, address, phone } = req.body;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    const addr = buyer.addresses.id(id);
+    if (!addr) return res.status(404).json({ success: false, message: "Address not found" });
+    addr.name = name;
+    addr.address = address;
+    addr.phone = phone;
+    await buyer.save();
+    res.status(200).json({ success: true, address: addr });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating address" });
+  }
+};
+
+export const deleteBuyerAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    buyer.addresses.id(id)?.remove();
+    await buyer.save();
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error deleting address" });
+  }
+};
 //controllers/buyer.controller.js
 import bcrypt from "bcrypt";
 import {
@@ -106,47 +163,6 @@ export const filterBooksHandler = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error during filter search",
-      data: null
-    });
-  }
-};
-
-export const getBuyerCheckout = async (req, res) => {
-  try {
-    const buyer = await getBuyerById(req.user.id);
-    if (!buyer) {
-      return res.status(404).json({
-        success: false,
-        message: "Buyer not found",
-        data: null
-      });
-    }
-
-    const cart = buyer.cart;
-
-    const calculateOrderSummary = (cart) => {
-      const subtotal = cart.reduce(
-        (sum, item) => sum + item.book.price * item.quantity,
-        0
-      );
-      const shipping = subtotal >= 35 ? 0 : 5.99;
-      const tax = subtotal * 0.08;
-      const total = subtotal + shipping + tax;
-      return { subtotal, shipping, tax, total };
-    };
-
-    const orderSummary = calculateOrderSummary(cart);
-
-    res.status(200).json({
-      success: true,
-      message: "Checkout data fetched successfully",
-      data: { ...orderSummary }
-    });
-  } catch (error) {
-    console.error("Error loading Checkout Page:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error loading Checkout Page",
       data: null
     });
   }

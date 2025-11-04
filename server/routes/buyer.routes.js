@@ -6,7 +6,6 @@ import {
   getBuyerSearchPage,
   searchBooksHandler,
   filterBooksHandler,
-  getBuyerCheckout,
   createBuyerSignup,
   getProductDetail,
   getBuyerCart,
@@ -22,6 +21,10 @@ import {
   getBuyerProfile,
   updateBuyerProfile,
   updateBuyerProfileById,
+  getBuyerAddresses,
+  addBuyerAddress,
+  updateBuyerAddress,
+  deleteBuyerAddress
 } from "../controllers/buyer.controller.js";
 
 const router = express.Router();
@@ -30,7 +33,6 @@ router.get("/dashboard", protect, getBuyerDashboard);
 router.get("/search-page", protect, getBuyerSearchPage);
 router.get("/search", protect, searchBooksHandler);
 router.get("/filter", protect, filterBooksHandler);
-router.get("/checkout", protect, getBuyerCheckout);
 router.post("/signup", createBuyerSignup);
 router.get("/product-detail/:id", protect, getProductDetail);
 router.get("/cart", protect, getBuyerCart);
@@ -46,5 +48,10 @@ router.post("/auctions/:id/bid", protect, placeBid);
 router.get("/profile", protect, getBuyerProfile);
 router.put("/profile", protect, updateBuyerProfile);
 router.post("/update-profile/:id", protect, updateBuyerProfileById);
+
+router.get("/addresses", protect, getBuyerAddresses);
+router.post("/addresses", protect, addBuyerAddress);
+router.put("/addresses/:id", protect, updateBuyerAddress);
+router.delete("/addresses/:id", protect, deleteBuyerAddress);
 
 export default router;
