@@ -1,4 +1,10 @@
-const Hero = () => (
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../store/hooks";
+
+const Hero = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();  
+  return (
   <section className="pt-40 pb-12 bg-gradient-to-b from-purple-50 to-white">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center">
@@ -11,13 +17,15 @@ const Hero = () => (
         <div className="h-7" />
         <div className="flex justify-center space-x-4 animate-fade-in-delay-2">
           <button
-            onClick={() => (window.location.href = "/buyer/signup")}
+            disabled={isAuthenticated}
+            onClick={() => navigate("/buyer/signup")}
             className="bg-purple-600 text-white px-8 py-3 font-semibold rounded-lg hover:bg-purple-700 transform transition-all duration-300 hover:-translate-y-1 cursor-pointer"
           >
             Start Reading
           </button>
           <button
-            onClick={() => (window.location.href = "/publisher/signup")}
+            disabled={isAuthenticated}  
+            onClick={() => navigate("/publisher/signup")}
             className="bg-white text-purple-600 px-8 py-3 font-semibold rounded-lg border-2 border-purple-600 hover:bg-purple-50 transform transition-all duration-300 hover:-translate-y-1 cursor-pointer"
           >
             Sell Your Books
@@ -26,6 +34,6 @@ const Hero = () => (
       </div>
     </div>
   </section>
-);
+)};
 
 export default Hero;

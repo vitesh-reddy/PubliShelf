@@ -18,8 +18,8 @@ const Cart = () => {
   // Calculate totals from cart items
   const cartTotals = useMemo(() => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.book?.price || 0) * item.quantity, 0);
-    const shipping = subtotal > 35 ? 0 : 35;
-    const tax = subtotal * 0.18;
+    const shipping = subtotal > 35 ? 0 : 100;
+    const tax = subtotal * 0.02;
     const total = subtotal + shipping + tax;
     return { subtotal, shipping, tax, total };
   }, [cartItems]);

@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 const CountdownProgress = ({ auctionStart, auctionEnd, isActive }) => {
   const [countdown, setCountdown] = useState("");
   const [progress, setProgress] = useState(0);
+  const { name } = useUser();
 
   useEffect(() => {
     const update = () => {
@@ -348,7 +349,7 @@ const AuctionOngoing = () => {
                       const bidderName = bidder.firstname && bidder.lastname
                         ? `${bidder.firstname} ${bidder.lastname}`
                         : "Anonymous";
-                      const isCurrentUser = false; // Replace with real logic if available
+                      const isCurrentUser = (bid.bidder._id == user._id); 
                       const bidTime = new Date(bid.bidTime);
                       const timeAgo = getTimeAgo(bidTime);
 

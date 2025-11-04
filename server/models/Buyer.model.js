@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+const AddressSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  address: { type: String, required: true },
+  phone: { type: String, required: true }
+}, { _id: true });
+
 const buyerSchema = new mongoose.Schema({
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
@@ -25,6 +31,7 @@ const buyerSchema = new mongoose.Schema({
       orderDate: { type: Date, default: Date.now },
     },
   ],
+  addresses: [AddressSchema]
 });
 
 const Buyer = mongoose.model("Buyer", buyerSchema);

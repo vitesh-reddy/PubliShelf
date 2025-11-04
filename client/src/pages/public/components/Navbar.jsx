@@ -1,7 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../store/hooks";
 
-const Navbar = () => (
+const Navbar = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();  
+  return (
   <nav className="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between h-16">
@@ -21,10 +24,10 @@ const Navbar = () => (
         </div>
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => (window.location.href = "/auth/login")}
+            onClick={() => navigate("/auth/login")}
             className="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300"
           >
-            Join Now
+            {isAuthenticated ? "Dashboard" : "Join Now"}
           </button>
           <div className="relative group">
             <button className="md:hidden text-gray-700 hover:text-purple-600 transition-colors px-3 py-2">
@@ -46,6 +49,6 @@ const Navbar = () => (
       </div>
     </div>
   </nav>
-);
+)};
 
 export default Navbar;
