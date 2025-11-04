@@ -12,6 +12,7 @@ import {
   addToCart,
   removeFromCart,
   addToWishlist,
+  removeFromWishlist,
   updateCartQuantity,
   placeOrderController,
   getBuyerAuctionPage,
@@ -39,6 +40,7 @@ router.get("/cart", protect, getBuyerCart);
 router.post("/cart/add", protect, addToCart);
 router.delete("/cart/remove", protect, removeFromCart);
 router.post("/wishlist/add", protect, addToWishlist);
+router.delete("/wishlist/:bookId", protect, removeFromWishlist);
 router.patch("/cart/update-quantity", protect, updateCartQuantity);
 router.post("/checkout/place-order", protect, placeOrderController);
 router.get("/auction-page", protect, getBuyerAuctionPage);

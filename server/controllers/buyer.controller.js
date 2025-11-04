@@ -398,6 +398,46 @@ export const addToWishlist = async (req, res) => {
   }
 };
 
+export const removeFromWishlist = async (req, res) => {
+  const bookId = req.params.bookId;
+  try {
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) {
+      return res.status(404).json({
+        success: false,
+        message: "Buyer not found",
+        data: null
+      });
+    }
+
+    const beforeCount = buyer.wishlist.length;
+    buyer.wishlist = buyer.wishlist.filter((id) => id.toString() !== bookId.toString());
+
+    if (buyer.wishlist.length === beforeCount) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found in wishlist",
+        data: null
+      });
+    }
+
+    await buyer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Book removed from wishlist successfully",
+      data: null
+    });
+  } catch (error) {
+    console.error("Error removing from wishlist:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while removing from the wishlist",
+      data: null
+    });
+  }
+};
+
 export const updateCartQuantity = async (req, res) => {
   const { bookId, quantity } = req.body;
   try {

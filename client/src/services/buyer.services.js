@@ -72,6 +72,11 @@ export const addToWishlist = async (bookId) => {
   return response.data;
 };
 
+export const removeFromWishlist = async (bookId) => {
+  const response = await axiosInstance.delete(`buyer/wishlist/${bookId}`);
+  return response.data;
+};
+
 export const updateCartQuantity = async ({ bookId, quantity }) => {
   const response = await axiosInstance.patch("buyer/cart/update-quantity", { bookId, quantity });
   return response.data;
