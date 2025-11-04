@@ -1,14 +1,15 @@
 //client/src/pages/buyer/product-detail/ProductDetail.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { FaHeart, FaShoppingCart, FaStar } from "react-icons/fa";
-import { getProductDetail, addToCart, addToWishlist } from "../../../services/buyer.services.js";
+import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { getProductDetail, addToCart, addToWishlist, removeFromWishlist } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
-import { addToWishlist as addToWishlistInStore } from '../../../store/slices/wishlistSlice';
+import { addToWishlist as addToWishlistInStore, removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
 import { useCart, useWishlist } from '../../../store/hooks';
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
+import StarRating from "../components/StarRating.jsx";
 
 const ProductDetail = () => {
   const dispatch = useDispatch();
@@ -48,6 +49,11 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
+    if (book.quantity <= 0) {
+      alert("This book is out of stock!");
+      return;
+    }
+    
     if (isInCart) {
       alert("Book is already in your cart!");
       return;
@@ -69,25 +75,34 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToWishlist = async () => {
-    if (isInWishlist) {
-      alert("Book is already in your wishlist!");
+  const handleToggleWishlist = async (targetBook) => {
+    const targetId = targetBook?._id || id;
+    const alreadyIn = wishlistItems.some(item => item._id === targetId);
+
+    if (alreadyIn) {
+      // Optimistic remove
+      dispatch(removeFromWishlistInStore({ bookId: targetId }));
+      try {
+        const response = await removeFromWishlist(targetId);
+        if (!response.success) {
+          alert(response.message || 'Failed to remove from wishlist');
+        }
+      } catch {
+        alert('Error removing from wishlist');
+      }
       return;
     }
-    
-    // Optimistic update: add to store immediately
-    dispatch(addToWishlistInStore(book));
-    
+
+    // Optimistic add
+    const payloadBook = targetBook || book;
+    dispatch(addToWishlistInStore(payloadBook));
     try {
-      const response = await addToWishlist(id);
-      if (response.success) {
-        alert("Book added to wishlist successfully!");
-      } else {
-        // Revert on failure - for now just show message
-        alert(response.message);
+      const response = await addToWishlist(targetId);
+      if (!response.success) {
+        alert(response.message || 'Failed to add to wishlist');
       }
-    } catch (err) {
-      alert("Error adding to wishlist");
+    } catch {
+      alert('Error adding to wishlist');
     }
   };
 
@@ -106,13 +121,13 @@ const ProductDetail = () => {
             <ol className="inline-flex items-center space-x-1 md:space-x-3">
               <li className="inline-flex items-center">
                 <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600">
-                <i class="fas fa-home mr-2"></i>
+                <i className="fas fa-home mr-2"></i>
                   Home
                 </Link>
               </li>
               <li>
                 <div className="flex items-center">
-                  <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                  <i className="fas fa-chevron-right text-gray-400 mx-2"></i>
                   <span className="text-gray-500">{book.title}</span>
                 </div>
               </li>
@@ -137,13 +152,38 @@ const ProductDetail = () => {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
-                  <p className="text-lg text-gray-600 mt-2">{book.author}</p>
-                  <p className="text-gray-600">Genre: {book.genre}</p>
+                  <p className="text-lg text-gray-600 mt-2">by {book.author}</p>
+                  <p className="text-gray-600 mt-1">Genre: <span className="font-medium">{book.genre}</span></p>
                 </div>
 
-                <div className="flex items-center">
-                  <span className="ml-2 text-gray-600">{book.rating} ({book.reviews.length})</span>
-                  <span className="text-green-600 ml-4">In Stock ({book.quantity})</span>
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center">
+                    <span className="text-sm font-semibold text-gray-700 mr-3 w-20">Rating:</span>
+                    <StarRating rating={book.rating || 0} size="text-lg" />
+                    <span className="ml-2 text-gray-600 font-medium">{book.rating.toFixed(1)}</span>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <span className="text-sm font-semibold text-gray-700 mr-3 w-20">Reviews:</span>
+                    <span className="text-gray-600">
+                      {book.reviews.length} {book.reviews.length === 1 ? 'review' : 'reviews'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <span className="text-sm font-semibold text-gray-700 mr-3 w-20">Stock:</span>
+                    {book.quantity > 0 ? (
+                      <span className="text-green-600 font-semibold">
+                        <i className="fas fa-check-circle mr-1"></i>
+                        In Stock ({book.quantity} available)
+                      </span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">
+                        <i className="fas fa-times-circle mr-1"></i>
+                        Out of Stock
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="border-t border-b border-gray-200 py-4">
@@ -155,16 +195,33 @@ const ProductDetail = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center border rounded-lg"></div>
-                    <Link
-                      to="/buyer/cart"
-                      className="flex flex-1 justify-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                      <p className="text-white"> Buy Now </p>
-                    </Link>
+                    {book.quantity > 0 ? (
+                      <Link
+                        to="/buyer/cart"
+                        className="flex flex-1 justify-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        <p className="text-white"> Buy Now </p>
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex flex-1 justify-center bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed"
+                      >
+                        <p className="text-white"> Out of Stock </p>
+                      </button>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="relative grid grid-cols-2 gap-4">
-                      {isInCart ? (
+                      {book.quantity <= 0 ? (
+                        <button
+                          disabled
+                          className="absolute w-full flex items-center justify-center space-x-2 bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed"
+                        >
+                          <i className="fas fa-shopping-cart text-white"></i>
+                          <span className="text-white">Out of Stock</span>
+                        </button>
+                      ) : isInCart ? (
                         <Link
                           to="/buyer/cart"
                           className="absolute w-full flex items-center justify-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
@@ -185,13 +242,13 @@ const ProductDetail = () => {
                     </div>
                     <button
                       id="addToWishlistBtn"
-                      onClick={handleAddToWishlist}
+                      onClick={() => handleToggleWishlist(book)}
                       className={`flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg transition-colors ${
                         isInWishlist ? "text-red-500" : "hover:text-red-500"
                       }`}
                     >
                       <i className={isInWishlist ? "fas fa-heart" : "far fa-heart"}></i>
-                      <span>Add to Wishlist</span>
+                      <span>{isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}</span>
                     </button>
                   </div>
                 </div>
@@ -223,10 +280,8 @@ const ProductDetail = () => {
                         </h4>
                         <span className="text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
                       </div>
-                      <div className="flex text-yellow-400 my-1">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar key={i} className={i < review.rating ? "fas fa-star" : "far fa-star"} />
-                        ))}
+                      <div className="my-1">
+                        <StarRating rating={review.rating} size="text-base" />
                       </div>
                       <p className="text-gray-600">{review.comment}</p>
                     </div>
@@ -242,40 +297,42 @@ const ProductDetail = () => {
           <div className="mt-12">
             <h3 className="text-2xl font-bold mb-6">You May Also Like</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {similarBooks.map((book) => (
+              {similarBooks.map((sBook) => {
+                const sInWishlist = wishlistItems.some(item => item._id === sBook._id);
+                return (
                 <div
-                  key={book._id}
+                  key={sBook._id}
                   className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer"
-                  onClick={() => navigate(`/buyer/product-detail/${book._id}`)}
+                  onClick={() => navigate(`/buyer/product-detail/${sBook._id}`)}
                 >
                   <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
                     <img
-                      src={book.image}
-                      alt={book.title}
+                      src={sBook.image}
+                      alt={sBook.title}
                       className="max-w-full max-h-full object-contain"
                     />
                   </div>
 
                   <div className="p-3 md:p-4">
-                    <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+                    <h3 className="text-lg font-semibold mb-1 truncate">{sBook.title}</h3>
+                    <p className="text-gray-600 text-sm mb-2">by {sBook.author}</p>
 
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
+                      <span className="font-bold text-purple-600 text-sm">₹{sBook.price}</span>
                     </div>
 
                     <button
                       className="absolute bottom-3 right-3 wishlist-btn text-gray-600 hover:text-red-500"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAddToWishlist(book._id);
+                        handleToggleWishlist(sBook);
                       }}
                     >
-                      <i className="far fa-heart text-xl"></i>
+                      <i className={`${sInWishlist ? 'fas text-red-500' : 'far text-gray-600'} fa-heart text-xl`}></i>
                     </button>
                   </div>
                 </div>
-              ))}
+              );})}
             </div>
           </div>
         </div>

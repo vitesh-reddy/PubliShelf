@@ -1,13 +1,14 @@
 //client/src/pages/buyer/cart/Cart.jsx
 import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { updateCartQuantity, removeFromCart } from "../../../services/buyer.services.js";
+import { updateCartQuantity, removeFromCart, addToCart, removeFromWishlist as removeFromWishlistApi } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
-import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore } from '../../../store/slices/cartSlice';
+import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore, addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
 import { removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
 import { useCart, useWishlist } from '../../../store/hooks';
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
+import StarRating from "../components/StarRating.jsx";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -27,6 +28,16 @@ const Cart = () => {
   // Optimistic update: update store first, then backend
   const handleQuantityChange = async (bookId, newQuantity) => {
     if (newQuantity < 1) return;
+    
+    // Find the book to check stock
+    const cartItem = cartItems.find(item => item.book._id === bookId);
+    const availableStock = cartItem?.book?.quantity || 0;
+    
+    // Don't allow quantity to exceed available stock
+    if (newQuantity > availableStock) {
+      alert(`Only ${availableStock} items available in stock!`);
+      return;
+    }
     
     // Update store immediately (optimistic)
     dispatch(updateCartInStore({ bookId, quantity: newQuantity }));
@@ -62,8 +73,35 @@ const Cart = () => {
   };
 
   const handleAddToCartFromWishlist = async (bookId) => {
-    // For now, just show message - implement add to cart logic
-    alert("Add to cart from wishlist - implement this with your backend");
+    // Find the book from wishlist
+    const bookToAdd = wishlistItems.find(item => item._id === bookId);
+    if (!bookToAdd) return;
+
+    if (bookToAdd.quantity <= 0) {
+      alert("This book is out of stock!");
+      return;
+    }
+
+    // Check if already in cart
+    const isAlreadyInCart = cartItems.some(item => item.book?._id === bookId);
+    if (isAlreadyInCart) {
+      alert("Book is already in your cart!");
+      return;
+    }
+
+    // Optimistic update: add to cart store
+    dispatch(addToCartInStore({ book: bookToAdd, quantity: 1 }));
+
+    try {
+      const response = await addToCart({ bookId, quantity: 1 });
+      if (response.success) {
+        alert("Book added to cart successfully!");
+      } else {
+        alert(response.message || "Failed to add to cart");
+      }
+    } catch (err) {
+      alert("Error adding to cart");
+    }
   };
 
   const handleRemoveFromWishlist = async (bookId) => {
@@ -72,16 +110,26 @@ const Cart = () => {
     
     // Sync with backend
     try {
-      // Call your backend wishlist remove API
-      alert("Removed from wishlist!");
+      const response = await removeFromWishlistApi(bookId);
+      if (!response.success) {
+        alert(response.message || "Failed to remove from wishlist");
+      }
     } catch (err) {
       alert("Error removing from wishlist");
     }
   };
 
+  const hasOutOfStockItems = useMemo(() => {
+    return cartItems.some(item => item.book?.quantity <= 0);
+  }, [cartItems]);
+
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
       alert("Your cart is empty");
+      return;
+    }
+    if (hasOutOfStockItems) {
+      alert("Some items in your cart are out of stock. Please remove them before proceeding to checkout.");
       return;
     }
     navigate("/buyer/checkout");
@@ -106,67 +154,69 @@ const Cart = () => {
                 <div id="cart-items" className="divide-y divide-gray-300">
                   {cartItems.map((item, idx) => (
                     <div
-                      key={item._id + idx}
+                      key={"cart" + item._id + idx}
                       className="flex items-center p-6 space-x-4 cart-item"
                       data-book-id={item.book._id}
                     >
                       <img
                         src={item.book.image}
                         alt={item.book.title}
-                        className="object-contain w-24 h-32 rounded-lg"
+                        className="object-contain w-24 h-32 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => navigate(`/buyer/product-detail/${item.book._id}`)}
                       />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          <Link to={`/buyer/product/${item.book._id}`}>{item.book.title}</Link>
+                        <h3 
+                          className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-purple-600 transition-colors"
+                          onClick={() => navigate(`/buyer/product-detail/${item.book._id}`)}
+                        >
+                          {item.book.title}
                         </h3>
                         <p className="text-gray-600">by {item.book.author}</p>
                         <div className="flex items-center mt-2">
-                          <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => {
-                              const rating = item.rating || 0;
-                              const floorRating = Math.floor(rating);
-                              const hasHalf = rating % 1 >= 0.5 && i === floorRating;
-
-                              let starClass = "far fa-star";
-                              if (i < floorRating)
-                                starClass = "fas fa-star";
-                              else if (hasHalf)
-                                starClass = "fas fa-star-half-alt";
-
-                              return <i key={i} className={starClass}></i>;
-                            })}
-                          </div>
-                          <span className="ml-2 text-gray-600">{item.book.rating || 0}</span>
+                          <StarRating rating={item.book?.rating || 0} showValue={true} />
                         </div>
+                        {item.book?.quantity <= 0 && (
+                          <div className="mt-2 px-2 py-1 bg-red-100 border border-red-300 rounded inline-block">
+                            <span className="text-red-700 text-sm font-semibold">
+                              <i className="fas fa-exclamation-circle mr-1"></i>
+                              Out of Stock - Remove to checkout
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-4">
-                        <div className="flex items-center border border-gray-300 rounded-lg">
-                          <button
-                            type="button"
-                            className="px-3 py-1 text-gray-600 hover:text-purple-600 decrement-btn"
-                            data-book-id={item.book._id}
-                            onClick={() => handleQuantityChange(item.book._id, item.quantity - 1)}
-                          >
-                            <i className="fas fa-minus"></i> 
-                          </button>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            min="1"
-                            max={item.book.quantity}
-                            className="w-12 text-center border-x border-gray-300 focus:outline-none focus:ring-0 quantity-input"
-                            data-book-id={item.book._id}
-                            onChange={(e) => handleQuantityChange(item.book._id, parseInt(e.target.value))}
-                          />
-                          <button
-                            type="button"
-                            className="px-3 py-1 text-gray-600 hover:text-purple-600 increment-btn"
-                            data-book-id={item.book._id}
-                            onClick={() => handleQuantityChange(item.book._id, item.quantity + 1)}
-                          >
-                            <i className="fas fa-plus"></i> 
-                          </button>
-                        </div>
+                        <div>
+                          <div className="flex items-center border border-gray-300 rounded-lg">
+                            <button
+                              type="button"
+                              className="px-3 py-1 text-gray-600 hover:text-purple-600 decrement-btn"
+                              data-book-id={item.book._id}
+                              onClick={() => handleQuantityChange(item.book._id, item.quantity - 1)}
+                            >
+                              <i className="fas fa-minus"></i> 
+                            </button>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              min="1"
+                              max={item.book.quantity}
+                              className="w-12 text-center border-x border-gray-300 focus:outline-none focus:ring-0 quantity-input"
+                              data-book-id={item.book._id}
+                              onChange={(e) => handleQuantityChange(item.book._id, parseInt(e.target.value))}
+                            />
+                            <button
+                              type="button"
+                              className="px-3 py-1 text-gray-600 hover:text-purple-600 increment-btn"
+                              data-book-id={item.book._id}
+                              onClick={() => handleQuantityChange(item.book._id, item.quantity + 1)}
+                            >
+                              <i className="fas fa-plus"></i> 
+                            </button>
+                          </div>
+                          <p className={`text-xs mt-1 text-center ${item.quantity === item.book.quantity ? 'text-orange-600 font-semibold' : 'text-gray-500'}`}>
+                            {item.book.quantity} left in stock
+                          </p>
+                        </div>                        
                         <div className="text-right">
                           <p className="text-lg font-bold text-gray-900 unit-price" data-unit-price={item.book.price}>
                             ₹{item.book.price}
@@ -198,52 +248,63 @@ const Cart = () => {
                 <div className="divide-y">
                   {wishlistItems.map((item, idx) => (
                     <div
-                      key={item._id + idx}
+                      key={"wishlist" +item._id + idx}
                       className="flex items-center p-6 space-x-4 wishlist-item border-b border-gray-300"
                       data-book-id={item._id}
                     >
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="object-contain w-24 h-32 rounded-lg"
+                        className="object-contain w-24 h-32 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => navigate(`/buyer/product-detail/${item._id}`)}
                       />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                        <h3 
+                          className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-purple-600 transition-colors"
+                          onClick={() => navigate(`/buyer/product-detail/${item._id}`)}
+                        >
+                          {item.title}
+                        </h3>
                         <p className="text-gray-600">by {item.author}</p>
                         <div className="flex items-center mt-2">
-                          <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => {
-                              const rating = item.rating || 0;
-                              const floorRating = Math.floor(rating);
-                              const hasHalf = rating % 1 >= 0.5 && i === floorRating;
-
-                              let starClass = "far fa-star";
-                              if (i < floorRating)
-                                starClass = "fas fa-star";
-                              else if (hasHalf)
-                                starClass = "fas fa-star-half-alt";
-
-                              return <i key={i} className={starClass}></i>;
-                            })}
-                          </div>
-                          <span className="ml-2 text-gray-600">{item.rating || 0}</span>
+                          <StarRating rating={item.rating || 0} showValue={true} />
                         </div>
                       </div>
                       <div className="space-y-2 text-right">
                         <p className="text-lg font-bold text-gray-900">₹{item.price}</p>
-                        <button
-                          type="button"
-                          className="w-full px-4 py-2 text-white transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 add-to-cart-btn"
-                          data-book-id={item._id}
-                          data-title={item.title}
-                          data-author={item.author}
-                          data-price={item.price}
-                          data-image={item.image}
-                          data-rating={item.rating || 0}
-                          onClick={() => handleAddToCartFromWishlist(item._id)}
-                        >
-                          Add to Cart
-                        </button>
+                        {item.quantity <= 0 ? (
+                          <div>
+                            <button
+                              type="button"
+                              className="w-full px-4 py-2 text-white bg-gray-400 rounded-lg cursor-not-allowed"
+                              disabled
+                            >
+                              Out of Stock
+                            </button>
+                          </div>
+                        ) : (() => {
+                          const isInCart = cartItems.some(cartItem => cartItem.book?._id === item._id);
+                          return (
+                            <button
+                              type="button"
+                              className={`w-full px-4 py-2 text-white transition-colors rounded-lg add-to-cart-btn ${
+                                isInCart 
+                                  ? 'bg-gray-400 cursor-not-allowed' 
+                                  : 'bg-purple-600 hover:bg-purple-700'
+                              }`}
+                              data-book-id={item._id}
+                              data-title={item.title}
+                              data-author={item.author}
+                              data-price={item.price}
+                              data-image={item.image}
+                              data-rating={item.rating || 0}
+                              onClick={() => handleAddToCartFromWishlist(item._id)}
+                              disabled={isInCart}
+                            >
+                              {isInCart ? 'In Cart' : 'Add to Cart'}
+                            </button>
+                          );
+                        })()}
                         <button
                           className="text-sm text-red-500 hover:text-red-600 remove-from-wishlist-btn"
                           data-book-id={item._id}
@@ -291,13 +352,29 @@ const Cart = () => {
                       <span id="summary-total">₹{cartTotals.total.toFixed(2)}</span>
                     </div>
                   </div>
+                  
+                  {/* Out of stock warning */}
+                  {hasOutOfStockItems && (
+                    <div className="p-3 mb-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start">
+                        <i className="fas fa-exclamation-triangle text-red-600 mt-0.5 mr-2"></i>
+                        <p className="text-sm text-red-800">
+                          <strong>Cannot proceed:</strong> Some items in your cart are out of stock. 
+                          Please remove them before checkout.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     id="proceedToCheckoutBtn"
                     onClick={handleProceedToCheckout}
-                    className={`w-full py-3 text-white transition-colors rounded-lg bg-purple-600 hover:bg-purple-700 ${
-                      cartItems.length === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    className={`w-full py-3 text-white transition-colors rounded-lg ${
+                      cartItems.length === 0 || hasOutOfStockItems
+                        ? "bg-gray-400 cursor-not-allowed" 
+                        : "bg-purple-600 hover:bg-purple-700"
                     }`}
-                    disabled={cartItems.length === 0}
+                    disabled={cartItems.length === 0 || hasOutOfStockItems}
                   >
                     Proceed to Checkout
                   </button>
@@ -313,7 +390,7 @@ const Cart = () => {
       </div>
 
       {/* Inline styles from EJS */}
-      <style jsx>{`
+      <style>{`
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
           margin: 0;
