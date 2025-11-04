@@ -1,9 +1,9 @@
   import React, { useState, useEffect } from "react";
   import { Link, useNavigate, useSearchParams } from "react-router-dom";
-  import { searchBooks, addToWishlist } from "../../../services/buyer.services.js";
+  import { searchBooks, addToWishlist, removeFromWishlist } from "../../../services/buyer.services.js";
   import BookGrid from "./components/BookGrid.jsx";
   import { useDispatch } from 'react-redux';
-  import { addToWishlist as addToWishlistInStore } from '../../../store/slices/wishlistSlice';
+  import { addToWishlist as addToWishlistInStore, removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
   import { useWishlist } from '../../../store/hooks';
   import Navbar from "../components/Navbar.jsx";
   import Footer from "../components/Footer.jsx";
@@ -89,30 +89,46 @@
       setCurrentSort("relevance");
     };
 
-    const handleWishlistAdd = async (bookId, buttonRef) => {
+    const handleWishlistAdd = async (bookId, e) => {
+      const buttonEl = e?.currentTarget;
+      const iconEl = buttonEl?.querySelector('i');
+      const isAlreadyInWishlist = wishlistItems.some(item => item._id === bookId);
+
+      if (isAlreadyInWishlist) {
+        // Optimistic remove
+        dispatch(removeFromWishlistInStore({ bookId }));
+        if (iconEl) {
+          iconEl.classList.remove('fas', 'text-red-500');
+          iconEl.classList.add('far', 'text-gray-600');
+        }
+        try {
+          const response = await removeFromWishlist(bookId);
+          if (!response.success) {
+            alert(response.message || 'Failed to remove from wishlist');
+          }
+        } catch {
+          alert('Error removing from wishlist');
+        }
+        return;
+      }
+
       // Find the book from the books array
       const bookToAdd = books.find(b => b._id === bookId);
       if (!bookToAdd) return;
-      
-      // Check if already in wishlist
-      const isAlreadyInWishlist = wishlistItems.some(item => item._id === bookId);
-      if (isAlreadyInWishlist) {
-        alert("Book is already in your wishlist!");
-        return;
-      }
-      
-      // Optimistic update
+
+      // Optimistic add
       dispatch(addToWishlistInStore(bookToAdd));
-      buttonRef.current.querySelector("i").classList.replace("far", "fas");
-      buttonRef.current.classList.add("text-red-500");
-      
+      if (iconEl) {
+        iconEl.classList.remove('far', 'text-gray-600');
+        iconEl.classList.add('fas', 'text-red-500');
+      }
       try {
         const response = await addToWishlist(bookId);
         if (!response.success) {
           alert(`Failed to add to wishlist: ${response.message}`);
         }
-      } catch { 
-        alert("Error adding to wishlist"); 
+      } catch {
+        alert('Error adding to wishlist');
       }
     };
 

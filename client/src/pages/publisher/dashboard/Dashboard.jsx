@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getDashboard } from "../../../services/publisher.services.js";
+import { logout } from "../../../services/auth.services.js";
+import { clearAuth } from "../../../store/slices/authSlice";
+import { useDispatch } from "react-redux";
+import { clearUser } from "../../../store/slices/userSlice";
 
 const PublisherDashboard = () => {
   const [data, setData] = useState({
@@ -15,6 +19,7 @@ const PublisherDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchDashboard();
@@ -36,8 +41,14 @@ const PublisherDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+    dispatch(clearAuth());
+    dispatch(clearUser());
     navigate("/auth/login");
   };
 

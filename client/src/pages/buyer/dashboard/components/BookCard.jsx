@@ -17,13 +17,18 @@ const BookCard = ({ book, onClick, showSold = false, isTrending = false, idx }) 
         <h3 className="text-lg font-semibold mb-1 truncate">{book.title}</h3>
         <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
         <div className="flex justify-between items-center">
-          {showSold && (
-            <span className="text-purple-600 text-sm">Total Sold: {book.totalSold}</span>
-          )}
-          {!showSold && isTrending && (
-            <span className="text-purple-600 text-sm">Trending</span>
-          )}
-          <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
+          <div className="flex flex-col">
+            {showSold && (
+              <span className="text-purple-600 text-sm">Total Sold: {book.totalSold}</span>
+            )}
+            {!showSold && isTrending && (
+              <span className="text-purple-600 text-sm">Trending</span>
+            )}
+            <span className="font-bold text-purple-600 text-sm">₹{book.price}</span>
+            {book.quantity <= 0 && (
+              <span className="text-red-600 text-xs font-semibold mt-1">Out of Stock</span>
+            )}
+          </div>
         </div>
       </div>
     </div>

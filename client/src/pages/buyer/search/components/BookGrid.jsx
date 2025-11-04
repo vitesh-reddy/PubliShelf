@@ -42,9 +42,16 @@ const BookGrid = ({ books, onWishlistAdd }) => {
                 </h3>
                 <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-purple-600 text-sm">
-                    ₹{book.price}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-purple-600 text-sm">
+                      ₹{book.price}
+                    </span>
+                    {book.quantity <= 0 && (
+                      <span className="text-red-600 text-xs font-semibold mt-1">
+                        Out of Stock
+                      </span>
+                    )}
+                  </div>
 
                   {/* Wishlist Button */}
                   <button

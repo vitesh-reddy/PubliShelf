@@ -46,7 +46,7 @@ const Navbar = () => {
     if (query) navigate(`/buyer/search?q=${encodeURIComponent(query)}`);
   };
 
-  const showSearchBar = !["/buyer/cart", "/buyer/checkout", "/buyer/profile"].includes(location.pathname);
+  const showSearchBar = !["/buyer/checkout", "/buyer/profile"].includes(location.pathname);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -78,7 +78,7 @@ const Navbar = () => {
           </Link>
 
           {/* ===== Desktop Section (unchanged) ===== */}
-          <div className="flex items-center md:space-x-8 relative">
+          <div className="flex items-center md:gap-8 mr-2 relative">
             <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
               <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600 px-3 py-2">Home</Link>
               <Link to={buttonDestination} className="text-gray-700 hover:text-purple-600 px-3 py-2">

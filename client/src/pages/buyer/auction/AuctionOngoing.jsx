@@ -349,7 +349,7 @@ const AuctionOngoing = () => {
                       const bidderName = bidder.firstname && bidder.lastname
                         ? `${bidder.firstname} ${bidder.lastname}`
                         : "Anonymous";
-                      const isCurrentUser = (bid.bidder._id == user._id); 
+                      const isCurrentUser = (bid?.bidder?._id === user._id);
                       const bidTime = new Date(bid.bidTime);
                       const timeAgo = getTimeAgo(bidTime);
 
