@@ -242,3 +242,65 @@ export const sellAntique = async (req, res) => {
     });
   }
 };
+
+export const getPublisherBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) return res.status(404).json({ success: false, message: 'Book not found', data: null });
+    if (book.publisher.toString() !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized', data: null });
+    res.status(200).json({ success: true, message: 'Book fetched', data: book });
+  } catch (error) {
+    console.error('Error fetching book:', error);
+    res.status(500).json({ success: false, message: 'Error fetching book', data: null });
+  }
+};
+
+export const updatePublisherBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) return res.status(404).json({ success: false, message: 'Book not found', data: null });
+    if (book.publisher.toString() !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized', data: null });
+
+    const allowed = ["title", "author", "description", "genre", "price", "quantity"];
+    allowed.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        book[field] = req.body[field];
+      }
+    });
+
+    if (req.file && req.file.path) {
+      book.image = req.file.path;
+    }
+
+    await book.save();
+
+    res.status(200).json({ success: true, message: 'Book updated', data: book });
+  } catch (error) {
+    console.error('Error updating book:', error);
+    res.status(500).json({ success: false, message: 'Error updating book', data: null });
+  }
+};
+
+export const deletePublisherBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) return res.status(404).json({ success: false, message: 'Book not found', data: null });
+    if (book.publisher.toString() !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized', data: null });
+
+    book.isDeleted = true;
+    await book.save();
+
+    await Buyer.updateMany(
+      { $or: [ { 'cart.book': book._id }, { wishlist: book._id } ] },
+      { $pull: { cart: { book: book._id }, wishlist: book._id } }
+    );
+
+    res.status(200).json({ success: true, message: 'Book soft-deleted and buyers updated', data: null });
+  } catch (error) {
+    console.error('Error deleting book:', error);
+    res.status(500).json({ success: false, message: 'Error deleting book', data: null });
+  }
+};

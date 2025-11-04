@@ -19,6 +19,7 @@ const bookSchema = new mongoose.Schema({
   publisher: { type: mongoose.Schema.Types.ObjectId, ref: "Publisher" },
   publishedAt: { type: Date, default: Date.now },  
   reviews: [reviewSchema],
+  isDeleted: { type: Boolean, default: false }
 });
 
 const Book = mongoose.model("Book", bookSchema);

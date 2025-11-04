@@ -1,7 +1,7 @@
 //client/src/pages/publisher/dashboard/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getDashboard } from "../../../services/publisher.services.js";
+import { getDashboard, softDeleteBook } from "../../../services/publisher.services.js";
 import { logout } from "../../../services/auth.services.js";
 import { clearAuth } from "../../../store/slices/authSlice";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,9 @@ const PublisherDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hoveredBookId, setHoveredBookId] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -50,6 +53,27 @@ const PublisherDashboard = () => {
     dispatch(clearAuth());
     dispatch(clearUser());
     navigate("/auth/login");
+  };
+
+  const handleEditClick = (book) => {
+    navigate(`/publisher/edit-book/${book._id}`, { state: { book } });
+  };
+
+  const handleDeleteClick = async (book) => {
+    const confirm = window.confirm(
+      `Are you sure you want to delete "${book.title}"? This will soft-delete the book and update buyers' availability/cart.`
+    );
+    if (!confirm) return;
+    try {
+      setActionLoading(true);
+      await softDeleteBook(book._id);
+      await fetchDashboard();
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete book");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   if (loading)
@@ -127,9 +151,7 @@ const PublisherDashboard = () => {
                 {data.analytics.mostSoldBook ? data.analytics.mostSoldBook.title : "None"}
               </p>
               <p className="text-sm text-gray-600">
-                {data.analytics.mostSoldBook
-                  ? `${data.analytics.mostSoldBook.count} sold`
-                  : ""}
+                {data.analytics.mostSoldBook ? `${data.analytics.mostSoldBook.count} sold` : ""}
               </p>
             </div>
             <div className="bg-white rounded-xl shadow-lg p-6">
@@ -184,13 +206,38 @@ const PublisherDashboard = () => {
                 {data.books.map((book) => (
                   <div
                     key={book._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden"
+                    className="bg-white rounded-lg shadow-md overflow-hidden relative transform transition-transform duration-300 hover:scale-[1.0125] hover:shadow-lg"
+                    onMouseEnter={() => setHoveredBookId(book._id)}
+                    onMouseLeave={() => setHoveredBookId(null)}
                   >
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="w-full h-[350px] object-contain"
-                    />
+                    <div className="relative bg-gray-50">
+                      <img
+                        src={book.image}
+                        alt={book.title}
+                        className="w-full h-[350px] object-contain bg-white"
+                      />
+                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/0 backdrop-blur-[4px] transition-opacity duration-200 ${
+                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
+                        <button
+                          title="Edit"
+                          onClick={() => handleEditClick(book)}
+                          className="text-xl flex items-center gap-2 bg-white/90 text-purple-500 rounded-xl px-6 py-2 shadow hover:bg-white hover:shadow-md focus:outline-none transition-colors duration-200"
+                        >
+                          <i className="fas fa-edit"></i>
+                          <span className="text-lg font-medium select-none">Edit</span>
+                        </button>
+                        <button
+                          title="Delete"
+                          onClick={() => handleDeleteClick(book)}
+                          className="text-xl flex items-center gap-2 bg-white/90 text-red-500 rounded-xl px-6 py-2 shadow hover:bg-white hover:shadow-md focus:outline-none transition-colors duration-200"
+                          disabled={actionLoading}
+                        >
+                          <i className="fas fa-trash"></i>
+                          <span className="text-lg font-medium select-none">Delete</span>
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="p-4">
                       <h3 className="text-lg font-semibold mb-1">{book.title}</h3>
                       <p className="text-gray-600 text-sm">{book.author}</p>

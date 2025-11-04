@@ -2,11 +2,11 @@
 import Book from "../models/Book.model.js";
 
 export const getAllBooks = async () => {
-  return await Book.find();
+  return await Book.find({ isDeleted: { $ne: true } });
 };
 
 export const getBookById = async (bookId) => {
-  return await Book.findById(bookId).populate("reviews.buyer").populate("publisher");
+  return await Book.findOne({ _id: bookId, isDeleted: { $ne: true } }).populate("reviews.buyer").populate("publisher");
 };
 
 export const addReviewToBook = async (bookId, review) => {
@@ -35,6 +35,7 @@ export const searchBooks = async (query) => {
   }
 
   return await Book.find({
+    isDeleted: { $ne: true },
     $or: [
       { title: { $regex: query, $options: "i" } },
       { author: { $regex: query, $options: "i" } },
@@ -46,7 +47,7 @@ export const searchBooks = async (query) => {
 export const filterBooks = async (filters) => {
   const { category, sort, condition, priceRange } = filters;
 
-  const query = {};
+  const query = { isDeleted: { $ne: true } };
   if (category && category !== "All") {
     query.genre = category;
   }

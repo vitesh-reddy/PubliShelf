@@ -131,6 +131,7 @@ export const getTopSoldBooks = async () => {
         },
       },
       { $unwind: "$bookDetails" },
+      {$match: {"bookDetails.isDeleted": { $ne: true }}},
       {
         $project: {
           _id: "$bookDetails._id",
@@ -139,6 +140,7 @@ export const getTopSoldBooks = async () => {
           price: "$bookDetails.price",
           image: "$bookDetails.image",
           rating: "$bookDetails.rating",
+          quantity: "$bookDetails.quantity",
           totalSold: 1,
         },
       },
@@ -180,6 +182,11 @@ export const getTrendingBooks = async () => {
       },
       { $unwind: "$bookDetails" },
       {
+        $match: {
+          "bookDetails.isDeleted": { $ne: true },
+        },
+      },
+      {
         $project: {
           _id: "$bookDetails._id",
           title: "$bookDetails.title",
@@ -187,6 +194,7 @@ export const getTrendingBooks = async () => {
           price: "$bookDetails.price",
           image: "$bookDetails.image",
           rating: "$bookDetails.rating",
+          quantity: "$bookDetails.quantity",
           totalOrdered: 1,
         },
       },
@@ -200,7 +208,7 @@ export const getTrendingBooks = async () => {
 
 export const getMetrics = async () => {
   try {
-    const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 } });
+    const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 }, isDeleted: { $ne: true } });
     const activeReaders = await Buyer.countDocuments({ orders: { $ne: [] } });
     const publishers = await Publisher.countDocuments();
     const booksSold = await Buyer.aggregate([

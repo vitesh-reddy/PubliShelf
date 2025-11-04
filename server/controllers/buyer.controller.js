@@ -1,98 +1,14 @@
-// Address CRUD
-export const getBuyerAddresses = async (req, res) => {
-  try {
-    const buyer = await Buyer.findById(req.user.id);
-    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
-    res.status(200).json({ success: true, addresses: buyer.addresses });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching addresses" });
-  }
-};
-
-export const addBuyerAddress = async (req, res) => {
-  try {
-    const { name, address, phone } = req.body;
-    const buyer = await Buyer.findById(req.user.id);
-    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
-    const newAddr = { name, address, phone };
-    buyer.addresses.push(newAddr);
-    await buyer.save();
-    // Return the last address (with _id)
-    const createdAddr = buyer.addresses[buyer.addresses.length - 1];
-    res.status(201).json({ success: true, address: createdAddr });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error adding address" });
-  }
-};
-
-export const updateBuyerAddress = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, address, phone } = req.body;
-    const buyer = await Buyer.findById(req.user.id);
-    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
-    const addr = buyer.addresses.id(id);
-    if (!addr) return res.status(404).json({ success: false, message: "Address not found" });
-    addr.name = name;
-    addr.address = address;
-    addr.phone = phone;
-    await buyer.save();
-    res.status(200).json({ success: true, address: addr });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error updating address" });
-  }
-};
-
-export const deleteBuyerAddress = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const buyer = await Buyer.findById(req.user.id);
-    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
-    buyer.addresses.id(id)?.remove();
-    await buyer.save();
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error deleting address" });
-  }
-};
 //controllers/buyer.controller.js
 import bcrypt from "bcrypt";
-import {
-  getBuyerById,
-  createBuyer,
-  updateBuyerDetails,
-  getTopSoldBooks,
-  getTrendingBooks,
-  getAllBuyers,
-  updateBuyerCart,
-  updateBuyerWishlist,
-  addOrderToBuyer,
-  getAllOrders,
-  updateCartItemQuantity,
-  placeOrder,
-} from "../services/buyer.services.js";
-import {
-  getAllBooks,
-  getBookById,
-  searchBooks,
-  filterBooks,
-  addReviewToBook,
-  createBook,
-} from "../services/book.services.js";
-import {
-  getOngoingAuctions,
-  getFutureAuctions,
-  getEndedAuctions,
-  getAuctionItemById,
-  addBid,
-  createAntiqueBook,
-} from "../services/antiqueBook.services.js";
+import { getBuyerById, createBuyer, updateBuyerDetails, getTopSoldBooks, getTrendingBooks } from "../services/buyer.services.js";
+import { getAllBooks, getBookById, searchBooks, filterBooks} from "../services/book.services.js";
+import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBook.services.js";
 import Buyer from "../models/Buyer.model.js";
 import Book from "../models/Book.model.js";
 
 export const getBuyerDashboard = async (req, res) => {
   try {
-    const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
+    const newlyBooks = await Book.find({isDeleted: { $ne: true }}).sort({ publishedAt: -1 }).limit(8);
     const mostSoldBooks = await getTopSoldBooks();
     const trendingBooks = await getTrendingBooks();
 
@@ -113,7 +29,7 @@ export const getBuyerDashboard = async (req, res) => {
 
 export const getBuyerSearchPage = async (req, res) => {
   try {
-    const books = await getAllBooks();
+    const books = await getAllBooks({isDeleted: false});
     res.status(200).json({
       success: true,
       message: "Search page data fetched successfully",
@@ -219,7 +135,8 @@ export const getProductDetail = async (req, res) => {
 
     const similarBooks = await Book.find({
       genre: book.genre,
-      _id: { $ne: bookId }
+      _id: { $ne: bookId },
+      isDeleted: { $ne: true }
     }).limit(4);
 
     res.status(200).json({
@@ -719,5 +636,63 @@ export const updateBuyerProfileById = async (req, res) => {
       message: err.message,
       data: null
     });
+  }
+};
+
+// Address CRUD
+export const getBuyerAddresses = async (req, res) => {
+  try {
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    res.status(200).json({ success: true, addresses: buyer.addresses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching addresses" });
+  }
+};
+
+export const addBuyerAddress = async (req, res) => {
+  try {
+    const { name, address, phone } = req.body;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    const newAddr = { name, address, phone };
+    buyer.addresses.push(newAddr);
+    await buyer.save();
+    // Return the last address (with _id)
+    const createdAddr = buyer.addresses[buyer.addresses.length - 1];
+    res.status(201).json({ success: true, address: createdAddr });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error adding address" });
+  }
+};
+
+export const updateBuyerAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, address, phone } = req.body;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    const addr = buyer.addresses.id(id);
+    if (!addr) return res.status(404).json({ success: false, message: "Address not found" });
+    addr.name = name;
+    addr.address = address;
+    addr.phone = phone;
+    await buyer.save();
+    res.status(200).json({ success: true, address: addr });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating address" });
+  }
+};
+
+export const deleteBuyerAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const buyer = await Buyer.findById(req.user.id);
+    if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
+    buyer.addresses.id(id)?.remove();
+    await buyer.save();
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error deleting address" });
   }
 };
