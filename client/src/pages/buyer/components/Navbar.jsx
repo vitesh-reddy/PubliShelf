@@ -80,14 +80,50 @@ const Navbar = () => {
           {/* ===== Desktop Section (unchanged) ===== */}
           <div className="flex items-center md:gap-8 mr-2 relative">
             <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-              <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600 px-3 py-2">Home</Link>
-              <Link to={buttonDestination} className="text-gray-700 hover:text-purple-600 px-3 py-2">
+              <Link 
+                to="/buyer/dashboard" 
+                className={`px-3 py-2 rounded-lg transition-all ${
+                  location.pathname === '/buyer/dashboard'
+                    ? 'bg-purple-50 text-purple-600 font-semibold'
+                    : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                }`}
+              >
+                Home
+              </Link>
+              <Link 
+                to={buttonDestination} 
+                className={`px-3 py-2 rounded-lg transition-all ${
+                  location.pathname.includes('/auction')
+                    ? 'bg-purple-50 text-purple-600 font-semibold'
+                    : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                }`}
+              >
                 {isOnAuctionPage ? "Bookstore" : "Auctions"}
               </Link>
-              <Link to="/about" className="text-gray-700 hover:text-purple-600 px-3 py-2">About</Link>
-              <Link to="/contact" className="text-gray-700 hover:text-purple-600 px-3 py-2">Contact</Link>
+              <Link 
+                to="/about" 
+                className={`px-3 py-2 rounded-lg transition-all ${
+                  location.pathname === '/about'
+                    ? 'bg-purple-50 text-purple-600 font-semibold'
+                    : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                }`}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`px-3 py-2 rounded-lg transition-all ${
+                  location.pathname === '/contact'
+                    ? 'bg-purple-50 text-purple-600 font-semibold'
+                    : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                }`}
+              >
+                Contact
+              </Link>
               <div className="relative group">
-                <button className="text-gray-700 hover:text-purple-600 px-3 py-2">Categories</button>
+                <button className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all">
+                  Categories
+                </button>
                 <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 hidden group-hover:block">
                   {["Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Romance", "Thriller", "Other"].map((cat) => (
                     <Link
@@ -139,24 +175,21 @@ const Navbar = () => {
 
             {/* Profile (Desktop) */}
             <div className="relative group hidden md:block" ref={profileMenuRef}>
-              <button className="flex items-center gap-2">
-                <img
-                  src={(buyerFullName != null) ? `https://ui-avatars.com/api/?name=${buyerFullName}&background=9810fa&color=fff&bold=true&size=128` : "https://img.icons8.com/?size=100&id=zxB19VPoVLjK&format=png&color=000000"}
-                  alt="Profile"
-                  className={` ${(buyerFullName != null) ? "size-7" : "size-5"} rounded-full`}
-                />
-                <span className="text-gray-700 md:scale-100 scale-0">{buyerName}</span>
+              <button className="flex items-center gap-2 font-medium text-gray-700">
+                <i className="text-3xl fas fa-user-circle text-purple-600"></i>
+                <span className="font-[550] md:scale-100 scale-0">{buyerName}</span>
               </button>
               <div
-                className="absolute hidden group-hover:block top-full right-1 w-48 bg-white shadow-lg rounded-lg py-2 transition-all duration-200"
+                className="absolute hidden group-hover:block top-full -right-6 w-48 bg-white shadow-lg rounded-lg py-2 transition-all duration-200"
               >
-                <Link to="/buyer/profile" className=" block px-4 py-2 text-gray-700 hover:bg-purple-50">
+                <Link to="/buyer/profile" className="block px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600">
+                  <i className="fas fa-user mr-2"></i>
                   Your Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50"
-                >
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-red-600">
+                  <i className="fas fa-sign-out-alt mr-2"></i>
                   Logout
                 </button>
               </div>
