@@ -7,6 +7,11 @@ import { logout } from "../../../services/auth.services";
 import { clearAuth } from "../../../store/slices/authSlice";
 import { clearUser } from "../../../store/slices/userSlice";
 import PublisherNavbar from "../components/PublisherNavbar";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import { Line, Doughnut, Bar } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register( CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -258,21 +263,90 @@ const Dashboard = () => {
 
               {/* Top Selling Books */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Top Selling Books</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Top Selling Books</h2>
                 {analytics.topSellingBooks && analytics.topSellingBooks.length > 0 ? (
-                  <div className="space-y-3">
-                    {analytics.topSellingBooks.map((book, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-purple-600">#{index + 1}</span>
-                          <div>
-                            <p className="font-medium text-gray-900">{book.title}</p>
-                            <p className="text-sm text-gray-500">{book.quantity} copies sold</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* List View */}
+                    <div className="space-y-3">
+                      {analytics.topSellingBooks.slice(0, 3).map((book, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-100">
+                          <div className="flex items-center gap-3">
+                            <span className="flex items-center justify-center w-8 h-8 bg-purple-600 text-white rounded-full text-sm font-bold">
+                              {index + 1}
+                            </span>
+                            <div>
+                              <p className="font-medium text-gray-900">{book.title}</p>
+                              <p className="text-sm text-gray-500">{book.quantity} copies sold</p>
+                            </div>
                           </div>
+                          <p className="font-bold text-purple-600">₹{book.revenue.toFixed(2)}</p>
                         </div>
-                        <p className="font-bold text-purple-600">₹{book.revenue.toFixed(2)}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    
+                    {/* Bar Chart */}
+                    <div className="h-64">
+                      <Bar
+                        data={{
+                          labels: analytics.topSellingBooks.map(book => 
+                            book.title.length > 20 ? book.title.substring(0, 20) + '...' : book.title
+                          ),
+                          datasets: [
+                            {
+                              label: 'Revenue (₹)',
+                              data: analytics.topSellingBooks.map(book => book.revenue),
+                              backgroundColor: [
+                                'rgba(147, 51, 234, 0.8)',
+                                'rgba(99, 102, 241, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(20, 184, 166, 0.8)',
+                              ],
+                              borderColor: [
+                                'rgb(147, 51, 234)',
+                                'rgb(99, 102, 241)',
+                                'rgb(59, 130, 246)',
+                                'rgb(34, 197, 94)',
+                                'rgb(20, 184, 166)',
+                              ],
+                              borderWidth: 2,
+                              borderRadius: 6,
+                            },
+                          ],
+                        }}
+                        options={{
+                          indexAxis: 'y',
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                            tooltip: {
+                              callbacks: {
+                                label: function(context) {
+                                  return `Revenue: ₹${context.parsed.x.toFixed(2)}`;
+                                },
+                                afterLabel: function(context) {
+                                  const book = analytics.topSellingBooks[context.dataIndex];
+                                  return `Copies Sold: ${book.quantity}`;
+                                }
+                              }
+                            }
+                          },
+                          scales: {
+                            x: {
+                              beginAtZero: true,
+                              ticks: {
+                                callback: function(value) {
+                                  return '₹' + value;
+                                }
+                              }
+                            }
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <p className="text-gray-500 text-center py-4">No sales data available</p>
@@ -303,27 +377,58 @@ const Dashboard = () => {
 
           {activeTab === 'revenue' && analytics && (
             <div className="space-y-8">
-              {/* Revenue Trend */}
+              {/* Revenue Trend - Line Chart */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Revenue Trend (Last 6 Months)</h2>
                 {analytics.revenueData && analytics.revenueData.length > 0 ? (
-                  <div className="space-y-4">
-                    {analytics.revenueData.map((item, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 font-medium">{item.month}</span>
-                          <span className="text-purple-600 font-bold">₹{item.revenue.toFixed(2)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div
-                            className="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full transition-all duration-500"
-                            style={{
-                              width: `${(item.revenue / Math.max(...analytics.revenueData.map(d => d.revenue))) * 100}%`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="h-80">
+                    <Line
+                      data={{
+                        labels: analytics.revenueData.map(item => item.month),
+                        datasets: [
+                          {
+                            label: 'Revenue (₹)',
+                            data: analytics.revenueData.map(item => item.revenue),
+                            borderColor: 'rgb(147, 51, 234)',
+                            backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(147, 51, 234)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: true,
+                            position: 'top',
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                return `Revenue: ₹${context.parsed.y.toFixed(2)}`;
+                              }
+                            }
+                          }
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              callback: function(value) {
+                                return '₹' + value;
+                              }
+                            }
+                          }
+                        }
+                      }}
+                    />
                   </div>
                 ) : (
                   <p className="text-gray-500 text-center py-8">No revenue data available</p>
@@ -334,58 +439,115 @@ const Dashboard = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Genre Performance</h2>
                 {analytics.genreBreakdown && analytics.genreBreakdown.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      {analytics.genreBreakdown.map((genre, index) => {
-                        const maxRevenue = Math.max(...analytics.genreBreakdown.map(g => g.revenue));
-                        const percentage = (genre.revenue / maxRevenue) * 100;
-                        const colors = ['purple', 'indigo', 'blue', 'green', 'teal'];
-                        const color = colors[index % colors.length];
-                        
-                        return (
-                          <div key={index} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-700">{genre.genre}</span>
-                              <span className="text-sm text-gray-500">{genre.quantity} sold</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-3">
-                              <div
-                                className={`bg-${color}-500 h-3 rounded-full transition-all duration-500`}
-                                style={{ width: `${percentage}%` }}
-                              ></div>
-                            </div>
-                            <p className="text-xs text-gray-600">₹{genre.revenue.toFixed(2)}</p>
-                          </div>
-                        );
-                      })}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Doughnut Chart */}
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="text-center mb-4">
+                        <p className="text-sm font-medium text-gray-600">Revenue Distribution</p>
+                        <p className="text-2xl font-bold text-purple-600">
+                          ₹{analytics.genreBreakdown.reduce((sum, g) => sum + g.revenue, 0).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="w-full max-w-sm h-64">
+                        <Doughnut
+                          data={{
+                            labels: analytics.genreBreakdown.map(g => g.genre),
+                            datasets: [
+                              {
+                                label: 'Revenue',
+                                data: analytics.genreBreakdown.map(g => g.revenue),
+                                backgroundColor: [
+                                  'rgba(147, 51, 234, 0.8)',
+                                  'rgba(99, 102, 241, 0.8)',
+                                  'rgba(59, 130, 246, 0.8)',
+                                  'rgba(34, 197, 94, 0.8)',
+                                  'rgba(20, 184, 166, 0.8)',
+                                ],
+                                borderColor: [
+                                  'rgb(147, 51, 234)',
+                                  'rgb(99, 102, 241)',
+                                  'rgb(59, 130, 246)',
+                                  'rgb(34, 197, 94)',
+                                  'rgb(20, 184, 166)',
+                                ],
+                                borderWidth: 2,
+                              },
+                            ],
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: {
+                                position: 'bottom',
+                              },
+                              tooltip: {
+                                callbacks: {
+                                  label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ₹${context.parsed.toFixed(2)} (${percentage}%)`;
+                                  }
+                                }
+                              }
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
 
-                    {/* Genre Pie Chart Visual */}
-                    <div className="flex items-center justify-center">
-                      <div className="relative w-48 h-48">
-                        {analytics.genreBreakdown.map((genre, index) => {
-                          const total = analytics.genreBreakdown.reduce((sum, g) => sum + g.revenue, 0);
-                          const percentage = ((genre.revenue / total) * 100).toFixed(1);
-                          const colors = ['bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500'];
-                          const color = colors[index % colors.length];
-                          
-                          return (
-                            <div key={index} className="absolute inset-0 flex items-center justify-center">
-                              <div className={`${color} w-full h-full rounded-full opacity-${100 - (index * 15)}`}
-                                style={{ transform: `scale(${1 - (index * 0.15)})` }}></div>
-                            </div>
-                          );
-                        })}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg">
-                            <div className="text-center">
-                              <p className="text-2xl font-bold text-purple-600">
-                                {analytics.genreBreakdown.length}
-                              </p>
-                              <p className="text-xs text-gray-600">Genres</p>
-                            </div>
-                          </div>
-                        </div>
+                    {/* Bar Chart for Books Sold by Genre */}
+                    <div className="flex flex-col">
+                      <div className="text-center mb-4">
+                        <p className="text-sm font-medium text-gray-600">Books Sold by Genre</p>
+                        <p className="text-2xl font-bold text-indigo-600">
+                          {analytics.genreBreakdown.reduce((sum, g) => sum + g.quantity, 0)} books
+                        </p>
+                      </div>
+                      <div className="h-64">
+                        <Bar
+                          data={{
+                            labels: analytics.genreBreakdown.map(g => g.genre),
+                            datasets: [
+                              {
+                                label: 'Books Sold',
+                                data: analytics.genreBreakdown.map(g => g.quantity),
+                                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                                borderColor: 'rgb(99, 102, 241)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                              },
+                            ],
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: {
+                                display: false,
+                              },
+                              tooltip: {
+                                callbacks: {
+                                  label: function(context) {
+                                    return `Books Sold: ${context.parsed.y}`;
+                                  },
+                                  afterLabel: function(context) {
+                                    const revenue = analytics.genreBreakdown[context.dataIndex].revenue;
+                                    return `Revenue: ₹${revenue.toFixed(2)}`;
+                                  }
+                                }
+                              }
+                            },
+                            scales: {
+                              y: {
+                                beginAtZero: true,
+                                ticks: {
+                                  stepSize: 1,
+                                }
+                              }
+                            }
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

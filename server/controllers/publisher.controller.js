@@ -7,6 +7,7 @@ import Order from "../models/Order.model.js";
 import AntiqueBook from "../models/AntiqueBook.model.js";
 import Publisher from "../models/Publisher.model.js";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 
 export const getPublisherProfile = async (req, res) => {
   try {
@@ -49,10 +50,12 @@ export const getPublisherProfile = async (req, res) => {
     // Monthly revenue for last 6 months
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const publisherObjectId = new mongoose.Types.ObjectId(req.user.id);
+    
     const monthlyRevenue = await Order.aggregate([
-      { $match: { publishers: req.user.id, createdAt: { $gte: sixMonthsAgo } } },
+      { $match: { publishers: publisherObjectId, createdAt: { $gte: sixMonthsAgo } } },
       { $unwind: "$items" },
-      { $match: { "items.publisher": req.user.id } },
+      { $match: { "items.publisher": publisherObjectId } },
       {
         $group: {
           _id: {
@@ -65,10 +68,30 @@ export const getPublisherProfile = async (req, res) => {
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    const revenueData = monthlyRevenue.map(item => ({
-      month: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
-      revenue: item.revenue || 0
-    }));
+    // Create a map of months with data
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const revenueMap = new Map();
+    
+    monthlyRevenue.forEach(item => {
+      const key = `${item._id.year}-${String(item._id.month).padStart(2, '0')}`;
+      revenueMap.set(key, item.revenue);
+    });
+
+    // Generate all 6 months including empty ones
+    const revenueData = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const key = `${year}-${String(month).padStart(2, '0')}`;
+      const monthLabel = `${monthNames[month - 1]} ${year}`;
+      
+      revenueData.push({
+        month: monthLabel,
+        revenue: revenueMap.get(key) || 0
+      });
+    }
 
     // Genre breakdown with revenue
     const genreData = orders.reduce((acc, order) => {
