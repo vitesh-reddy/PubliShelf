@@ -1,47 +1,110 @@
-//client/src/pages/publisher/dashboard/Dashboard.jsx
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { getDashboard, softDeleteBook, restoreBook } from "../../../services/publisher.services.js";
-import { logout } from "../../../services/auth.services.js";
-import { clearAuth } from "../../../store/slices/authSlice";
+// client/src/pages/publisher/dashboard/Dashboard.jsx
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { getProfile, updateProfile } from "../../../services/publisher.services";
+import { logout } from "../../../services/auth.services";
+import { clearAuth } from "../../../store/slices/authSlice";
 import { clearUser } from "../../../store/slices/userSlice";
+import PublisherNavbar from "../components/PublisherNavbar";
 
-const PublisherDashboard = () => {
-  const [data, setData] = useState({
-    publisher: { firstname: "", lastname: "", status: "approved" },
-    analytics: { booksSold: 0, totalRevenue: 0, mostSoldBook: null, topGenres: [] },
-    books: [],
-    deletedBooks: [],
-    auctions: [],
-    activities: [],
-    availableBooks: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [hoveredBookId, setHoveredBookId] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
-
+const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [user, setUser] = useState({ firstname: "", lastname: "", email: "", publishingHouse: "" });
+  const [analytics, setAnalytics] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    publishingHouse: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const saveBtnRef = useRef(null);
 
   useEffect(() => {
-    fetchDashboard();
+    loadProfile();
   }, []);
 
-  const fetchDashboard = async () => {
+  const loadProfile = async () => {
     try {
-      setLoading(true);
-      const response = await getDashboard();
-      if (response.success) {
-        setData(response.data);
+      const res = await getProfile();
+      if (res?.success && res?.data?.user) {
+        setUser(res.data.user);
+        setFormData({
+          firstname: res.data.user.firstname,
+          lastname: res.data.user.lastname,
+          publishingHouse: res.data.user.publishingHouse,
+          email: res.data.user.email,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+      if (res?.data?.analytics) {
+        setAnalytics(res.data.analytics);
+      }
+    } catch (e) {
+      console.error("Failed to load profile:", e);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormErrors({});
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, currentPassword, newPassword, confirmPassword } = formData;
+
+    // Current password is always required
+    if (!currentPassword) {
+      setFormErrors({ currentPasswordError: "Current password is required to update profile." });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormErrors({ generalError: "Please enter a valid email address." });
+      return;
+    }
+
+    // If changing password, validate new password fields
+    if (newPassword || confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        setFormErrors({ passwordError: "New passwords do not match." });
+        return;
+      }
+    }
+
+    try {
+      saveBtnRef.current.innerText = "Saving...";
+      saveBtnRef.current.disabled = true;
+
+      const res = await updateProfile(formData);
+      if (res?.success) {
+        setUser(res.data);
+        setShowEditDialog(false);
+        setFormData({
+          ...formData,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       } else {
-        setError(response.message);
+        setFormErrors({ generalError: res?.message || "Failed to update profile" });
       }
     } catch (err) {
-      setError("Failed to fetch dashboard");
+      setFormErrors({ generalError: err.response?.data?.message || "Failed to update profile" });
     } finally {
-      setLoading(false);
+      saveBtnRef.current.innerText = "Save Changes";
+      saveBtnRef.current.disabled = false;
     }
   };
 
@@ -56,507 +119,478 @@ const PublisherDashboard = () => {
     navigate("/auth/login");
   };
 
-  const handleEditClick = (book, e) => {
-    e?.stopPropagation();
-    navigate(`/publisher/edit-book/${book._id}`, { state: { book } });
-  };
-
-  const handleDeleteClick = async (book, e) => {
-    e?.stopPropagation();
-    const confirm = window.confirm(
-      `Are you sure you want to delete "${book.title}"? This will soft-delete the book and update buyers' availability/cart.`
-    );
-    if (!confirm) return;
-    try {
-      setActionLoading(true);
-      await softDeleteBook(book._id);
-      setData(prevData => {
-        const updatedDeletedBooks = [...(prevData.deletedBooks || []), { ...book, isDeleted: true }]
-          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-        
-        return {
-          ...prevData,
-          books: prevData.books.filter(b => b._id !== book._id),
-          deletedBooks: updatedDeletedBooks
-        };
-      });
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Failed to delete book");
-      await fetchDashboard();
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRestoreClick = async (book, e) => {
-    e?.stopPropagation(); // Prevent card click
-    const confirm = window.confirm(
-      `Are you sure you want to restore "${book.title}"? This will make it available to buyers again.`
-    );
-    if (!confirm) return;
-    try {
-      setActionLoading(true);
-      await restoreBook(book._id);  
-      setData(prevData => {
-        const updatedBooks = [...prevData.books, { ...book, isDeleted: false }]
-          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-        
-        return {
-          ...prevData,
-          books: updatedBooks,
-          deletedBooks: prevData.deletedBooks.filter(b => b._id !== book._id)
-        };
-      });
-    } catch (err) {
-      console.error("Restore error:", err);
-      alert("Failed to restore book");
-      // Revert on error
-      await fetchDashboard();
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleViewBook = (bookId) => {
-    navigate(`/publisher/view-book/${bookId}`);
-  };
-
-  if (loading)
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
-    );
-
   return (
-    <div className="bg-gray-50">
-      {/* Navbar */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/publisher/dashboard" className="flex items-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                  PubliShelf
-                </span>
-              </Link>
+    <div className="bg-gray-50 min-h-screen">
+      <PublisherNavbar publisherName={`${user.firstname} ${user.lastname}`} />
+
+      <div className="pt-16 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Profile Header */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <div className="bg-purple-600 rounded-full w-20 h-20 flex items-center justify-center text-white text-3xl font-bold">
+                  {user.firstname?.charAt(0)}{user.lastname?.charAt(0)}
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {user.firstname} {user.lastname}
+                  </h1>
+                  <p className="text-gray-600 mt-1">{user.email}</p>
+                  <p className="text-purple-600 font-medium mt-1">{user.publishingHouse}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowEditDialog(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-[550] px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <i className="fas fa-edit"></i>
+                  Edit Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-6 py-2.5 bg-gray-200 text-gray-700 font-[550] rounded-lg transition-colors flex items-center gap-2"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                {data.publisher.firstname} {data.publisher.lastname}
-              </span>
+          </div>
+
+          {/* Tabs */}
+          <div className="mb-6 border-b border-gray-200">
+            <div className="flex space-x-8">
               <button
-                onClick={handleLogout}
-                className="bg-gradient-to-r hover:bg-gradient-to-l from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:-translate-y-[2px] transition-all duration-300"
+                onClick={() => setActiveTab('overview')}
+                className={`pb-4 font-medium transition-colors ${
+                  activeTab === 'overview'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
-                Logout
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('revenue')}
+                className={`pb-4 font-medium transition-colors ${
+                  activeTab === 'revenue'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Revenue Analytics
+              </button>
+              <button
+                onClick={() => setActiveTab('buyers')}
+                className={`pb-4 font-medium transition-colors ${
+                  activeTab === 'buyers'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Buyer Interactions
               </button>
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Main Content */}
-      <div className="pt-16 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Publisher Dashboard</h1>
+          {/* Content based on active tab */}
+          {activeTab === 'overview' && analytics && (
+            <div className="space-y-8">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Revenue</p>
+                      <p className="text-2xl font-bold text-purple-600 mt-1">
+                        ₹{analytics.totalRevenue.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="bg-purple-100 rounded-full p-3">
+                      <i className="fas fa-rupee-sign text-purple-600 text-xl"></i>
+                    </div>
+                  </div>
+                </div>
 
-          {/* Approval Status */}
-          {data.publisher.status !== "approved" && (
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-lg">
-              <p className="font-medium">
-                Approval Status:{" "}
-                {data.publisher.status.charAt(0).toUpperCase() + data.publisher.status.slice(1)}
-              </p>
-              <p>
-                Your account is{" "}
-                {data.publisher.status === "pending"
-                  ? "awaiting approval. You can publish books, but they will be reviewed before listing."
-                  : "rejected. Please contact support@publishelf.com."}
-              </p>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Books Sold</p>
+                      <p className="text-2xl font-bold text-indigo-600 mt-1">
+                        {analytics.totalBooksSold}
+                      </p>
+                    </div>
+                    <div className="bg-indigo-100 rounded-full p-3">
+                      <i className="fas fa-book text-indigo-600 text-xl"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Active Books</p>
+                      <p className="text-2xl font-bold text-green-600 mt-1">
+                        {analytics.activeBooks}
+                      </p>
+                    </div>
+                    <div className="bg-green-100 rounded-full p-3">
+                      <i className="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Books</p>
+                      <p className="text-2xl font-bold text-gray-600 mt-1">
+                        {analytics.totalBooks}
+                      </p>
+                    </div>
+                    <div className="bg-gray-100 rounded-full p-3">
+                      <i className="fas fa-layer-group text-gray-600 text-xl"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Selling Books */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Top Selling Books</h2>
+                {analytics.topSellingBooks && analytics.topSellingBooks.length > 0 ? (
+                  <div className="space-y-3">
+                    {analytics.topSellingBooks.map((book, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-bold text-purple-600">#{index + 1}</span>
+                          <div>
+                            <p className="font-medium text-gray-900">{book.title}</p>
+                            <p className="text-sm text-gray-500">{book.quantity} copies sold</p>
+                          </div>
+                        </div>
+                        <p className="font-bold text-purple-600">₹{book.revenue.toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No sales data available</p>
+                )}
+              </div>
+
+              {/* Low Stock Alerts */}
+              {analytics.lowStockBooks && analytics.lowStockBooks.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm border border-amber-200 p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <i className="fas fa-exclamation-triangle text-amber-500"></i>
+                    <h2 className="text-xl font-bold text-gray-900">Low Stock Alerts</h2>
+                  </div>
+                  <div className="space-y-2">
+                    {analytics.lowStockBooks.map((book) => (
+                      <div key={book._id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                        <p className="font-medium text-gray-900">{book.title}</p>
+                        <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+                          {book.quantity} left
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Analytics Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900">Books Sold</h3>
-              <p className="text-2xl font-bold text-purple-600 mt-2">{data.analytics.booksSold}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900">Total Revenue</h3>
-              <p className="text-2xl font-bold text-purple-600 mt-2">
-                ₹{data.analytics.totalRevenue.toFixed(2)}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900">Most Sold Book</h3>
-              <p className="text-lg font-bold text-purple-600 mt-2">
-                {data.analytics.mostSoldBook ? data.analytics.mostSoldBook.title : "None"}
-              </p>
-              <p className="text-sm text-gray-600">
-                {data.analytics.mostSoldBook ? `${data.analytics.mostSoldBook.count} sold` : ""}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900">Top Genres</h3>
-              <ul className="mt-2 text-sm text-gray-600 space-y-1">
-                {data.analytics.topGenres.map((genre) => (
-                  <li key={genre.genre}>
-                    {genre.genre}: {genre.count} sold
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <Link
-              to="/publisher/publish-book"
-              className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-1"
-            >
-              <div className="flex items-center space-x-4 text-white">
-                <div className="bg-purple-500 p-3 rounded-lg">
-                  <i className="fas fa-book text-2xl"></i>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Publish New Book</h3>
-                  <p className="text-purple-200">List your book for sale</p>
-                </div>
-              </div>
-            </Link>
-            <Link
-              to="/publisher/sell-antique"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-1"
-            >
-              <div className="flex items-center space-x-4 text-white">
-                <div className="bg-indigo-500 p-3 rounded-lg">
-                  <i className="fas fa-gavel text-2xl"></i>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Sell Antique Book</h3>
-                  <p className="text-indigo-200">Start an auction</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Recent Publications */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Publications</h2>
-            {data.books.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                {data.books.map((book) => (
-                  <div
-                    key={book._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden relative transform transition-transform duration-300 hover:scale-[1.0125] hover:shadow-lg"
-                    onMouseEnter={() => setHoveredBookId(book._id)}
-                    onMouseLeave={() => setHoveredBookId(null)}
-                  >
-                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
-                      <img
-                        src={book.image}
-                        alt={book.title}
-                        className="w-full h-[300px] object-contain bg-white p-2"
-                      />
-                      
-                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 cursor-pointer ${
-                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}
-                          onClick={() => handleViewBook(book._id)}>
-                        <button
-                          title="Edit"
-                          onClick={(e) => handleEditClick(book, e)}
-                          className="text-base flex items-center gap-2 bg-white text-purple-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-purple-50 hover:scale-105 focus:outline-none transition-all duration-200"
-                        >
-                          <i className="fas fa-edit"></i>
-                          <span className="font-medium select-none">Edit Book</span>
-                        </button>
-                        <button
-                          title="Delete"
-                          onClick={(e) => handleDeleteClick(book, e)}
-                          className="text-base flex items-center gap-2 bg-white text-red-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-red-50 hover:scale-105 focus:outline-none transition-all duration-200"
-                          disabled={actionLoading}
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span className="font-medium select-none">Delete Book</span>
-                        </button>
+          {activeTab === 'revenue' && analytics && (
+            <div className="space-y-8">
+              {/* Revenue Trend */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Revenue Trend (Last 6 Months)</h2>
+                {analytics.revenueData && analytics.revenueData.length > 0 ? (
+                  <div className="space-y-4">
+                    {analytics.revenueData.map((item, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 font-medium">{item.month}</span>
+                          <span className="text-purple-600 font-bold">₹{item.revenue.toFixed(2)}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div
+                            className="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full transition-all duration-500"
+                            style={{
+                              width: `${(item.revenue / Math.max(...analytics.revenueData.map(d => d.revenue))) * 100}%`
+                            }}
+                          ></div>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No revenue data available</p>
+                )}
+              </div>
+
+              {/* Genre Breakdown */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Genre Performance</h2>
+                {analytics.genreBreakdown && analytics.genreBreakdown.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      {analytics.genreBreakdown.map((genre, index) => {
+                        const maxRevenue = Math.max(...analytics.genreBreakdown.map(g => g.revenue));
+                        const percentage = (genre.revenue / maxRevenue) * 100;
+                        const colors = ['purple', 'indigo', 'blue', 'green', 'teal'];
+                        const color = colors[index % colors.length];
+                        
+                        return (
+                          <div key={index} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-gray-700">{genre.genre}</span>
+                              <span className="text-sm text-gray-500">{genre.quantity} sold</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-3">
+                              <div
+                                className={`bg-${color}-500 h-3 rounded-full transition-all duration-500`}
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-600">₹{genre.revenue.toFixed(2)}</p>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    <div className="p-4 cursor-pointer" onClick={() => handleViewBook(book._id)}> 
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xl font-bold text-purple-600">₹{book.price}</span>
-                        </div>
-                        <div>
-                          {book.quantity === 0 ? (
-                            <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-red-200">
-                              <i className="fas fa-times-circle"></i>
-                              Out of Stock
-                            </span>
-                          ) : book.quantity <= 5 ? (
-                            <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-orange-200">
-                              <i className="fas fa-exclamation-circle"></i>
-                              {book.quantity} left
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-green-200">
-                              <i className="fas fa-check-circle"></i>
-                              {book.quantity} units
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <h3 className="text-lg font-semibold mb-1 line-clamp-1" title={book.title}>
-                        {book.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
-                      
-                      {/* Info grid */}
-                      <div className="flex justify-between mt-3 pt-3 px-2 border-t border-gray-200">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                          <i className="fas fa-tag text-purple-500"></i>
-                          <span className="font-medium">{book.genre}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                          <i className="fas fa-calendar text-green-500"></i>
-                          <span className="font-medium">{new Date(book.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                    {/* Genre Pie Chart Visual */}
+                    <div className="flex items-center justify-center">
+                      <div className="relative w-48 h-48">
+                        {analytics.genreBreakdown.map((genre, index) => {
+                          const total = analytics.genreBreakdown.reduce((sum, g) => sum + g.revenue, 0);
+                          const percentage = ((genre.revenue / total) * 100).toFixed(1);
+                          const colors = ['bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500'];
+                          const color = colors[index % colors.length];
+                          
+                          return (
+                            <div key={index} className="absolute inset-0 flex items-center justify-center">
+                              <div className={`${color} w-full h-full rounded-full opacity-${100 - (index * 15)}`}
+                                style={{ transform: `scale(${1 - (index * 0.15)})` }}></div>
+                            </div>
+                          );
+                        })}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-purple-600">
+                                {analytics.genreBreakdown.length}
+                              </p>
+                              <p className="text-xs text-gray-600">Genres</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No genre data available</p>
+                )}
               </div>
-            ) : (
-              <p className="text-gray-600 text-sm">No recent publications found.</p>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Deleted Books */}
-          {data.deletedBooks && data.deletedBooks.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Deleted Books</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                {data.deletedBooks.map((book) => (
-                  <div
-                    key={book._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden relative transform transition-transform duration-300 hover:scale-[1.0125] hover:shadow-lg opacity-75"
-                    onMouseEnter={() => setHoveredBookId(book._id)}
-                    onMouseLeave={() => setHoveredBookId(null)}
-                  >
-                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
-                      <img
-                        src={book.image}
-                        alt={book.title}
-                        className="w-full h-[300px] object-contain bg-white p-2 grayscale"
-                      />
-                      
-                      {/* Deleted Badge */}
-                      <div className="absolute top-3 left-3">
-                        <span className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-lg">
-                          <i className="fas fa-trash"></i>
-                          Deleted
-                        </span>
-                      </div>
-                      
-                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
-                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
-                        <button
-                          title="Restore"
-                          onClick={(e) => handleRestoreClick(book, e)}
-                          className="text-base flex items-center gap-2 bg-white text-green-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-green-50 hover:scale-105 focus:outline-none transition-all duration-200"
-                          disabled={actionLoading}
-                        >
-                          <i className="fas fa-undo"></i>
-                          <span className="font-medium select-none">Restore Book</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="p-4 cursor-pointer" onClick={() => handleViewBook(book._id)}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xl font-bold text-gray-500">₹{book.price}</span>
+          {activeTab === 'buyers' && analytics && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Buyer Interactions</h2>
+              {analytics.buyerInteractions && analytics.buyerInteractions.length > 0 ? (
+                <div className="space-y-4">
+                  {analytics.buyerInteractions.map((interaction, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-purple-100 rounded-full w-10 h-10 flex items-center justify-center">
+                            <i className="fas fa-user text-purple-600"></i>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">{interaction.buyer.name}</p>
+                            <p className="text-sm text-gray-500">{interaction.buyer.email}</p>
+                          </div>
                         </div>
-                        <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-red-200">
-                          <i className="fas fa-ban"></i>
-                          Unavailable
-                        </span>
+                        <div className="text-right">
+                          <p className="font-bold text-purple-600">₹{interaction.totalAmount.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(interaction.orderDate).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-
-                      <h3 className="text-lg font-semibold mb-1 line-clamp-1 text-gray-700" title={book.title}>
-                        {book.title}
-                      </h3>
-                      <p className="text-gray-500 text-sm mb-2">by {book.author}</p>
                       
-                      {/* Rating */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center text-amber-400">
-                          <i className="fas fa-star text-xs"></i>
-                          <span className="ml-1 text-sm font-semibold text-gray-700">
-                            {book.rating ? book.rating.toFixed(1) : '0.0'}
+                      <div className="flex justify-between items-center ">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <i className="fas fa-book text-purple-500"></i>
+                          <span>
+                            {interaction.books.length === 1 
+                              ? interaction.books[0]
+                              : `${interaction.books[0]} +${interaction.books.length - 1} more`
+                            }
+                          </span>
+                        </div>  
+                        <div>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            interaction.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            interaction.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {interaction.status}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">
-                          ({book.reviewCount || 0} reviews)
-                        </span>
-                      </div>
-                      
-                      {/* Info grid */}
-                      <div className="flex justify-between mt-3 pt-3 px-2 border-t border-gray-200">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <i className="fas fa-tag text-gray-400"></i>
-                          <span className="font-medium">{book.genre}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <i className="fas fa-calendar text-gray-400"></i>
-                          <span className="font-medium">{new Date(book.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
-                        </div>
-                      </div>
+                      </div>                  
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">No buyer interactions yet</p>
+              )}
             </div>
           )}
-
-          {/* Recent Auctions */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Auctions</h2>
-            {data.auctions.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Title
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Base Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Current Bid
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Start Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        End Time
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {data.auctions.map((auction) => (
-                      <tr key={auction._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {auction.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{auction.basePrice}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{auction.currentPrice || auction.basePrice}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(auction.auctionStart).toLocaleString("en-US", {
-                            month: "short",
-                            day: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(auction.auctionEnd).toLocaleString("en-US", {
-                            month: "short",
-                            day: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-gray-600 text-sm">No active auctions.</p>
-            )}
-          </div>
-
-          {/* Recent Buyer Interactions */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Recent Buyer Interactions
-            </h2>
-            {data.activities.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {data.activities.map((activity, idx) => (
-                      <tr key={idx}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {activity.action}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(activity.timestamp).toLocaleString("en-US", {
-                            month: "short",
-                            day: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-gray-600 text-sm">No recent buyer interactions.</p>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                PubliShelf
-              </span>
-              <p className="text-sm mt-2">© 2025 PubliShelf. All rights reserved.</p>
-            </div>
-            <div className="flex space-x-6">
-              <a href="/terms" className="text-gray-300 hover:text-purple-400 text-sm">
-                Terms and Conditions
-              </a>
-              <a href="/privacy" className="text-gray-300 hover:text-purple-400 text-sm">
-                Privacy Policy
-              </a>
+      {/* Edit Profile Modal */}
+      {showEditDialog && (
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
+                <button
+                  onClick={() => setShowEditDialog(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <i className="fas fa-times text-xl"></i>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input
+                    type="text"
+                    name="firstname"
+                    value={formData.firstname}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    name="lastname"
+                    value={formData.lastname}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Publishing House</label>
+                  <input
+                    type="text"
+                    name="publishingHouse"
+                    value={formData.publishingHouse}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Password </label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={formData.currentPassword}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                    required
+                  />
+                  {formErrors.currentPasswordError && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.currentPasswordError}</p>
+                  )}
+                </div>                
+
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-1">Change Password (Optional)</p>
+                  
+                  <div className="space-y-3">
+
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">New Password</label>
+                      <input
+                        type="password"
+                        name="newPassword"
+                        value={formData.newPassword}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Confirm New Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-0"
+                      />
+                      {formErrors.passwordError && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.passwordError}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {formErrors.generalError && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    {formErrors.generalError}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditDialog(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    ref={saveBtnRef}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      </footer>
+      )}
     </div>
   );
 };
 
-export default PublisherDashboard;
+export default Dashboard;
