@@ -1,16 +1,13 @@
 @import "tailwindcss";
 
-/* Global Scrollbar */
 * {
-  scrollbar-width: thin !important;
-  scrollbar-color: #4f46e5aa #f1f1f1 !important;
+  scrollbar-width: none !important; 
 }
 
-html {
-  scroll-behavior: smooth;
+*::-webkit-scrollbar {
+  display: none !important;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
