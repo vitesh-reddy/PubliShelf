@@ -18,7 +18,7 @@ import PublishBook from '../pages/publisher/publish-book/PublishBook';
 import SellAntique from '../pages/publisher/sell-antique/SellAntique';
 import EditBookPage from '../pages/publisher/edit-book/EditBookPage';
 import PublisherViewBook from '../pages/publisher/view-book/ViewBook';
-import Dashboard from '../pages/publisher/dashboard/Dashboard';
+import PublisherDashboard from '../pages/publisher/dashboard/Dashboard';
 import PublisherDashboard_Old from '../pages/publisher/dashboard old/Dashboard_Old';
 
 const ProtectedRoutes = () => (
@@ -39,7 +39,7 @@ const ProtectedRoutes = () => (
     {/* Publisher Routes */}
     <Route element={<ProtectedRoute allowedRoles={['publisher']} />}>
       <Route path="/publisher/old-dashboard" element={<PublisherDashboard_Old/> } />
-      <Route path="/publisher/dashboard" element={<Dashboard />} />
+      <Route path="/publisher/dashboard" element={<PublisherDashboard />} />
       <Route path="/publisher/active-books" element={<ActiveBooks />} />
       <Route path="/publisher/deleted-books" element={<DeletedBooks />} />
       <Route path="/publisher/auctions" element={<Auctions />} />
