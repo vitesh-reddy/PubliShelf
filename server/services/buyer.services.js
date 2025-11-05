@@ -186,6 +186,8 @@ export const updateBuyerDetails = async (buyerId, currentPassword, updatedData) 
   const buyer = await Buyer.findById(buyerId);
   if (!buyer) throw new Error("Buyer not found");
 
+  if (!currentPassword) throw new Error("Current password is required to update profile");
+
   const isPasswordValid = await bcrypt.compare(currentPassword, buyer.password);
   if (!isPasswordValid) throw new Error("Incorrect Password");
 
@@ -193,7 +195,14 @@ export const updateBuyerDetails = async (buyerId, currentPassword, updatedData) 
     const existingBuyer = await Buyer.findOne({ email: updatedData.email });
     if (existingBuyer) throw new Error("Email already exists");
   }
-  Object.assign(buyer, updatedData);
+  
+  // Update fields except password if it's empty (password change is optional)
+  const fieldsToUpdate = { ...updatedData };
+  if (!updatedData.password) {
+    delete fieldsToUpdate.password;
+  }
+  
+  Object.assign(buyer, fieldsToUpdate);
   return await buyer.save();
 };
 

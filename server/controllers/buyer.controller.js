@@ -531,7 +531,7 @@ export const getBuyerProfile = async (req, res) => {
     // Fetch orders from Order collection and attach as user.orders for backward compatibility
     const ordersDocs = await Order.find({ buyer: req.user.id })
       .sort({ createdAt: -1 })
-      .populate({ path: "items.book", select: "title author price image genre" })
+      .populate({ path: "items.book", select: "title author price image genre description" })
       .lean();
     const flatOrders = ordersDocs.flatMap((o) =>
       (o.items || []).map((it) => ({
@@ -544,10 +544,82 @@ export const getBuyerProfile = async (req, res) => {
     );
     user.orders = flatOrders;
 
+    // Calculate analytics metrics efficiently
+    const analytics = {
+      totalOrders: ordersDocs.length,
+      totalItemsPurchased: flatOrders.reduce((sum, order) => sum + (order.quantity || 0), 0),
+      totalSpent: ordersDocs.reduce((sum, order) => sum + (order.grandTotal || 0), 0),
+      wishlistCount: user.wishlist?.length || 0,
+      deliveredOrders: ordersDocs.filter(o => o.status === "delivered").length,
+      pendingOrders: ordersDocs.filter(o => o.status === "pending").length,
+    };
+
+    // Calculate favorite genres from purchased books with spending
+    const genreData = {};
+    flatOrders.forEach(order => {
+      if (order.book?.genre) {
+        if (!genreData[order.book.genre]) {
+          genreData[order.book.genre] = { count: 0, totalSpent: 0 };
+        }
+        genreData[order.book.genre].count += order.quantity;
+      }
+    });
+    
+    // Add spending per genre
+    ordersDocs.forEach(order => {
+      order.items?.forEach(item => {
+        if (item.book?.genre) {
+          if (genreData[item.book.genre]) {
+            genreData[item.book.genre].totalSpent += item.lineTotal || 0;
+          }
+        }
+      });
+    });
+    
+    analytics.favoriteGenres = Object.entries(genreData)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5)
+      .map(([genre, data]) => ({ 
+        _id: genre, 
+        count: data.count,
+        totalSpent: data.totalSpent
+      }));
+
+    // Calculate monthly spending for the last 6 months
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const monthlySpending = {};
+    
+    ordersDocs.forEach(order => {
+      const orderDate = new Date(order.createdAt);
+      if (orderDate >= sixMonthsAgo) {
+        const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+        monthlySpending[monthKey] = (monthlySpending[monthKey] || 0) + (order.grandTotal || 0);
+      }
+    });
+    
+    analytics.monthlySpending = Object.entries(monthlySpending)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, amount]) => ({ month, amount }));
+
+    // Recent activity (last 5 orders) with book names
+    analytics.recentActivity = ordersDocs.slice(0, 5).map(order => ({
+      date: order.createdAt,
+      books: order.items?.map(item => item.book?.title || item.title).filter(Boolean) || [],
+      itemCount: order.items?.length || 0,
+      total: order.grandTotal || 0,
+      status: order.status
+    }));
+
+    // Average order value
+    analytics.averageOrderValue = analytics.totalOrders > 0 
+      ? (analytics.totalSpent / analytics.totalOrders).toFixed(2) 
+      : 0;
+
     res.status(200).json({
       success: true,
       message: "Profile fetched successfully",
-      data: { user }
+      data: { user, analytics }
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -605,12 +677,19 @@ export const updateBuyerProfileById = async (req, res) => {
   const { id: buyerId } = req.params;
   const { currentPassword, firstname, lastname, email, confirmPassword } = req.body;
   try {
-    const updatedBuyer = await updateBuyerDetails(buyerId, currentPassword, {
+    // Build update data - only hash password if provided
+    const updateData = {
       firstname,
       lastname,
       email,
-      password: await bcrypt.hash(confirmPassword, 10),
-    });
+    };
+    
+    // Only include password in update if user wants to change it
+    if (confirmPassword) {
+      updateData.password = await bcrypt.hash(confirmPassword, 10);
+    }
+    
+    const updatedBuyer = await updateBuyerDetails(buyerId, currentPassword, updateData);
 
     res.status(200).json({
       success: true,
