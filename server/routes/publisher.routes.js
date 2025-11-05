@@ -4,7 +4,7 @@ import { protect } from "../middleware/auth.middleware.js";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
-import { getPublisherDashboard, createPublisherSignup, publishBook, sellAntique, getPublisherBook, updatePublisherBook, deletePublisherBook, restorePublisherBook } from "../controllers/publisher.controller.js";
+import { getPublisherDashboard, getPublisherProfile, updatePublisherProfile, createPublisherSignup, publishBook, sellAntique, getPublisherBook, updatePublisherBook, deletePublisherBook, restorePublisherBook } from "../controllers/publisher.controller.js";
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -19,6 +19,8 @@ const upload = multer({ storage });
 const router = express.Router();
 
 router.get("/dashboard", protect, getPublisherDashboard);
+router.get("/profile", protect, getPublisherProfile);
+router.put("/profile", protect, updatePublisherProfile);
 router.post("/signup", createPublisherSignup);
 router.post("/publish-book", protect, upload.single("imageFile"), publishBook);
 router.post("/sell-antique", protect, upload.fields([

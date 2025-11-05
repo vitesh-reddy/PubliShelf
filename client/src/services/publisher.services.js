@@ -6,6 +6,16 @@ export const getDashboard = async () => {
   return response.data;
 };
 
+export const getProfile = async () => {
+  const response = await axiosInstance.get("/publisher/profile");
+  return response.data;
+};
+
+export const updateProfile = async (profileData) => {
+  const response = await axiosInstance.put("/publisher/profile", profileData);
+  return response.data;
+};
+
 export const signupPublisher = async (userData) => {
   const response = await axiosInstance.post("/publisher/signup", userData);
   return response.data;

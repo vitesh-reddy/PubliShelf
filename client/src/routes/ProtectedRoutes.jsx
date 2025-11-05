@@ -12,6 +12,10 @@ import AuctionItemDetail from '../pages/buyer/auction/AuctionItemDetail';
 import AuctionOngoing from '../pages/buyer/auction/AuctionOngoing';
 
 import PublisherDashboard from '../pages/publisher/dashboard/Dashboard';
+import PublisherProfile from '../pages/publisher/profile/PublisherProfile';
+import ActiveBooks from '../pages/publisher/active-books/ActiveBooks';
+import DeletedBooks from '../pages/publisher/deleted-books/DeletedBooks';
+import Auctions from '../pages/publisher/auctions/Auctions';
 import PublishBook from '../pages/publisher/publish-book/PublishBook';
 import SellAntique from '../pages/publisher/sell-antique/SellAntique';
 import EditBookPage from '../pages/publisher/edit-book/EditBookPage';
@@ -34,7 +38,11 @@ const ProtectedRoutes = () => (
 
     {/* Publisher Routes */}
     <Route element={<ProtectedRoute allowedRoles={['publisher']} />}>
-      <Route path="/publisher/dashboard" element={<PublisherDashboard />} />
+      <Route path="/publisher/old-dashboard" element={<PublisherDashboard />} />
+      <Route path="/publisher/dashboard" element={<PublisherProfile />} />
+      <Route path="/publisher/active-books" element={<ActiveBooks />} />
+      <Route path="/publisher/deleted-books" element={<DeletedBooks />} />
+      <Route path="/publisher/auctions" element={<Auctions />} />
       <Route path="/publisher/publish-book" element={<PublishBook />} />
       <Route path="/publisher/sell-antique" element={<SellAntique />} />
       <Route path="/publisher/edit-book/:id" element={<EditBookPage />} />

@@ -5,7 +5,158 @@ import { createAntiqueBook } from "../services/antiqueBook.services.js";
 import Book from "../models/Book.model.js";
 import Order from "../models/Order.model.js";
 import AntiqueBook from "../models/AntiqueBook.model.js";
+import Publisher from "../models/Publisher.model.js";
 import bcrypt from "bcrypt";
+
+export const getPublisherProfile = async (req, res) => {
+  try {
+    const publisher = await getPublisherById(req.user.id);
+    if (!publisher) {
+      return res.status(404).json({ success: false, message: "Publisher not found" });
+    }
+
+    const allBooks = await Book.find({ publisher: req.user.id }).sort({ publishedAt: -1 });
+    const books = allBooks.filter(book => !book.isDeleted);
+    
+    // Fetch all orders with items for this publisher
+    const ordersDocs = await Order.find({ publishers: req.user.id })
+      .select("items createdAt status buyer grandTotal")
+      .populate({ path: "items.book", select: "title price genre" })
+      .populate({ path: "buyer", select: "firstname lastname email" })
+      .lean();
+
+    // Flatten order items for this publisher
+    const orders = ordersDocs.flatMap((o) =>
+      (o.items || [])
+        .filter((it) => it.publisher?.toString() === req.user.id)
+        .map((it) => ({
+          book: it.book?._id || it.book,
+          title: it.book?.title || it.title,
+          genre: it.book?.genre,
+          price: it.unitPrice,
+          quantity: it.quantity,
+          lineTotal: it.lineTotal || (it.unitPrice * it.quantity),
+          orderDate: o.createdAt,
+          status: o.status,
+          buyer: o.buyer,
+        }))
+    );
+
+    // Basic analytics
+    const totalBooksSold = orders.reduce((sum, order) => sum + order.quantity, 0);
+    const totalRevenue = orders.reduce((sum, order) => sum + order.lineTotal, 0);
+
+    // Monthly revenue for last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const monthlyRevenue = await Order.aggregate([
+      { $match: { publishers: req.user.id, createdAt: { $gte: sixMonthsAgo } } },
+      { $unwind: "$items" },
+      { $match: { "items.publisher": req.user.id } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          revenue: { $sum: "$items.lineTotal" }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const revenueData = monthlyRevenue.map(item => ({
+      month: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
+      revenue: item.revenue || 0
+    }));
+
+    // Genre breakdown with revenue
+    const genreData = orders.reduce((acc, order) => {
+      const genre = order.genre || 'Unknown';
+      if (!acc[genre]) {
+        acc[genre] = { genre, quantity: 0, revenue: 0 };
+      }
+      acc[genre].quantity += order.quantity;
+      acc[genre].revenue += order.lineTotal;
+      return acc;
+    }, {});
+
+    const genreBreakdown = Object.values(genreData)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    // Top selling books
+    const bookSalesMap = orders.reduce((acc, order) => {
+      const bookId = order.book.toString();
+      if (!acc[bookId]) {
+        acc[bookId] = { title: order.title, quantity: 0, revenue: 0 };
+      }
+      acc[bookId].quantity += order.quantity;
+      acc[bookId].revenue += order.lineTotal;
+      return acc;
+    }, {});
+
+    const topSellingBooks = Object.values(bookSalesMap)
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
+
+    // Recent buyer interactions - unique buyers with their orders
+    const buyerInteractions = ordersDocs
+      .filter(o => o.buyer)
+      .map(o => ({
+        buyer: {
+          name: `${o.buyer.firstname} ${o.buyer.lastname}`,
+          email: o.buyer.email,
+        },
+        books: o.items
+          .filter(it => it.publisher?.toString() === req.user.id)
+          .map(it => it.book?.title || it.title),
+        totalAmount: o.items
+          .filter(it => it.publisher?.toString() === req.user.id)
+          .reduce((sum, it) => sum + (it.lineTotal || 0), 0),
+        orderDate: o.createdAt,
+        status: o.status,
+      }))
+      .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+      .slice(0, 10);
+
+    // Stock alerts - low stock books
+    const lowStockBooks = books
+      .filter(book => book.quantity > 0 && book.quantity <= 5)
+      .map(book => ({
+        title: book.title,
+        quantity: book.quantity,
+        _id: book._id,
+      }));
+
+    res.status(200).json({
+      success: true,
+      message: "Publisher profile fetched successfully",
+      data: {
+        user: {
+          firstname: publisher.firstname,
+          lastname: publisher.lastname,
+          email: publisher.email,
+          publishingHouse: publisher.publishingHouse,
+        },
+        analytics: {
+          totalBooksSold,
+          totalRevenue,
+          activeBooks: books.length,
+          totalBooks: allBooks.length,
+          revenueData,
+          genreBreakdown,
+          topSellingBooks,
+          buyerInteractions,
+          lowStockBooks,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching publisher profile:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const getPublisherDashboard = async (req, res) => {
   try {
@@ -322,5 +473,61 @@ export const restorePublisherBook = async (req, res) => {
   } catch (error) {
     console.error('Error restoring book:', error);
     res.status(500).json({ success: false, message: 'Error restoring book', data: null });
+  }
+};
+
+export const updatePublisherProfile = async (req, res) => {
+  try {
+    const publisher = await getPublisherById(req.user.id);
+    if (!publisher) {
+      return res.status(404).json({ success: false, message: "Publisher not found" });
+    }
+
+    const { firstname, lastname, publishingHouse, email, currentPassword, newPassword } = req.body;
+
+    // Verify current password is provided for any changes
+    if (!currentPassword) {
+      return res.status(400).json({ success: false, message: "Current password is required to update profile" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, publisher.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    // Update basic info
+    if (firstname) publisher.firstname = firstname;
+    if (lastname) publisher.lastname = lastname;
+    if (publishingHouse) publisher.publishingHouse = publishingHouse;
+
+    // Handle email change
+    if (email && email !== publisher.email) {
+      const existingPublisher = await Publisher.findOne({ email });
+      if (existingPublisher) {
+        return res.status(400).json({ success: false, message: "Email already in use" });
+      }
+      publisher.email = email;
+    }
+
+    // Handle password change (optional)
+    if (newPassword) {
+      publisher.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    await publisher.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        firstname: publisher.firstname,
+        lastname: publisher.lastname,
+        email: publisher.email,
+        publishingHouse: publisher.publishingHouse,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating publisher profile:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
