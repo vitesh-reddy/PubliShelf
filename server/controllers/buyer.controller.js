@@ -1,10 +1,11 @@
 //controllers/buyer.controller.js
 import bcrypt from "bcrypt";
-import { getBuyerById, createBuyer, updateBuyerDetails, getTopSoldBooks, getTrendingBooks } from "../services/buyer.services.js";
+import { getBuyerById, createBuyer, updateBuyerDetails, getTopSoldBooks, getTrendingBooks, placeOrder } from "../services/buyer.services.js";
 import { getAllBooks, getBookById, searchBooks, filterBooks} from "../services/book.services.js";
 import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBook.services.js";
 import Buyer from "../models/Buyer.model.js";
 import Book from "../models/Book.model.js";
+import Order from "../models/Order.model.js";
 
 export const getBuyerDashboard = async (req, res) => {
   try {
@@ -398,42 +399,18 @@ export const updateCartQuantity = async (req, res) => {
 
 export const placeOrderController = async (req, res) => {
   try {
-    const buyer = await getBuyerById(req.user.id);
-    if (!buyer) {
-      return res.status(404).json({
-        success: false,
-        message: "Buyer not found",
-        data: null
-      });
-    }
-
-    const newOrders = buyer.cart.map((item) => ({
-      book: item.book,
-      quantity: item.quantity,
-      orderDate: new Date(),
-      delivered: false,
-    }));
-    buyer.orders.push(...newOrders);
-
-    buyer.cart.forEach(async (item) => {
-      await Book.findByIdAndUpdate(
-        { _id: item.book._id },
-        { $inc: { quantity: -parseInt(item.quantity) } },
-        { new: true }
-      );
-    });
-    buyer.cart = [];
-    await buyer.save();
+    const { addressId, paymentMethod } = req.body;
+    const order = await placeOrder(req.user.id, { addressId, paymentMethod });
     res.status(200).json({
       success: true,
       message: "Order placed successfully",
-      data: null
+      data: { orderId: order._id }
     });
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: "An error occurred while placing the order",
+      message: error.message || "An error occurred while placing the order",
       data: null
     });
   }
@@ -542,7 +519,6 @@ export const placeBid = async (req, res) => {
 export const getBuyerProfile = async (req, res) => {
   try {
     const user = await Buyer.findById(req.user.id)
-      .populate("orders.book")
       .populate("wishlist")
       .lean();
     if (!user) {
@@ -552,10 +528,21 @@ export const getBuyerProfile = async (req, res) => {
         data: null
       });
     }
-
-    if (user.orders && user.orders.length > 0) {
-      user.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-    }
+    // Fetch orders from Order collection and attach as user.orders for backward compatibility
+    const ordersDocs = await Order.find({ buyer: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate({ path: "items.book", select: "title author price image genre" })
+      .lean();
+    const flatOrders = ordersDocs.flatMap((o) =>
+      (o.items || []).map((it) => ({
+        _id: it._id,
+        book: it.book || { title: it.title, image: it.image },
+        quantity: it.quantity,
+        delivered: o.status === "delivered",
+        orderDate: o.createdAt,
+      }))
+    );
+    user.orders = flatOrders;
 
     res.status(200).json({
       success: true,

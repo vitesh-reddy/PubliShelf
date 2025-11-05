@@ -19,49 +19,39 @@ const Cart = () => {
   // Calculate totals from cart items
   const cartTotals = useMemo(() => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.book?.price || 0) * item.quantity, 0);
-    const shipping = subtotal > 35 ? 0 : 100;
+    const shipping = subtotal > 35 || !cartItems.length ? 0 : 100;
     const tax = subtotal * 0.02;
     const total = subtotal + shipping + tax;
     return { subtotal, shipping, tax, total };
   }, [cartItems]);
 
-  // Optimistic update: update store first, then backend
   const handleQuantityChange = async (bookId, newQuantity) => {
     if (newQuantity < 1) return;
     
-    // Find the book to check stock
     const cartItem = cartItems.find(item => item.book._id === bookId);
     const availableStock = cartItem?.book?.quantity || 0;
     
-    // Don't allow quantity to exceed available stock
     if (newQuantity > availableStock) {
       alert(`Only ${availableStock} items available in stock!`);
       return;
     }
     
-    // Update store immediately (optimistic)
     dispatch(updateCartInStore({ bookId, quantity: newQuantity }));
     
-    // Sync with backend
     try {
       const response = await updateCartQuantity({ bookId, quantity: newQuantity });
-      if (!response.success) {
-        // Revert on failure - would need to fetch fresh data
+      if (!response.success)
         alert(response.message || "Failed to update quantity");
-      }
     } catch (err) {
       alert("Error updating quantity");
     }
   };
 
-  // Optimistic update: remove from store first, then backend
   const handleRemoveFromCart = async (bookId) => {
     if (!confirm("Remove this item from cart?")) return;
     
-    // Update store immediately (optimistic)
     dispatch(removeFromCartInStore({ bookId }));
     
-    // Sync with backend
     try {
       const response = await removeFromCart(bookId);
       if (!response.success) {

@@ -3,7 +3,7 @@ import { getPublisherById, addBookToPublisher, createPublisher } from "../servic
 import { createBook } from "../services/book.services.js";
 import { createAntiqueBook } from "../services/antiqueBook.services.js";
 import Book from "../models/Book.model.js";
-import Buyer from "../models/Buyer.model.js";
+import Order from "../models/Order.model.js";
 import AntiqueBook from "../models/AntiqueBook.model.js";
 import bcrypt from "bcrypt";
 
@@ -26,29 +26,31 @@ export const getPublisherDashboard = async (req, res) => {
     const auctions = await AntiqueBook.find({ publisher: req.user.id })
       .sort({ auctionStart: -1 })
     
-    const buyers = await Buyer.find({
-      "orders.book": { $in: books.map((book) => book._id) },
-    });
-    
-    const orders = [];
-    buyers.forEach((buyer) => {
-      buyer.orders.forEach((order) => {
-        if (books.some((book) => book._id.toString() === order.book.toString()))
-          orders.push(order);
-      });
-    });
+    // Fetch orders including this publisher via items array
+    const ordersDocs = await Order.find({ publishers: req.user.id })
+      .select("items createdAt status")
+      .populate({ path: "items.book", select: "title price genre" })
+      .lean();
+    // Flatten relevant items for this publisher
+    const orders = ordersDocs.flatMap((o) =>
+      (o.items || []).filter((it) => it.publisher?.toString() === req.user.id).map((it) => ({
+        book: it.book?._id || it.book,
+        title: it.book?.title || it.title,
+        genre: it.book?.genre,
+        price: it.unitPrice,
+        quantity: it.quantity,
+        orderDate: o.createdAt,
+      }))
+    );
 
     const booksSold = orders.reduce((sum, order) => sum + order.quantity, 0);
     const totalRevenue = orders.reduce((sum, order) => {
-      const book = books.find(
-        (b) => b._id.toString() === order.book.toString()
-      );
-      return sum + (book ? book.price * order.quantity : 0);
+      return sum + (order.price * order.quantity);
     }, 0);
 
     const bookSales = books.map((book) => {
       const sales = orders
-        .filter((order) => order.book.toString() === book._id.toString())
+  .filter((order) => order.book.toString() === book._id.toString())
         .reduce((sum, order) => sum + order.quantity, 0);
       return { book, sales };
     });
@@ -82,14 +84,10 @@ export const getPublisherDashboard = async (req, res) => {
       topGenres,
     };
 
-    const activities = buyers.flatMap((buyer) =>
-      buyer.orders.map((order) => ({
-        action: `Ordered ${order.quantity} copies of ${
-          books.find((b) => b._id.toString() === order.book.toString())?.title
-        }`,
-        timestamp: order.orderDate,
-      }))
-    );
+    const activities = orders.map((order) => ({
+      action: `Ordered ${order.quantity} copies of ${order.title}`,
+      timestamp: order.orderDate,
+    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     const availableBooks = await Book.find({ publisher: req.user.id });
 

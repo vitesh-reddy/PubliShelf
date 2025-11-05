@@ -7,6 +7,7 @@ const initialState = {
   email: null,
   address: null,
   profileImage: null,
+  orders: [],
 };
 
 const userSlice = createSlice({

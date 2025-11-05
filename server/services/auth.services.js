@@ -10,7 +10,6 @@ export const loginUser = async (email, password) => {
     const buyerDoc = await Buyer.findOne({ email })
       .populate("cart.book")
       .populate("wishlist")
-      .populate("orders.book")
       .lean();
 
     if (buyerDoc) {

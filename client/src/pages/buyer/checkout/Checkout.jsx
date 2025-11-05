@@ -5,6 +5,8 @@ import { placeOrder, getBuyerAddresses, addBuyerAddress, updateBuyerAddress, del
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../../../store/hooks';
+import { clearCart } from "../../../store/slices/cartSlice.js";
+import { useDispatch } from "react-redux";
 
 const Checkout = () => {
     const { items: cartItems } = useCart();
@@ -18,13 +20,17 @@ const Checkout = () => {
     const [addressToDelete, setAddressToDelete] = useState(null);
     const [addresses, setAddresses] = useState([]);
     const [loadingAddresses, setLoadingAddresses] = useState(true);
-    // Fetch addresses from backend on mount
+    const dispatch = useDispatch()
     useEffect(() => {
         const fetchAddresses = async () => {
             setLoadingAddresses(true);
             try {
                 const res = await getBuyerAddresses();
-                if (res.success) setAddresses(res.addresses);
+                if (res.success) {
+                    setAddresses(res.addresses);
+                    if (res.addresses && res.addresses.length > 0)
+                        setSelectedAddress(res.addresses[0]._id);
+                }
             } catch (err) {}
             setLoadingAddresses(false);
         };
@@ -32,7 +38,7 @@ const Checkout = () => {
     }, []);
     const [savedCards, setSavedCards] = useState([]);
     const [savedUpiIds, setSavedUpiIds] = useState([]);
-    const [selectedAddress, setSelectedAddress] = useState(1);
+    const [selectedAddress, setSelectedAddress] = useState(null);
     const [newAddress, setNewAddress] = useState({ fullName: "", phoneNumber: "", address: "", city: "", state: "", postalCode: "" });
     const [cardDetails, setCardDetails] = useState({ cardNumber: "", expiryDate: "", cvv: "" });
     const [upiDetails, setUpiDetails] = useState({ upiId: "" });
@@ -79,7 +85,6 @@ const Checkout = () => {
         return Object.keys(errors).length === 0;
     };
 
-    // Add address via backend
     const addNewAddress = async (e) => {
         e.preventDefault();
         if (validateAddress()) {
@@ -105,7 +110,6 @@ const Checkout = () => {
 
     // Open edit address form
     const openEditAddressForm = (addr) => {
-        // Parse the address back into form fields
         const addressParts = addr.address.split(', ');
         const postalCode = addressParts.pop() || '';
         const state = addressParts.pop() || '';
@@ -231,15 +235,25 @@ const Checkout = () => {
             alert("Please select a payment method before placing your order.");
             return;
         }
+        if (!selectedAddress) {
+            alert("Please select a shipping address before placing your order.");
+            return;
+        }
         if (orderSummary.subtotal <= 0) {
             alert("Your cart is empty. Please add items before placing an order.");
             return;
         }
+        // Map UI payment selection to backend enums
+        let paymentMethod = "COD";
+        if (selectedPayment === "cod") paymentMethod = "COD";
+        else if (selectedPayment === "creditCard" || selectedPayment.startsWith("card")) paymentMethod = "CARD";
+        else if (selectedPayment === "upi" || selectedPayment.startsWith("upi")) paymentMethod = "UPI";
         setPlacingOrder(true);
         try {
-            const response = await placeOrder();
+            const response = await placeOrder({ addressId: selectedAddress, paymentMethod });
             if (response.success) {
                 alert("Order placed successfully!");
+                dispatch(clearCart());
                 navigate("/buyer/cart");
             } else
                 alert(response.message);
@@ -248,7 +262,7 @@ const Checkout = () => {
         }
         setPlacingOrder(false);
     };
-
+    if (loadingAddresses) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
     const inputStyle = "w-full p-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white transition-all duration-300 ease-in-out focus:border-purple-600 focus:outline-none focus:ring-3 focus:ring-purple-600/10";
     const errorInputStyle = "border-red-500";

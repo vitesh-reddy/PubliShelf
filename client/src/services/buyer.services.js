@@ -1,23 +1,3 @@
-// Address CRUD
-export const getBuyerAddresses = async () => {
-  const response = await axiosInstance.get("buyer/addresses");
-  return response.data;
-};
-
-export const addBuyerAddress = async (addressData) => {
-  const response = await axiosInstance.post("buyer/addresses", addressData);
-  return response.data;
-};
-
-export const updateBuyerAddress = async (id, addressData) => {
-  const response = await axiosInstance.put(`buyer/addresses/${id}`, addressData);
-  return response.data;
-};
-
-export const deleteBuyerAddress = async (id) => {
-  const response = await axiosInstance.delete(`buyer/addresses/${id}`);
-  return response.data;
-};
 // client/src/services/buyer.services.js
 import axiosInstance from "../utils/axiosInstance.util.js";
 
@@ -82,8 +62,11 @@ export const updateCartQuantity = async ({ bookId, quantity }) => {
   return response.data;
 };
 
-export const placeOrder = async () => {
-  const response = await axiosInstance.post("buyer/checkout/place-order");
+export const placeOrder = async ({ addressId, paymentMethod } = {}) => {
+  const response = await axiosInstance.post("buyer/checkout/place-order", {
+    addressId,
+    paymentMethod,
+  });
   return response.data;
 };
 
@@ -119,5 +102,26 @@ export const updateProfile = async (profileData) => {
 
 export const updateProfileById = async ({ id, profileData }) => {
   const response = await axiosInstance.post(`buyer/update-profile/${id}`, profileData);
+  return response.data;
+};
+
+// Address CRUD
+export const getBuyerAddresses = async () => {
+  const response = await axiosInstance.get("buyer/addresses");
+  return response.data;
+};
+
+export const addBuyerAddress = async (addressData) => {
+  const response = await axiosInstance.post("buyer/addresses", addressData);
+  return response.data;
+};
+
+export const updateBuyerAddress = async (id, addressData) => {
+  const response = await axiosInstance.put(`buyer/addresses/${id}`, addressData);
+  return response.data;
+};
+
+export const deleteBuyerAddress = async (id) => {
+  const response = await axiosInstance.delete(`buyer/addresses/${id}`);
   return response.data;
 };

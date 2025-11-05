@@ -1,6 +1,7 @@
 //controllers/admin.controller.js
 import { getAllPublishers, deletePublisherById } from "../services/publisher.services.js";
 import { getAllBuyers, getAllOrders } from "../services/buyer.services.js";
+import Order from "../models/Order.model.js";
 import Book from "../models/Book.model.js";
 import Buyer from "../models/Buyer.model.js";
 
@@ -11,11 +12,8 @@ export const getAdminDashboard = async (req, res) => {
     const auctions = []; // Placeholder
 
     const totalBuyers = buyers.length;
-    const totalOrders = orders.length;
-    const totalRevenue = orders.reduce(
-      (sum, order) => sum + order.book.price * order.quantity,
-      0
-    );
+    const totalOrders = orders.length; // flattened items count
+    const totalRevenue = orders.reduce((sum, r) => sum + (r.book.price || 0) * (r.quantity || 0), 0);
     const activeAuctions = auctions.filter(
       (auction) => auction.status === "ongoing"
     ).length;
@@ -25,23 +23,14 @@ export const getAdminDashboard = async (req, res) => {
       { $project: { genre: "$_id", count: 1, _id: 0 } },
     ]);
 
-    const revenueByGenre = await Buyer.aggregate([
-      { $unwind: "$orders" },
-      {
-        $lookup: {
-          from: "books",
-          localField: "orders.book",
-          foreignField: "_id",
-          as: "bookDetails",
-        },
-      },
+    const revenueByGenre = await Order.aggregate([
+      { $unwind: "$items" },
+      { $lookup: { from: "books", localField: "items.book", foreignField: "_id", as: "bookDetails" } },
       { $unwind: "$bookDetails" },
       {
         $group: {
           _id: "$bookDetails.genre",
-          revenue: {
-            $sum: { $multiply: ["$orders.quantity", "$bookDetails.price"] },
-          },
+          revenue: { $sum: { $multiply: ["$items.quantity", "$bookDetails.price"] } },
         },
       },
       { $project: { genre: "$_id", revenue: 1, _id: 0 } },

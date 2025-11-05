@@ -1,7 +1,7 @@
 // client/src/pages/buyer/profile/Profile.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { updateProfileById } from "../../../services/buyer.services.js";
+import { getProfile, updateProfileById } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../../store/slices/userSlice';
 import { clearAuth } from '../../../store/slices/authSlice';
@@ -18,7 +18,30 @@ const BuyerProfile = () => {
   const user = useUser();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
-  const { orders } = useUser();
+  const { orders = [] } = useUser();
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const res = await getProfile();
+        if (!ignore && res?.success && res?.data?.user) {
+          const srvUser = res.data.user;
+          dispatch(updateUser({
+            firstname: srvUser.firstname,
+            lastname: srvUser.lastname,
+            email: srvUser.email,
+            createdAt: srvUser.createdAt,
+            orders: Array.isArray(srvUser.orders) ? srvUser.orders : [],
+          }));
+        }
+      } catch (e) {
+        console.error("Failed to load profile:", e);
+      }
+    };
+    load();
+    return () => { ignore = true; };
+  }, [dispatch]);
   
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -253,7 +276,8 @@ const BuyerProfile = () => {
                       <img
                         src={order.book.image || "https://m.media-amazon.com/images/I/61R+Cpm+HxL._SL1000_.jpg"}
                         alt={order.book.title}
-                        className="w-[175px] h-[250px] mx-auto object-cover rounded-[8px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105"
+                        className="w-[175px] h-[250px] mx-auto object-cover rounded-[8px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 cursor-pointer"
+                        onClick={() => navigate(`/buyer/product-detail/${order.book._id}`)}
                       />
                       <div className="flex flex-col gap-[10px] justify-center items-stretch max-md:flex-row max-md:flex-wrap">
                         <span className="w-full text-center p-[12px] rounded-[6px] text-[14px] bg-[#f5f5f5] text-[#6b48ff] font-semibold">
