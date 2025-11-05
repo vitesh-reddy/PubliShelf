@@ -190,8 +190,8 @@ const PublisherViewBook = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-baseline gap-4 mb-6">
-                    <span className="text-4xl font-bold text-purple-600">₹{book.price}</span>
+                  <div className="flex items-center gap-4 mb-6">
+                    <span className="text-3xl font-bold text-purple-600">₹{book.price}</span>
                     {book.quantity === 0 ? (
                       <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-sm font-semibold px-3 py-1.5 rounded-md border border-red-200">
                         <i className="fas fa-times-circle"></i>

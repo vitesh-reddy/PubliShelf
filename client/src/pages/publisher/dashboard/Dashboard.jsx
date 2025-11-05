@@ -263,8 +263,9 @@ const PublisherDashboard = () => {
                         className="w-full h-[300px] object-contain bg-white p-2"
                       />
                       
-                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
-                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
+                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 cursor-pointer ${
+                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}
+                          onClick={() => handleViewBook(book._id)}>
                         <button
                           title="Edit"
                           onClick={(e) => handleEditClick(book, e)}
