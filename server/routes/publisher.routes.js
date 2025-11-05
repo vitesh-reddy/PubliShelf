@@ -4,7 +4,7 @@ import { protect } from "../middleware/auth.middleware.js";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
-import { getPublisherDashboard, createPublisherSignup, publishBook, sellAntique, getPublisherBook, updatePublisherBook, deletePublisherBook } from "../controllers/publisher.controller.js";
+import { getPublisherDashboard, createPublisherSignup, publishBook, sellAntique, getPublisherBook, updatePublisherBook, deletePublisherBook, restorePublisherBook } from "../controllers/publisher.controller.js";
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -29,5 +29,6 @@ router.post("/sell-antique", protect, upload.fields([
 router.get('/book/:id', protect, getPublisherBook);
 router.put('/book/:id', protect, upload.single('imageFile'), updatePublisherBook);
 router.delete('/book/:id', protect, deletePublisherBook);
+router.put('/book/:id/restore', protect, restorePublisherBook);
 
 export default router;

@@ -20,8 +20,11 @@ export const getPublisherDashboard = async (req, res) => {
       });
     }
 
-        const books = await Book.find({ publisher: req.user.id })
-      .sort({ publishedAt: -1 })
+    // Split books into active and deleted
+    const allBooks = await Book.find({ publisher: req.user.id })
+      .sort({ publishedAt: -1 });
+    const books = allBooks.filter(book => !book.isDeleted);
+    const deletedBooks = allBooks.filter(book => book.isDeleted);
     
     const auctions = await AntiqueBook.find({ publisher: req.user.id })
       .sort({ auctionStart: -1 })
@@ -98,6 +101,7 @@ export const getPublisherDashboard = async (req, res) => {
         publisher: { ...publisher.toObject(), status: "approved" },
         analytics,
         books,
+        deletedBooks,
         auctions,
         activities,
         availableBooks,
@@ -291,6 +295,7 @@ export const deletePublisherBook = async (req, res) => {
     book.isDeleted = true;
     await book.save();
 
+    const Buyer = (await import('../models/Buyer.model.js')).default;
     await Buyer.updateMany(
       { $or: [ { 'cart.book': book._id }, { wishlist: book._id } ] },
       { $pull: { cart: { book: book._id }, wishlist: book._id } }
@@ -300,5 +305,22 @@ export const deletePublisherBook = async (req, res) => {
   } catch (error) {
     console.error('Error deleting book:', error);
     res.status(500).json({ success: false, message: 'Error deleting book', data: null });
+  }
+};
+
+export const restorePublisherBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) return res.status(404).json({ success: false, message: 'Book not found', data: null });
+    if (book.publisher.toString() !== req.user.id) return res.status(403).json({ success: false, message: 'Not authorized', data: null });
+
+    book.isDeleted = false;
+    await book.save();
+
+    res.status(200).json({ success: true, message: 'Book restored successfully', data: book });
+  } catch (error) {
+    console.error('Error restoring book:', error);
+    res.status(500).json({ success: false, message: 'Error restoring book', data: null });
   }
 };

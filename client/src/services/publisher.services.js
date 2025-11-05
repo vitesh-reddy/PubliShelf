@@ -40,3 +40,8 @@ export const softDeleteBook = async (bookId) => {
   const response = await axiosInstance.delete(`/publisher/book/${bookId}`);
   return response.data;
 };
+
+export const restoreBook = async (bookId) => {
+  const response = await axiosInstance.put(`/publisher/book/${bookId}/restore`);
+  return response.data;
+};

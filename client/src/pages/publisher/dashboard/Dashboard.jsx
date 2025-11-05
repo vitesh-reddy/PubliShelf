@@ -1,7 +1,7 @@
 //client/src/pages/publisher/dashboard/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getDashboard, softDeleteBook } from "../../../services/publisher.services.js";
+import { getDashboard, softDeleteBook, restoreBook } from "../../../services/publisher.services.js";
 import { logout } from "../../../services/auth.services.js";
 import { clearAuth } from "../../../store/slices/authSlice";
 import { useDispatch } from "react-redux";
@@ -12,6 +12,7 @@ const PublisherDashboard = () => {
     publisher: { firstname: "", lastname: "", status: "approved" },
     analytics: { booksSold: 0, totalRevenue: 0, mostSoldBook: null, topGenres: [] },
     books: [],
+    deletedBooks: [],
     auctions: [],
     activities: [],
     availableBooks: [],
@@ -55,11 +56,13 @@ const PublisherDashboard = () => {
     navigate("/auth/login");
   };
 
-  const handleEditClick = (book) => {
+  const handleEditClick = (book, e) => {
+    e?.stopPropagation();
     navigate(`/publisher/edit-book/${book._id}`, { state: { book } });
   };
 
-  const handleDeleteClick = async (book) => {
+  const handleDeleteClick = async (book, e) => {
+    e?.stopPropagation();
     const confirm = window.confirm(
       `Are you sure you want to delete "${book.title}"? This will soft-delete the book and update buyers' availability/cart.`
     );
@@ -67,13 +70,56 @@ const PublisherDashboard = () => {
     try {
       setActionLoading(true);
       await softDeleteBook(book._id);
-      await fetchDashboard();
+      setData(prevData => {
+        const updatedDeletedBooks = [...(prevData.deletedBooks || []), { ...book, isDeleted: true }]
+          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+        
+        return {
+          ...prevData,
+          books: prevData.books.filter(b => b._id !== book._id),
+          deletedBooks: updatedDeletedBooks
+        };
+      });
     } catch (err) {
       console.error("Delete error:", err);
       alert("Failed to delete book");
+      await fetchDashboard();
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleRestoreClick = async (book, e) => {
+    e?.stopPropagation(); // Prevent card click
+    const confirm = window.confirm(
+      `Are you sure you want to restore "${book.title}"? This will make it available to buyers again.`
+    );
+    if (!confirm) return;
+    try {
+      setActionLoading(true);
+      await restoreBook(book._id);  
+      setData(prevData => {
+        const updatedBooks = [...prevData.books, { ...book, isDeleted: false }]
+          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+        
+        return {
+          ...prevData,
+          books: updatedBooks,
+          deletedBooks: prevData.deletedBooks.filter(b => b._id !== book._id)
+        };
+      });
+    } catch (err) {
+      console.error("Restore error:", err);
+      alert("Failed to restore book");
+      // Revert on error
+      await fetchDashboard();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleViewBook = (bookId) => {
+    navigate(`/publisher/view-book/${bookId}`);
   };
 
   if (loading)
@@ -221,7 +267,7 @@ const PublisherDashboard = () => {
                           hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
                         <button
                           title="Edit"
-                          onClick={() => handleEditClick(book)}
+                          onClick={(e) => handleEditClick(book, e)}
                           className="text-base flex items-center gap-2 bg-white text-purple-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-purple-50 hover:scale-105 focus:outline-none transition-all duration-200"
                         >
                           <i className="fas fa-edit"></i>
@@ -229,7 +275,7 @@ const PublisherDashboard = () => {
                         </button>
                         <button
                           title="Delete"
-                          onClick={() => handleDeleteClick(book)}
+                          onClick={(e) => handleDeleteClick(book, e)}
                           className="text-base flex items-center gap-2 bg-white text-red-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-red-50 hover:scale-105 focus:outline-none transition-all duration-200"
                           disabled={actionLoading}
                         >
@@ -239,7 +285,7 @@ const PublisherDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="p-4"> 
+                    <div className="p-4 cursor-pointer" onClick={() => handleViewBook(book._id)}> 
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xl font-bold text-purple-600">₹{book.price}</span>
@@ -288,6 +334,94 @@ const PublisherDashboard = () => {
               <p className="text-gray-600 text-sm">No recent publications found.</p>
             )}
           </div>
+
+          {/* Deleted Books */}
+          {data.deletedBooks && data.deletedBooks.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Deleted Books</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                {data.deletedBooks.map((book) => (
+                  <div
+                    key={book._id}
+                    className="bg-white rounded-lg shadow-md overflow-hidden relative transform transition-transform duration-300 hover:scale-[1.0125] hover:shadow-lg opacity-75"
+                    onMouseEnter={() => setHoveredBookId(book._id)}
+                    onMouseLeave={() => setHoveredBookId(null)}
+                  >
+                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
+                      <img
+                        src={book.image}
+                        alt={book.title}
+                        className="w-full h-[300px] object-contain bg-white p-2 grayscale"
+                      />
+                      
+                      {/* Deleted Badge */}
+                      <div className="absolute top-3 left-3">
+                        <span className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-lg">
+                          <i className="fas fa-trash"></i>
+                          Deleted
+                        </span>
+                      </div>
+                      
+                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
+                          hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
+                        <button
+                          title="Restore"
+                          onClick={(e) => handleRestoreClick(book, e)}
+                          className="text-base flex items-center gap-2 bg-white text-green-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-green-50 hover:scale-105 focus:outline-none transition-all duration-200"
+                          disabled={actionLoading}
+                        >
+                          <i className="fas fa-undo"></i>
+                          <span className="font-medium select-none">Restore Book</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4 cursor-pointer" onClick={() => handleViewBook(book._id)}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xl font-bold text-gray-500">₹{book.price}</span>
+                        </div>
+                        <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-red-200">
+                          <i className="fas fa-ban"></i>
+                          Unavailable
+                        </span>
+                      </div>
+
+                      <h3 className="text-lg font-semibold mb-1 line-clamp-1 text-gray-700" title={book.title}>
+                        {book.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm mb-2">by {book.author}</p>
+                      
+                      {/* Rating */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center text-amber-400">
+                          <i className="fas fa-star text-xs"></i>
+                          <span className="ml-1 text-sm font-semibold text-gray-700">
+                            {book.rating ? book.rating.toFixed(1) : '0.0'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          ({book.reviewCount || 0} reviews)
+                        </span>
+                      </div>
+                      
+                      {/* Info grid */}
+                      <div className="flex justify-between mt-3 pt-3 px-2 border-t border-gray-200">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <i className="fas fa-tag text-gray-400"></i>
+                          <span className="font-medium">{book.genre}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <i className="fas fa-calendar text-gray-400"></i>
+                          <span className="font-medium">{new Date(book.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Recent Auctions */}
           <div className="mb-12">

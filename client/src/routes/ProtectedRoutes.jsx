@@ -15,6 +15,7 @@ import PublisherDashboard from '../pages/publisher/dashboard/Dashboard';
 import PublishBook from '../pages/publisher/publish-book/PublishBook';
 import SellAntique from '../pages/publisher/sell-antique/SellAntique';
 import EditBookPage from '../pages/publisher/edit-book/EditBookPage';
+import PublisherViewBook from '../pages/publisher/view-book/ViewBook';
 
 const ProtectedRoutes = () => (
   <>
@@ -37,6 +38,7 @@ const ProtectedRoutes = () => (
       <Route path="/publisher/publish-book" element={<PublishBook />} />
       <Route path="/publisher/sell-antique" element={<SellAntique />} />
       <Route path="/publisher/edit-book/:id" element={<EditBookPage />} />
+      <Route path="/publisher/view-book/:id" element={<PublisherViewBook />} />
     </Route>
   </>
 );
