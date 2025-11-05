@@ -1,5 +1,6 @@
   import React, { useState, useEffect } from "react";
   import { Link, useNavigate, useSearchParams } from "react-router-dom";
+  import { toast } from "sonner";
   import { searchBooks, addToWishlist, removeFromWishlist } from "../../../services/buyer.services.js";
   import BookGrid from "./components/BookGrid.jsx";
   import { useDispatch } from 'react-redux';
@@ -103,11 +104,13 @@
         }
         try {
           const response = await removeFromWishlist(bookId);
-          if (!response.success) {
-            alert(response.message || 'Failed to remove from wishlist');
+          if (response.success) {
+            toast.success('Removed from wishlist');
+          } else {
+            toast.error(response.message || 'Failed to remove from wishlist');
           }
         } catch {
-          alert('Error removing from wishlist');
+          toast.error('Error removing from wishlist');
         }
         return;
       }
@@ -124,11 +127,13 @@
       }
       try {
         const response = await addToWishlist(bookId);
-        if (!response.success) {
-          alert(`Failed to add to wishlist: ${response.message}`);
+        if (response.success) {
+          toast.success('Added to wishlist');
+        } else {
+          toast.error(`Failed to add to wishlist: ${response.message}`);
         }
       } catch {
-        alert('Error adding to wishlist');
+        toast.error('Error adding to wishlist');
       }
     };
 

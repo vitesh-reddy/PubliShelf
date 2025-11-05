@@ -1,6 +1,7 @@
 //client/src/pages/publisher/publish-book/PublishBook.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { publishBook } from "../../../services/publisher.services.js";
 
 const PublishBook = () => {
@@ -145,14 +146,14 @@ const PublishBook = () => {
       setLoading(true);
       const response = await publishBook(submitData);
       if (response.success) {
-        alert("Book published successfully!");
+        toast.success("Book published successfully!");
         navigate(response.redirect || "/publisher/dashboard");
       } else {
-        alert("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
       }
     } catch (error) {
       console.error("Error publishing book:", error);
-      alert("An error occurred while publishing the book.");
+      toast.error("An error occurred while publishing the book.");
     } finally {
       setLoading(false);
     }

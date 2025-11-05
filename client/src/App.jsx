@@ -3,10 +3,12 @@ import { Routes } from 'react-router-dom'
 import PublicRoutes from './routes/PublicRoutes'
 import ProtectedRoutes from './routes/ProtectedRoutes'
 import PublicOnlyRoutes from './routes/PublicOnlyRoutes'
+import ToastProvider from './components/ToastProvider'
 
-function App() {
+const App = () => {
   return (
     <div>
+      <ToastProvider />
       <Routes>
         {/* Can be accessed by any users */}
         {PublicRoutes()}

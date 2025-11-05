@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { sellAntique } from "../../../services/publisher.services.js";
 
 const SellAntique = () => {
@@ -231,14 +232,14 @@ const SellAntique = () => {
       setLoading(true);
       const response = await sellAntique(submitData);
       if (response.success) {
-        alert("Auction created successfully!");
+        toast.success("Auction created successfully!");
         navigate("/publisher/dashboard");
       } else {
-        alert("Failed to create auction. " + response.message);
+        toast.error("Failed to create auction. " + response.message);
       }
     } catch (err) {
       console.error(err);
-      alert("Error submitting form. Please try again.");
+      toast.error("Error submitting form. Please try again.");
     } finally {
       setLoading(false);
     }

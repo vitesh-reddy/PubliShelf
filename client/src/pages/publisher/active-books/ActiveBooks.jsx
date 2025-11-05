@@ -1,8 +1,19 @@
 // client/src/pages/publisher/active-books/ActiveBooks.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { getDashboard, softDeleteBook } from "../../../services/publisher.services";
 import PublisherNavbar from "../components/PublisherNavbar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const ActiveBooks = () => {
   const [user, setUser] = useState({ firstname: "", lastname: "" });
@@ -10,6 +21,8 @@ const ActiveBooks = () => {
   const [loading, setLoading] = useState(true);
   const [hoveredBookId, setHoveredBookId] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,22 +49,27 @@ const ActiveBooks = () => {
     navigate(`/publisher/edit-book/${book._id}`, { state: { book } });
   };
 
-  const handleDeleteClick = async (book, e) => {
+  const handleDeleteClick = (book, e) => {
     e?.stopPropagation();
-    const confirm = window.confirm(
-      `Are you sure you want to delete "${book.title}"? This will soft-delete the book and update buyers' availability/cart.`
-    );
-    if (!confirm) return;
+    setSelectedBook(book);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedBook) return;
 
     try {
       setActionLoading(true);
-      await softDeleteBook(book._id);
-      setBooks(prevBooks => prevBooks.filter(b => b._id !== book._id));
+      setShowDeleteDialog(false);
+      await softDeleteBook(selectedBook._id);
+      setBooks(prevBooks => prevBooks.filter(b => b._id !== selectedBook._id));
+      toast.success("Book deleted successfully!");
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Failed to delete book");
+      toast.error("Failed to delete book");
     } finally {
       setActionLoading(false);
+      setSelectedBook(null);
     }
   };
 
@@ -190,6 +208,24 @@ const ActiveBooks = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Book</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedBook?.title}"? This will soft-delete the book and update buyers' availability/cart.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

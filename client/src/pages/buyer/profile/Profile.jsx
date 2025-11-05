@@ -1,6 +1,7 @@
 // client/src/pages/buyer/profile/Profile.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { getProfile, updateProfileById } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../../store/slices/userSlice';
@@ -12,6 +13,16 @@ import { useUser, useWishlist } from '../../../store/hooks';
 import { logout } from "../../../services/auth.services";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const BuyerProfile = () => {
   const dispatch = useDispatch();
@@ -20,6 +31,7 @@ const BuyerProfile = () => {
   const { orders = [] } = useUser();
   const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -118,7 +130,7 @@ const BuyerProfile = () => {
       if (!response.success) {
         setFormErrors({ ...formErrors, generalError: response.message });
       } else {
-        alert("Profile updated successfully.");
+        toast.success("Profile updated successfully.");
         dispatch(updateUser({
           firstname: formData.firstname.trim(),
           lastname: formData.lastname.trim(),
@@ -141,7 +153,11 @@ const BuyerProfile = () => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -152,6 +168,7 @@ const BuyerProfile = () => {
     dispatch(clearUser());
     dispatch(clearCart());
     dispatch(clearWishlist());
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -732,6 +749,24 @@ const BuyerProfile = () => {
           </div>
         </div>
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>

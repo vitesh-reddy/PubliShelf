@@ -1,11 +1,22 @@
 //client/src/pages/publisher/view-book/ViewBook.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { getBook, softDeleteBook, restoreBook } from "../../../services/publisher.services.js";
 import { logout } from "../../../services/auth.services.js";
 import { clearAuth } from "../../../store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import { clearUser } from "../../../store/slices/userSlice";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const PublisherViewBook = () => {
   const { id } = useParams();
@@ -15,6 +26,9 @@ const PublisherViewBook = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     fetchBook();
@@ -39,43 +53,49 @@ const PublisherViewBook = () => {
     navigate(`/publisher/edit-book/${id}`, { state: { book } });
   };
 
-  const handleDelete = async () => {
-    const confirm = window.confirm(
-      `Are you sure you want to delete "${book.title}"? This will soft-delete the book and update buyers' availability/cart.`
-    );
-    if (!confirm) return;
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       setActionLoading(true);
+      setShowDeleteDialog(false);
       await softDeleteBook(id);
       setBook({ ...book, isDeleted: true });
-      alert("Book deleted successfully!");
+      toast.success("Book deleted successfully!");
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Failed to delete book");
+      toast.error("Failed to delete book");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleRestore = async () => {
-    const confirm = window.confirm(
-      `Are you sure you want to restore "${book.title}"? This will make it available to buyers again.`
-    );
-    if (!confirm) return;
+  const handleRestore = () => {
+    setShowRestoreDialog(true);
+  };
+
+  const confirmRestore = async () => {
     try {
       setActionLoading(true);
+      setShowRestoreDialog(false);
       await restoreBook(id);
       setBook({ ...book, isDeleted: false });
-      alert("Book restored successfully!");
+      toast.success("Book restored successfully!");
     } catch (err) {
       console.error("Restore error:", err);
-      alert("Failed to restore book");
+      toast.error("Failed to restore book");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -83,6 +103,7 @@ const PublisherViewBook = () => {
     }
     dispatch(clearAuth());
     dispatch(clearUser());
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -322,6 +343,60 @@ const PublisherViewBook = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Book</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{book?.title}"? This will soft-delete the book and update buyers' availability/cart.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Restore Confirmation Dialog */}
+      <AlertDialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore Book</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to restore "{book?.title}"? This will make it available to buyers again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore} className="bg-green-600 hover:bg-green-700">
+              Restore
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import { getBook, updateBook } from "../../../services/publisher.services";
 
 const genreOptions = [ "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Romance", "Thriller", "Other"];
@@ -55,12 +56,12 @@ const EditBookPage = () => {
           });
           setImagePreview(res.data.image || "");
         } else {
-          alert(res.message || "Failed to fetch book");
+          toast.error(res.message || "Failed to fetch book");
           navigate("/publisher/dashboard");
         }
       } catch (err) {
         console.error(err);
-        alert("Failed to fetch book");
+        toast.error("Failed to fetch book");
         navigate("/publisher/dashboard");
       } finally {
         setLoading(false);
@@ -108,13 +109,14 @@ const EditBookPage = () => {
       if (imageFile) payload.append("imageFile", imageFile);
       const res = await updateBook(id, payload);
       if (res && res.success) {
+        toast.success("Book updated successfully!");
         navigate("/publisher/dashboard");
       } else {
-        alert(res.message || "Failed to update book");
+        toast.error(res.message || "Failed to update book");
       }
     } catch (err) {
       console.error(err);
-      alert("Update failed");
+      toast.error("Update failed");
     } finally {
       setActionLoading(false);
     }

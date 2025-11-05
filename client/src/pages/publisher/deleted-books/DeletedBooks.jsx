@@ -1,14 +1,18 @@
 // client/src/pages/publisher/deleted-books/DeletedBooks.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { getDashboard, restoreBook } from "../../../services/publisher.services";
 import PublisherNavbar from "../components/PublisherNavbar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../../components/ui/AlertDialog";
 
 const DeletedBooks = () => {
   const [user, setUser] = useState({ firstname: "", lastname: "" });
   const [deletedBooks, setDeletedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,22 +34,27 @@ const DeletedBooks = () => {
     }
   };
 
-  const handleRestoreClick = async (book, e) => {
+  const handleRestoreClick = (book, e) => {
     e?.stopPropagation();
-    const confirm = window.confirm(
-      `Are you sure you want to restore "${book.title}"? This will make it available to buyers again.`
-    );
-    if (!confirm) return;
+    setSelectedBook(book);
+    setShowRestoreDialog(true);
+  };
+
+  const confirmRestore = async () => {
+    if (!selectedBook) return;
 
     try {
       setActionLoading(true);
-      await restoreBook(book._id);
-      setDeletedBooks(prevBooks => prevBooks.filter(b => b._id !== book._id));
+      setShowRestoreDialog(false);
+      await restoreBook(selectedBook._id);
+      setDeletedBooks(prevBooks => prevBooks.filter(b => b._id !== selectedBook._id));
+      toast.success("Book restored successfully!");
     } catch (err) {
       console.error("Restore error:", err);
-      alert("Failed to restore book");
+      toast.error("Failed to restore book");
     } finally {
       setActionLoading(false);
+      setSelectedBook(null);
     }
   };
 
@@ -136,6 +145,24 @@ const DeletedBooks = () => {
           )}
         </div>
       </div>
+
+      {/* Restore Confirmation Dialog */}
+      <AlertDialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore Book</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to restore "{selectedBook?.title}"? This will make it available to buyers again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore} className="bg-green-600 hover:bg-green-700">
+              Restore
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

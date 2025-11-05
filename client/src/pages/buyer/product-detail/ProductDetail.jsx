@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { toast } from "sonner";
 import { getProductDetail, addToCart, addToWishlist, removeFromWishlist } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
@@ -50,12 +51,12 @@ const ProductDetail = () => {
 
   const handleAddToCart = async () => {
     if (book.quantity <= 0) {
-      alert("This book is out of stock!");
+      toast.error("This book is out of stock!");
       return;
     }
     
     if (isInCart) {
-      alert("Book is already in your cart!");
+      toast.info("Book is already in your cart!");
       return;
     }
     
@@ -65,13 +66,13 @@ const ProductDetail = () => {
     try {
       const response = await addToCart({ bookId: id, quantity: 1 });
       if (response.success) {
-        alert("Book added to cart successfully!");
+        toast.success("Book added to cart successfully!");
       } else {
         // Revert on failure - for now just show message
-        alert(response.message);
+        toast.error(response.message);
       }
     } catch (err) {
-      alert("Error adding to cart");
+      toast.error("Error adding to cart");
     }
   };
 
@@ -84,11 +85,13 @@ const ProductDetail = () => {
       dispatch(removeFromWishlistInStore({ bookId: targetId }));
       try {
         const response = await removeFromWishlist(targetId);
-        if (!response.success) {
-          alert(response.message || 'Failed to remove from wishlist');
+        if (response.success) {
+          toast.success('Removed from wishlist');
+        } else {
+          toast.error(response.message || 'Failed to remove from wishlist');
         }
       } catch {
-        alert('Error removing from wishlist');
+        toast.error('Error removing from wishlist');
       }
       return;
     }
@@ -98,11 +101,13 @@ const ProductDetail = () => {
     dispatch(addToWishlistInStore(payloadBook));
     try {
       const response = await addToWishlist(targetId);
-      if (!response.success) {
-        alert(response.message || 'Failed to add to wishlist');
+      if (response.success) {
+        toast.success('Added to wishlist');
+      } else {
+        toast.error(response.message || 'Failed to add to wishlist');
       }
     } catch {
-      alert('Error adding to wishlist');
+      toast.error('Error adding to wishlist');
     }
   };
 

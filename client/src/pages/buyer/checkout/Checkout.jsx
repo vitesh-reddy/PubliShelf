@@ -1,6 +1,7 @@
 //client/src/pages/buyer/checkout/Checkout.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { placeOrder, getBuyerAddresses, addBuyerAddress, updateBuyerAddress, deleteBuyerAddress } from "../../../services/buyer.services.js";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -232,15 +233,15 @@ const Checkout = () => {
 
     const handlePlaceOrder = async () => {        
         if (!selectedPayment) {
-            alert("Please select a payment method before placing your order.");
+            toast.warning("Please select a payment method before placing your order.");
             return;
         }
         if (!selectedAddress) {
-            alert("Please select a shipping address before placing your order.");
+            toast.warning("Please select a shipping address before placing your order.");
             return;
         }
         if (orderSummary.subtotal <= 0) {
-            alert("Your cart is empty. Please add items before placing an order.");
+            toast.warning("Your cart is empty. Please add items before placing an order.");
             return;
         }
         // Map UI payment selection to backend enums
@@ -252,11 +253,11 @@ const Checkout = () => {
         try {
             const response = await placeOrder({ addressId: selectedAddress, paymentMethod });
             if (response.success) {
-                alert("Order placed successfully!");
+                toast.success("Order placed successfully!");
                 dispatch(clearCart());
                 navigate("/buyer/cart");
             } else {
-                alert(response.message || "Failed to place order");
+                toast.error(response.message || "Failed to place order");
                 // If cart items were removed (e.g., deleted books), sync with backend
                 if (response.message?.includes("not available") || response.message?.includes("Cart is empty")) {
                     dispatch(clearCart());
@@ -265,7 +266,7 @@ const Checkout = () => {
             }
         } catch (err) {
             const errorMessage = err?.response?.data?.message || err?.message || "Error placing order";
-            alert(errorMessage);
+            toast.error(errorMessage);
             // If error indicates cart sync issue, redirect to cart to refresh
             if (errorMessage.includes("not available") || errorMessage.includes("Cart is empty") || errorMessage.includes("Insufficient stock")) {
                 dispatch(clearCart());

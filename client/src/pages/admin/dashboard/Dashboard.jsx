@@ -5,12 +5,23 @@ import AnalyticsCards from "./components/AnalyticsCards";
 import Charts from "./components/Charts";
 import PublisherTable from "./components/PublisherTable";
 import ActivitiesTable from "./components/ActivitiesTable";
-import { getDashboardData } from "../../../services/admin.services.js"
+import { getDashboardData } from "../../../services/admin.services.js";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const AdminDashboard = () => {
   const [data, setData] = useState({ admin: {}, publishers: [], activities: [], analytics: {} });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const navigate = useNavigate();
     const { key } = useParams();
 
@@ -36,7 +47,12 @@ const AdminDashboard = () => {
   }, []);
 
   const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -113,6 +129,24 @@ const AdminDashboard = () => {
           </div>
         </div>
       </footer>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access the admin dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

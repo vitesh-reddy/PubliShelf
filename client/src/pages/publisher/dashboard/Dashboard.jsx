@@ -9,6 +9,16 @@ import { clearUser } from "../../../store/slices/userSlice";
 import PublisherNavbar from "../components/PublisherNavbar";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 // Register ChartJS components
 ChartJS.register( CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
@@ -20,6 +30,7 @@ const Dashboard = () => {
   const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -113,7 +124,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -121,6 +136,7 @@ const Dashboard = () => {
     }
     dispatch(clearAuth());
     dispatch(clearUser());
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -751,6 +767,24 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

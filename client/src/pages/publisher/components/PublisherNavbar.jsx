@@ -5,14 +5,29 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../../../services/auth.services';
 import { clearAuth } from '../../../store/slices/authSlice';
 import { clearUser } from '../../../store/slices/userSlice';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../components/ui/AlertDialog';
 
 const PublisherNavbar = ({ publisherName }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -20,6 +35,7 @@ const PublisherNavbar = ({ publisherName }) => {
     }
     dispatch(clearAuth());
     dispatch(clearUser());
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -150,6 +166,24 @@ const PublisherNavbar = ({ publisherName }) => {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 };

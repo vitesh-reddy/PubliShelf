@@ -1,6 +1,7 @@
 //client/src/pages/buyer/cart/Cart.jsx
 import React, { useMemo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { updateCartQuantity, removeFromCart, addToCart, removeFromWishlist as removeFromWishlistApi, getCart } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
 import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore, addToCart as addToCartInStore, setCart } from '../../../store/slices/cartSlice';
@@ -9,6 +10,16 @@ import { useCart, useWishlist } from '../../../store/hooks';
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import StarRating from "../components/StarRating.jsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -16,6 +27,8 @@ const Cart = () => {
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
   const [syncingCart, setSyncingCart] = useState(false);
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [bookToRemove, setBookToRemove] = useState(null);
 
   // Sync cart with backend on mount to handle deleted books
   useEffect(() => {
@@ -50,7 +63,7 @@ const Cart = () => {
     const availableStock = cartItem?.book?.quantity || 0;
     
     if (newQuantity > availableStock) {
-      alert(`Only ${availableStock} items available in stock!`);
+      toast.warning(`Only ${availableStock} items available in stock!`);
       return;
     }
     
@@ -59,24 +72,34 @@ const Cart = () => {
     try {
       const response = await updateCartQuantity({ bookId, quantity: newQuantity });
       if (!response.success)
-        alert(response.message || "Failed to update quantity");
+        toast.error(response.message || "Failed to update quantity");
     } catch (err) {
-      alert("Error updating quantity");
+      toast.error("Error updating quantity");
     }
   };
 
-  const handleRemoveFromCart = async (bookId) => {
-    if (!confirm("Remove this item from cart?")) return;
-    
-    dispatch(removeFromCartInStore({ bookId }));
+  const handleRemoveFromCart = (bookId) => {
+    setBookToRemove(bookId);
+    setShowRemoveDialog(true);
+  };
+
+  const confirmRemoveFromCart = async () => {
+    if (!bookToRemove) return;
+
+    dispatch(removeFromCartInStore({ bookId: bookToRemove }));
+    setShowRemoveDialog(false);
     
     try {
-      const response = await removeFromCart(bookId);
-      if (!response.success) {
-        alert(response.message);
+      const response = await removeFromCart(bookToRemove);
+      if (response.success) {
+        toast.success("Item removed from cart");
+      } else {
+        toast.error(response.message);
       }
     } catch (err) {
-      alert("Error removing item");
+      toast.error("Error removing item");
+    } finally {
+      setBookToRemove(null);
     }
   };
 
@@ -86,14 +109,14 @@ const Cart = () => {
     if (!bookToAdd) return;
 
     if (bookToAdd.quantity <= 0) {
-      alert("This book is out of stock!");
+      toast.error("This book is out of stock!");
       return;
     }
 
     // Check if already in cart
     const isAlreadyInCart = cartItems.some(item => item.book?._id === bookId);
     if (isAlreadyInCart) {
-      alert("Book is already in your cart!");
+      toast.info("Book is already in your cart!");
       return;
     }
 
@@ -103,12 +126,12 @@ const Cart = () => {
     try {
       const response = await addToCart({ bookId, quantity: 1 });
       if (response.success) {
-        alert("Book added to cart successfully!");
+        toast.success("Book added to cart successfully!");
       } else {
-        alert(response.message || "Failed to add to cart");
+        toast.error(response.message || "Failed to add to cart");
       }
     } catch (err) {
-      alert("Error adding to cart");
+      toast.error("Error adding to cart");
     }
   };
 
@@ -119,11 +142,13 @@ const Cart = () => {
     // Sync with backend
     try {
       const response = await removeFromWishlistApi(bookId);
-      if (!response.success) {
-        alert(response.message || "Failed to remove from wishlist");
+      if (response.success) {
+        toast.success("Removed from wishlist");
+      } else {
+        toast.error(response.message || "Failed to remove from wishlist");
       }
     } catch (err) {
-      alert("Error removing from wishlist");
+      toast.error("Error removing from wishlist");
     }
   };
 
@@ -133,11 +158,11 @@ const Cart = () => {
 
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty");
+      toast.warning("Your cart is empty");
       return;
     }
     if (hasOutOfStockItems) {
-      alert("Some items in your cart are out of stock. Please remove them before proceeding to checkout.");
+      toast.warning("Some items in your cart are out of stock. Please remove them before proceeding to checkout.");
       return;
     }
     navigate("/buyer/checkout");
@@ -433,6 +458,24 @@ const Cart = () => {
           -moz-appearance: textfield;
         }
       `}</style>
+
+      {/* Remove from Cart Confirmation Dialog */}
+      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this item from your cart?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoveFromCart} className="bg-red-600 hover:bg-red-700">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>

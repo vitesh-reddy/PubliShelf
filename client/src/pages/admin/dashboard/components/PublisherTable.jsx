@@ -1,27 +1,47 @@
 //client/src/pages/admin/dashboard/components/PublisherTable.jsx
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { toast } from "sonner";
 import { banPublisher, approvePublisher, rejectPublisher } from "../../../../services/admin.services.js";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../../components/ui/AlertDialog";
 
 const PublisherTable = ({ publishers, onUpdate }) => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showBanDialog, setShowBanDialog] = useState(false);
   const [selectedPublisher, setSelectedPublisher] = useState(null);
 
-  const handleBan = async (publisherId) => {
-    if (confirm("Are you sure you want to ban this publisher?")) {
-      try {
-        const response = await banPublisher(publisherId);
-        if (response.success) {
-          alert("Publisher banned successfully.");
-          onUpdate(); // Refresh data
-        } else {
-          alert(response.message || "Failed to ban publisher.");
-        }
-      } catch (error) {
-        console.error("Error banning publisher:", error);
-        alert("An error occurred. Please try again.");
+  const handleBan = (publisher) => {
+    setSelectedPublisher(publisher);
+    setShowBanDialog(true);
+  };
+
+  const confirmBan = async () => {
+    if (!selectedPublisher) return;
+
+    try {
+      setShowBanDialog(false);
+      const response = await banPublisher(selectedPublisher._id);
+      if (response.success) {
+        toast.success("Publisher banned successfully.");
+        onUpdate(); // Refresh data
+      } else {
+        toast.error(response.message || "Failed to ban publisher.");
       }
+    } catch (error) {
+      console.error("Error banning publisher:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setSelectedPublisher(null);
     }
   };
 
@@ -39,15 +59,15 @@ const PublisherTable = ({ publishers, onUpdate }) => {
     try {
       const response = await approvePublisher(selectedPublisher._id);
       if (response.success) {
-        alert("Publisher approved successfully.");
+        toast.success("Publisher approved successfully.");
         setShowApproveModal(false);
         onUpdate();
       } else {
-        alert(response.message || "Failed to approve publisher.");
+        toast.error(response.message || "Failed to approve publisher.");
       }
     } catch (error) {
       console.error("Error approving publisher:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -55,15 +75,15 @@ const PublisherTable = ({ publishers, onUpdate }) => {
     try {
       const response = await rejectPublisher(selectedPublisher._id);
       if (response.success) {
-        alert("Publisher rejected successfully.");
+        toast.success("Publisher rejected successfully.");
         setShowRejectModal(false);
         onUpdate();
       } else {
-        alert(response.message || "Failed to reject publisher.");
+        toast.error(response.message || "Failed to reject publisher.");
       }
     } catch (error) {
       console.error("Error rejecting publisher:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -115,7 +135,7 @@ const PublisherTable = ({ publishers, onUpdate }) => {
                     Reject
                   </button>
                   <button
-                    onClick={() => handleBan(publisher._id)}
+                    onClick={() => handleBan(publisher)}
                     className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-300 text-red-800 hover:bg-red-400"
                   >
                     Ban {publisher.publishingHouse}
@@ -190,6 +210,24 @@ const PublisherTable = ({ publishers, onUpdate }) => {
           </div>
         </div>
       )}
+
+      {/* Ban Confirmation Dialog */}
+      <AlertDialog open={showBanDialog} onOpenChange={setShowBanDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ban Publisher</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to ban <strong>{selectedPublisher?.publishingHouse}</strong>? This action will prevent them from accessing the platform.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBan} className="bg-red-600 hover:bg-red-700">
+              Ban Publisher
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

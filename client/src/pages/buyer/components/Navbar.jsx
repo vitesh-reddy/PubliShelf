@@ -7,6 +7,16 @@ import { clearCart } from "../../../store/slices/cartSlice";
 import { clearWishlist } from "../../../store/slices/wishlistSlice";
 import { useUser, useCart, useWishlist } from "../../../store/hooks";
 import { logout } from "../../../services/auth.services";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/AlertDialog";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -20,6 +30,7 @@ const Navbar = () => {
   const [query, setQuery] = useState(q || "");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const profileMenuRef = useRef(null);
   const buyerName = user.firstname || "Buyer";
@@ -28,7 +39,11 @@ const Navbar = () => {
   const isOnAuctionPage = location.pathname.includes("/auction");
   const buttonDestination = isOnAuctionPage ? "/buyer/dashboard" : "/buyer/auction-page";
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch (error) {
@@ -38,6 +53,7 @@ const Navbar = () => {
     dispatch(clearUser());
     dispatch(clearCart());
     dispatch(clearWishlist());
+    setShowLogoutDialog(false);
     navigate("/auth/login");
   };
 
@@ -294,6 +310,24 @@ const Navbar = () => {
           </button>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to login again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout} className="bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 };
