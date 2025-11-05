@@ -99,9 +99,14 @@ export const placeOrder = async (buyerId, { addressId, paymentMethod = "COD" } =
   // Build items and validate stock
   const items = [];
   let itemsTotal = 0;
+  const unavailableBooks = [];
+  
   for (const cartItem of buyer.cart) {
     const bookDoc = await Book.findOne({ _id: cartItem.book._id, isDeleted: { $ne: true } });
-    if (!bookDoc) throw new Error("Book not available");
+    if (!bookDoc) {
+      unavailableBooks.push(cartItem.book?.title || 'Unknown book');
+      continue;
+    }
     if (bookDoc.quantity < cartItem.quantity) {
       throw new Error(`Insufficient stock for ${bookDoc.title}. Available: ${bookDoc.quantity}`);
     }
@@ -118,6 +123,12 @@ export const placeOrder = async (buyerId, { addressId, paymentMethod = "COD" } =
       lineTotal,
     });
   }
+
+  if (unavailableBooks.length > 0)
+    throw new Error(`The following books are no longer available: ${unavailableBooks.join(', ')}. They have been removed from your cart.`);
+
+  if (items.length === 0)
+    throw new Error("Cart is empty or all items are unavailable");
 
   // Simple shipping/tax rules (keep consistent with frontend if any)
   const shipping = itemsTotal > 35 ? 0 : 100; // as used in frontend

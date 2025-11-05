@@ -255,10 +255,22 @@ const Checkout = () => {
                 alert("Order placed successfully!");
                 dispatch(clearCart());
                 navigate("/buyer/cart");
-            } else
-                alert(response.message);
+            } else {
+                alert(response.message || "Failed to place order");
+                // If cart items were removed (e.g., deleted books), sync with backend
+                if (response.message?.includes("not available") || response.message?.includes("Cart is empty")) {
+                    dispatch(clearCart());
+                    navigate("/buyer/cart");
+                }
+            }
         } catch (err) {
-            alert("Error placing order");
+            const errorMessage = err?.response?.data?.message || err?.message || "Error placing order";
+            alert(errorMessage);
+            // If error indicates cart sync issue, redirect to cart to refresh
+            if (errorMessage.includes("not available") || errorMessage.includes("Cart is empty") || errorMessage.includes("Insufficient stock")) {
+                dispatch(clearCart());
+                navigate("/buyer/cart");
+            }
         }
         setPlacingOrder(false);
     };

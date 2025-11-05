@@ -1,9 +1,9 @@
 //client/src/pages/buyer/cart/Cart.jsx
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { updateCartQuantity, removeFromCart, addToCart, removeFromWishlist as removeFromWishlistApi } from "../../../services/buyer.services.js";
+import { updateCartQuantity, removeFromCart, addToCart, removeFromWishlist as removeFromWishlistApi, getCart } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
-import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore, addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
+import { updateCartQuantity as updateCartInStore, removeFromCart as removeFromCartInStore, addToCart as addToCartInStore, setCart } from '../../../store/slices/cartSlice';
 import { removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
 import { useCart, useWishlist } from '../../../store/hooks';
 import Navbar from "../components/Navbar.jsx";
@@ -15,6 +15,24 @@ const Cart = () => {
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
+  const [syncingCart, setSyncingCart] = useState(false);
+
+  // Sync cart with backend on mount to handle deleted books
+  useEffect(() => {
+    const syncCart = async () => {
+      setSyncingCart(true);
+      try {
+        const response = await getCart();
+        if (response.success && response.data?.cart)
+          dispatch(setCart(response.data.cart));
+      } catch (err) {
+        console.error("Failed to sync cart:", err);
+      } finally {
+        setSyncingCart(false);
+      }
+    };
+    syncCart();
+  }, [dispatch]);
 
   // Calculate totals from cart items
   const cartTotals = useMemo(() => {
@@ -131,6 +149,14 @@ const Cart = () => {
 
       <div className="pt-16">
         <div className="max-w-7xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
+          {syncingCart ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="text-center">
+                <i className="fas fa-spinner fa-spin text-4xl text-purple-600 mb-4"></i>
+                <p className="text-gray-600">Syncing your cart...</p>
+              </div>
+            </div>
+          ) : (
           <div className="flex flex-col gap-8 lg:flex-row">
             {/* Cart Section */}
             <div className="lg:w-2/3">
@@ -141,6 +167,21 @@ const Cart = () => {
                     You have {cartItems.length} items in your cart
                   </p>
                 </div>
+                {cartItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-12">
+                    <i className="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
+                    <p className="text-gray-500 text-center mb-4">
+                      Some items may have been removed because they're no longer available
+                    </p>
+                    <button
+                      onClick={() => navigate("/buyer/dashboard")}
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                ) : (
                 <div id="cart-items" className="divide-y divide-gray-300">
                   {cartItems.map((item, idx) => (
                     <div
@@ -227,6 +268,7 @@ const Cart = () => {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
 
               {/* Wishlist Section */}
@@ -376,6 +418,7 @@ const Cart = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
 
