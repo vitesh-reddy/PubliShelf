@@ -202,7 +202,7 @@ const PublisherDashboard = () => {
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Publications</h2>
             {data.books.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                 {data.books.map((book) => (
                   <div
                     key={book._id}
@@ -210,40 +210,76 @@ const PublisherDashboard = () => {
                     onMouseEnter={() => setHoveredBookId(book._id)}
                     onMouseLeave={() => setHoveredBookId(null)}
                   >
-                    <div className="relative bg-gray-50">
+                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
                       <img
                         src={book.image}
                         alt={book.title}
-                        className="w-full h-[350px] object-contain bg-white"
+                        className="w-full h-[300px] object-contain bg-white p-2"
                       />
-                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/0 backdrop-blur-[4px] transition-opacity duration-200 ${
+                      
+                      <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
                           hoveredBookId === book._id ? "opacity-100" : "opacity-0 pointer-events-none" }`}>
                         <button
                           title="Edit"
                           onClick={() => handleEditClick(book)}
-                          className="text-xl flex items-center gap-2 bg-white/90 text-purple-500 rounded-xl px-6 py-2 shadow hover:bg-white hover:shadow-md focus:outline-none transition-colors duration-200"
+                          className="text-base flex items-center gap-2 bg-white text-purple-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-purple-50 hover:scale-105 focus:outline-none transition-all duration-200"
                         >
                           <i className="fas fa-edit"></i>
-                          <span className="text-lg font-medium select-none">Edit</span>
+                          <span className="font-medium select-none">Edit Book</span>
                         </button>
                         <button
                           title="Delete"
                           onClick={() => handleDeleteClick(book)}
-                          className="text-xl flex items-center gap-2 bg-white/90 text-red-500 rounded-xl px-6 py-2 shadow hover:bg-white hover:shadow-md focus:outline-none transition-colors duration-200"
+                          className="text-base flex items-center gap-2 bg-white text-red-600 rounded-lg px-5 py-2.5 shadow-lg hover:bg-red-50 hover:scale-105 focus:outline-none transition-all duration-200"
                           disabled={actionLoading}
                         >
                           <i className="fas fa-trash"></i>
-                          <span className="text-lg font-medium select-none">Delete</span>
+                          <span className="font-medium select-none">Delete Book</span>
                         </button>
                       </div>
                     </div>
 
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold mb-1">{book.title}</h3>
-                      <p className="text-gray-600 text-sm">{book.author}</p>
-                      <p className="text-gray-500 text-xs">
-                        Published on: {new Date(book.publishedAt).toLocaleDateString()}
-                      </p>
+                    <div className="p-4"> 
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xl font-bold text-purple-600">₹{book.price}</span>
+                        </div>
+                        <div>
+                          {book.quantity === 0 ? (
+                            <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-red-200">
+                              <i className="fas fa-times-circle"></i>
+                              Out of Stock
+                            </span>
+                          ) : book.quantity <= 5 ? (
+                            <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-orange-200">
+                              <i className="fas fa-exclamation-circle"></i>
+                              {book.quantity} left
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-green-200">
+                              <i className="fas fa-check-circle"></i>
+                              {book.quantity} units
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <h3 className="text-lg font-semibold mb-1 line-clamp-1" title={book.title}>
+                        {book.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+                      
+                      {/* Info grid */}
+                      <div className="flex justify-between mt-3 pt-3 px-2 border-t border-gray-200">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                          <i className="fas fa-tag text-purple-500"></i>
+                          <span className="font-medium">{book.genre}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                          <i className="fas fa-calendar text-green-500"></i>
+                          <span className="font-medium">{new Date(book.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
