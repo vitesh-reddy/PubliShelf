@@ -8,7 +8,7 @@ export default () => {
       closeButton
       toastOptions={{
         style: {
-          width: "300px",
+          width: "clamp(300px, max-content, 400px)",
           maxWidth: "90vw",
           padding: "0.9rem 1rem",
           borderRadius: "14px",
@@ -27,7 +27,7 @@ export default () => {
         },
         success: {
           style: {
-            width: "300px",
+            width: "clamp(300px, max-content, 400px)",
             borderRadius: "14px",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -42,7 +42,7 @@ export default () => {
         },
         error: {
           style: {
-            width: "300px",
+            width: "clamp(300px, max-content, 400px)",
             borderRadius: "14px",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
