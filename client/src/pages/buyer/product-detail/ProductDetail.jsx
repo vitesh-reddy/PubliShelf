@@ -1,132 +1,195 @@
-//client/src/pages/buyer/product-detail/ProductDetail.jsx
+// client/src/pages/buyer/product-detail/ProductDetail.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { toast } from "sonner";
-import { getProductDetail, addToCart, addToWishlist, removeFromWishlist } from "../../../services/buyer.services.js";
+import { getProductDetail } from "../../../services/buyer.services.js";
 import { useDispatch } from 'react-redux';
-import { addToCart as addToCartInStore } from '../../../store/slices/cartSlice';
-import { addToWishlist as addToWishlistInStore, removeFromWishlist as removeFromWishlistInStore } from '../../../store/slices/wishlistSlice';
+import { addToCartThunk } from '../../../store/slices/cartSlice';
+import { addToWishlistThunk, removeFromWishlistThunk } from '../../../store/slices/wishlistSlice';
 import { useCart, useWishlist } from '../../../store/hooks';
-import Navbar from "../components/Navbar.jsx";
-import Footer from "../components/Footer.jsx";
 import StarRating from "../components/StarRating.jsx";
+
+const SkeletonDetail = () => (
+  <div className="bg-white rounded-xl shadow-lg overflow-hidden p-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="space-y-4">
+        <div className="w-[500px] h-[600px] rounded-lg bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      </div>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="h-8 w-3/4 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-6 w-1/2 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-5 w-1/3 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+        <div className="space-y-2 border-t border-gray-200 pt-4">
+          <div className="h-5 w-40 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-5 w-32 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-5 w-32 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+        <div className="border-t border-b border-gray-200 py-4">
+          <div className="h-10 w-32 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+        <div className="space-y-4">
+          <div className="h-12 w-full rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-12 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+            <div className="h-12 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="h-6 w-32 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-24 w-full rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const SkeletonReview = () => (
+  <div className="flex items-start gap-4 p-6 bg-white rounded-xl shadow-lg mb-6">
+    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+    <div className="flex-1 space-y-2">
+      <div className="h-4 w-1/3 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      <div className="h-3 w-1/4 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      <div className="h-6 w-full rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+    </div>
+  </div>
+);
+
+const SkeletonCard = () => (
+  <div className="bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="w-full h-40 md:h-64 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+    <div className="p-4 space-y-3">
+      <div className="h-4 w-3/4 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      <div className="h-3 w-1/2 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      <div className="flex justify-between items-center pt-2">
+        <div className="space-y-2">
+          <div className="h-4 w-16 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          <div className="h-3 w-20 rounded bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+        </div>
+        <div className="h-7 w-7 rounded-full bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+      </div>
+    </div>
+  </div>
+);
 
 const ProductDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const { items: cartItems } = useCart();
-  const { items: wishlistItems } = useWishlist();
-  
+  const { items: wishlistItems, isAdding: isWishlistAdding, isRemoving: isWishlistRemoving } = useWishlist();
+
   const [book, setBook] = useState(null);
   const [similarBooks, setSimilarBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  
-  // Check if book is in cart/wishlist from Redux store
+
   const isInCart = cartItems.some(item => item.book?._id === id);
   const isInWishlist = wishlistItems.some(item => item._id === id);
 
   useEffect(() => {
-    fetchBook();
+    const run = async () => {
+      try {
+        setLoading(true);
+        const response = await getProductDetail(id);
+        if (response.success) {
+          setBook(response.data.book);
+          setSimilarBooks(response.data.similarBooks || []);
+        } else {
+          setError(response.message);
+        }
+      } catch {
+        setError("Failed to fetch book details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
   }, [id]);
 
-  const fetchBook = async () => {
-    try {
-      setLoading(true);
-      const response = await getProductDetail(id);
-      if (response.success) {
-        setBook(response.data.book);
-        setSimilarBooks(response.data.similarBooks || []);
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError("Failed to fetch book details");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (book.quantity <= 0) {
       toast.error("This book is out of stock!");
       return;
     }
-    
     if (isInCart) {
       toast.info("Book is already in your cart!");
       return;
     }
-    
-    // Optimistic update: add to store immediately
-    dispatch(addToCartInStore({ book, quantity: 1 }));
-    
-    try {
-      const response = await addToCart({ bookId: id, quantity: 1 });
-      if (response.success) {
-        toast.success("Book added to cart successfully!");
-      } else {
-        // Revert on failure - for now just show message
-        toast.error(response.message);
-      }
-    } catch (err) {
-      toast.error("Error adding to cart");
-    }
+    dispatch(addToCartThunk({ bookId: id, quantity: 1, book }))
+      .unwrap()
+      .then(() => toast.success('Book added to cart successfully!'))
+      .catch((e) => toast.error(typeof e === 'string' ? e : 'Error adding to cart'));
   };
 
-  const handleToggleWishlist = async (targetBook) => {
+  const handleToggleWishlist = (targetBook) => {
     const targetId = targetBook?._id || id;
     const alreadyIn = wishlistItems.some(item => item._id === targetId);
 
     if (alreadyIn) {
-      // Optimistic remove
-      dispatch(removeFromWishlistInStore({ bookId: targetId }));
-      try {
-        const response = await removeFromWishlist(targetId);
-        if (response.success) {
-          toast.success('Removed from wishlist');
-        } else {
-          toast.error(response.message || 'Failed to remove from wishlist');
-        }
-      } catch {
-        toast.error('Error removing from wishlist');
-      }
+      dispatch(removeFromWishlistThunk(targetId))
+        .unwrap()
+        .then(() => toast.success('Removed from wishlist'))
+        .catch((e) => toast.error(typeof e === 'string' ? e : 'Failed to remove from wishlist'));
       return;
     }
 
-    // Optimistic add
     const payloadBook = targetBook || book;
-    dispatch(addToWishlistInStore(payloadBook));
-    try {
-      const response = await addToWishlist(targetId);
-      if (response.success) {
-        toast.success('Added to wishlist');
-      } else {
-        toast.error(response.message || 'Failed to add to wishlist');
-      }
-    } catch {
-      toast.error('Error adding to wishlist');
-    }
+    dispatch(addToWishlistThunk({ bookId: targetId, book: payloadBook }))
+      .unwrap()
+      .then(() => toast.success('Added to wishlist'))
+      .catch((e) => toast.error(typeof e === 'string' ? e : 'Failed to add to wishlist'));
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center space-y-12 pt-20">
+        <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <nav className="flex mb-8" aria-label="Breadcrumb">            
+            <ol className="inline-flex items-center space-x-1 md:space-x-3">
+              <li className="inline-flex items-center">
+                <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600">
+                  <i className="fas fa-home mr-2"></i>
+                  Home
+                </Link>
+              </li>              
+              <li className="inline-flex items-center text-gray-400">
+                <i className="fas fa-chevron-right text-gray-400 mx-2"></i> Loading…
+              </li>
+            </ol>
+          </nav>
+
+          <SkeletonDetail />
+
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
+            {[1,2,3].map(i => <SkeletonReview key={i} />)}
+          </div>
+
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold mb-6">You May Also Like</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[1,2,3,4].map(i => <SkeletonCard key={i} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
   if (!book) return <div className="min-h-screen flex items-center justify-center">Book not found</div>;
 
   return (
     <div className="flex flex-col min-h-screen product-detail-page bg-gray-50">
-      <Navbar />
-
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumb */}
           <nav className="flex mb-8" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-3">
               <li className="inline-flex items-center">
                 <Link to="/buyer/dashboard" className="text-gray-700 hover:text-purple-600">
-                <i className="fas fa-home mr-2"></i>
+                  <i className="fas fa-home mr-2"></i>
                   Home
                 </Link>
               </li>
@@ -139,10 +202,8 @@ const ProductDetail = () => {
             </ol>
           </nav>
 
-          {/* Product Details */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-              {/* Image */}
               <div className="space-y-4">
                 <div className="w-[500px] h-[600px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
@@ -153,7 +214,6 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Info */}
               <div className="space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
@@ -199,7 +259,6 @@ const ProductDetail = () => {
 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center border rounded-lg"></div>
                     {book.quantity > 0 ? (
                       <Link
                         to="/buyer/cart"
@@ -216,6 +275,7 @@ const ProductDetail = () => {
                       </button>
                     )}
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="relative grid grid-cols-2 gap-4">
                       {book.quantity <= 0 ? (
@@ -248,12 +308,22 @@ const ProductDetail = () => {
                     <button
                       id="addToWishlistBtn"
                       onClick={() => handleToggleWishlist(book)}
-                      className={`flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg transition-colors ${
-                        isInWishlist ? "text-red-500" : "hover:text-red-500"
+                      disabled={isWishlistAdding(book._id) || isWishlistRemoving(book._id)}
+                      className={`flex items-center justify-center space-x-2 border border-purple-600 px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        isInWishlist ? 'text-red-500 border-red-400' : 'text-purple-600 hover:text-red-500'
                       }`}
                     >
-                      <i className={isInWishlist ? "fas fa-heart" : "far fa-heart"}></i>
-                      <span>{isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}</span>
+                      {isWishlistAdding(book._id) || isWishlistRemoving(book._id) ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          <span>Updating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className={isInWishlist ? 'fas fa-heart' : 'far fa-heart'}></i>
+                          <span>{isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -266,7 +336,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Reviews */}
           <div className="mt-12">
             <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
             {book.reviews.length > 0 ? (
@@ -298,52 +367,48 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {/* Similar Books */}
           <div className="mt-12">
             <h3 className="text-2xl font-bold mb-6">You May Also Like</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {similarBooks.map((sBook) => {
                 const sInWishlist = wishlistItems.some(item => item._id === sBook._id);
                 return (
-                <div
-                  key={sBook._id}
-                  className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer"
-                  onClick={() => navigate(`/buyer/product-detail/${sBook._id}`)}
-                >
-                  <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
-                    <img
-                      src={sBook.image}
-                      alt={sBook.title}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-
-                  <div className="p-3 md:p-4">
-                    <h3 className="text-lg font-semibold mb-1 truncate">{sBook.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2">by {sBook.author}</p>
-
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-purple-600 text-sm">₹{sBook.price}</span>
+                  <div
+                    key={sBook._id}
+                    className="relative bg-white rounded-lg shadow-md overflow-hidden hover:-translate-y-1 transition-transform cursor-pointer"
+                    onClick={() => navigate(`/buyer/product-detail/${sBook._id}`)}
+                  >
+                    <div className="relative w-full h-40 md:h-64 bg-gray-100 flex items-center justify-center">
+                      <img
+                        src={sBook.image}
+                        alt={sBook.title}
+                        className="max-w-full max-h-full object-contain"
+                      />
                     </div>
 
-                    <button
-                      className="absolute bottom-3 right-3 wishlist-btn text-gray-600 hover:text-red-500"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleWishlist(sBook);
-                      }}
-                    >
-                      <i className={`${sInWishlist ? 'fas text-red-500' : 'far text-gray-600'} fa-heart text-xl`}></i>
-                    </button>
+                    <div className="p-3 md:p-4">
+                      <h3 className="text-lg font-semibold mb-1 truncate">{sBook.title}</h3>
+                      <p className="text-gray-500 text-sm truncate">{sBook.author}</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="font-semibold text-gray-900">₹{sBook.price}</span>
+                        <button
+                          className={`text-xl transition-colors ${
+                            sInWishlist ? 'text-red-500' : 'text-purple-600 hover:text-red-500'
+                          }`}
+                          onClick={(e) => { e.stopPropagation(); handleToggleWishlist(sBook); }}
+                        >
+                          {sInWishlist ? <i className="fas fa-heart"></i> : <i className="far fa-heart"></i>}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );})}
+                );
+              })}
             </div>
           </div>
+
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

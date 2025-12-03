@@ -5,6 +5,7 @@ import cors from "cors";
 import buyerRoutes from "./routes/buyer.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import publisherRoutes from "./routes/publisher.routes.js";
+import managerRoutes from "./routes/manager.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
@@ -37,12 +38,15 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true,}));
 app.use("/api/buyer", buyerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/publisher", publisherRoutes);
+app.use("/api/manager", managerRoutes);
 app.use("/api/auth", authRoutes);
 
 // Home data API endpoint for landing page
 app.get("/api/home/data", async (req, res) => {
-  try {
-    const newlyBooks = await Book.find().sort({ publishedAt: -1 }).limit(8);
+  try {    
+    const newlyBooks = await Book.find({ isDeleted: { $ne: true } })
+      .sort({ publishedAt: -1 })
+      .limit(8);
     const mostSoldBooks = await getTopSoldBooks();
     const trendingBooks = await getTrendingBooks();
     const metrics = await getMetrics();

@@ -213,9 +213,18 @@ export const getTopSoldBooks = async () => {
       { $group: { _id: "$items.book", totalSold: { $sum: "$items.quantity" } } },
       { $sort: { totalSold: -1 } },
       { $limit: 8 },
-      { $lookup: { from: "books", localField: "_id", foreignField: "_id", as: "bookDetails" } },
+      {
+        $lookup: {
+          from: "books",
+          let: { bookId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
+            { $project: { title: 1, author: 1, price: 1, image: 1 } },
+          ],
+          as: "bookDetails",
+        },
+      },
       { $unwind: "$bookDetails" },
-      { $match: { "bookDetails.isDeleted": { $ne: true } } },
       {
         $project: {
           _id: "$bookDetails._id",
@@ -223,13 +232,10 @@ export const getTopSoldBooks = async () => {
           author: "$bookDetails.author",
           price: "$bookDetails.price",
           image: "$bookDetails.image",
-          rating: "$bookDetails.rating",
-          quantity: "$bookDetails.quantity",
           totalSold: 1,
         },
       },
     ]);
-
     return topBooks;
   } catch (error) {
     throw new Error("Failed to fetch top sold books: " + error.message);
@@ -247,9 +253,18 @@ export const getTrendingBooks = async () => {
       { $group: { _id: "$items.book", totalOrdered: { $sum: "$items.quantity" } } },
       { $sort: { totalOrdered: -1 } },
       { $limit: 8 },
-      { $lookup: { from: "books", localField: "_id", foreignField: "_id", as: "bookDetails" } },
+      {
+        $lookup: {
+          from: "books",
+          let: { bookId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
+            { $project: { title: 1, author: 1, price: 1, image: 1 } },
+          ],
+          as: "bookDetails",
+        },
+      },
       { $unwind: "$bookDetails" },
-      { $match: { "bookDetails.isDeleted": { $ne: true } } },
       {
         $project: {
           _id: "$bookDetails._id",
@@ -257,13 +272,9 @@ export const getTrendingBooks = async () => {
           author: "$bookDetails.author",
           price: "$bookDetails.price",
           image: "$bookDetails.image",
-          rating: "$bookDetails.rating",
-          quantity: "$bookDetails.quantity",
-          totalOrdered: 1,
         },
       },
     ]);
-
     return trendingBooks;
   } catch (error) {
     throw new Error("Failed to fetch trending books: " + error.message);

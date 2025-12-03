@@ -2,21 +2,100 @@
 import bcrypt from "bcrypt";
 import { getBuyerById, createBuyer, updateBuyerDetails, getTopSoldBooks, getTrendingBooks, placeOrder } from "../services/buyer.services.js";
 import { getAllBooks, getBookById, searchBooks, filterBooks} from "../services/book.services.js";
-import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBook.services.js";
+import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, getAuctionPollingData, addBid } from "../services/antiqueBook.services.js";
 import Buyer from "../models/Buyer.model.js";
 import Book from "../models/Book.model.js";
 import Order from "../models/Order.model.js";
 
 export const getBuyerDashboard = async (req, res) => {
   try {
-    const newlyBooks = await Book.find({isDeleted: { $ne: true }}).sort({ publishedAt: -1 }).limit(8);
-    const mostSoldBooks = await getTopSoldBooks();
-    const trendingBooks = await getTrendingBooks();
+    // Only select needed fields for books
+    const newlyBooks = await Book.find({isDeleted: { $ne: true }})
+      .sort({ publishedAt: -1 })
+      .limit(8)
+      .select('_id title author image price totalSold');
+
+    const mostSoldBooksRaw = await getTopSoldBooks();
+    const mostSoldBooks = mostSoldBooksRaw.map(book => ({
+      _id: book._id,
+      title: book.title,
+      author: book.author,
+      image: book.image,
+      price: book.price,
+      totalSold: book.totalSold
+    }));
+
+    const trendingBooksRaw = await getTrendingBooks();
+    const trendingBooks = trendingBooksRaw.map(book => ({
+      _id: book._id,
+      title: book.title,
+      author: book.author,
+      image: book.image,
+      price: book.price
+    }));
+
+    // Fetch ongoing and upcoming auctions for dashboard
+    const ongoingAuctionsRaw = await getOngoingAuctions();
+    const futureAuctionsRaw = await getFutureAuctions();
+
+    // Only select needed fields for auctions
+    const auctionFields = auction => ({
+      _id: auction._id,
+      title: auction.title,
+      author: auction.author,
+      image: auction.image,
+      auctionStart: auction.auctionStart,
+      auctionEnd: auction.auctionEnd,
+      currentPrice: auction.currentPrice,
+      basePrice: auction.basePrice
+    });
+
+    const ongoingAuctions = ongoingAuctionsRaw.slice(0, 6).map(auctionFields);
+    const futureAuctions = futureAuctionsRaw.slice(0, 6).map(auctionFields);
+
+    // Combine and limit auctions for hero carousel and countdown cards
+    const featuredAuctions = [
+      ...ongoingAuctionsRaw.slice(0, 3).map(auctionFields),
+      ...futureAuctionsRaw.slice(0, 3).map(auctionFields)
+    ];
+
+    // Get recent bids from all ongoing auctions for activity feed
+    const recentBidsData = [];
+    for (const auction of ongoingAuctionsRaw.slice(0, 10)) {
+      const auctionWithBids = await getAuctionItemById(auction._id);
+      if (auctionWithBids.biddingHistory && auctionWithBids.biddingHistory.length > 0) {
+        // Get last 3 bids from each auction
+        const lastBids = auctionWithBids.biddingHistory
+          .slice(-3)
+          .reverse()
+          .map(bid => ({
+            _id: bid._id,
+            bidder: bid.bidder,
+            bookTitle: auctionWithBids.title,
+            bidAmount: bid.bidAmount,
+            bidTime: bid.bidTime,
+            auctionId: auctionWithBids._id
+          }));
+        recentBidsData.push(...lastBids);
+      }
+    }
+    // Sort all bids by time and take top 10
+    const recentBids = recentBidsData
+      .sort((a, b) => new Date(b.bidTime) - new Date(a.bidTime))
+      .slice(0, 10);
 
     res.status(200).json({
       success: true,
       message: "Buyer dashboard data fetched successfully",
-      data: { newlyBooks, mostSoldBooks, trendingBooks }
+      data: { 
+        newlyBooks, 
+        mostSoldBooks, 
+        trendingBooks,
+        featuredAuctions,
+        ongoingAuctions,
+        upcomingAuctions: futureAuctions,
+        recentBids
+      }
     });
   } catch (error) {
     console.error("Error loading buyer dashboard:", error);
@@ -491,6 +570,28 @@ export const getAuctionOngoing = async (req, res) => {
   }
 };
 
+export const getAuctionPollData = async (req, res) => {
+  try {
+    const { id: auctionId } = req.params;
+    const { lastBidTime } = req.query;
+    
+    const pollData = await getAuctionPollingData(auctionId, lastBidTime);
+    
+    res.status(200).json({
+      success: true,
+      message: "Auction poll data fetched successfully",
+      data: pollData
+    });
+  } catch (error) {
+    console.error("Error fetching auction poll data:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch auction poll data",
+      data: null
+    });
+  }
+};
+
 export const placeBid = async (req, res) => {
   try {
     const { id: auctionId } = req.params;
@@ -498,12 +599,20 @@ export const placeBid = async (req, res) => {
     const bidderId = req.user.id;
     const updatedBook = await addBid(auctionId, bidderId, bidAmount);
 
+    // Return only the new bid (last entry) to reduce data transfer
+    const newBid = updatedBook.biddingHistory[updatedBook.biddingHistory.length - 1];
+    
     res.status(200).json({
       success: true,
       message: "Bid placed successfully",
       data: {
         currentPrice: updatedBook.currentPrice,
-        biddingHistory: updatedBook.biddingHistory
+        newBid: {
+          _id: newBid._id,
+          bidder: newBid.bidder,
+          bidAmount: newBid.bidAmount,
+          bidTime: newBid.bidTime
+        }
       }
     });
   } catch (error) {
@@ -755,10 +864,16 @@ export const deleteBuyerAddress = async (req, res) => {
     const { id } = req.params;
     const buyer = await Buyer.findById(req.user.id);
     if (!buyer) return res.status(404).json({ success: false, message: "Buyer not found" });
-    buyer.addresses.id(id)?.remove();
+    const beforeCount = buyer.addresses.length;
+    // Use filter instead of deprecated subdocument .remove() for Mongoose 7/8 compatibility
+    buyer.addresses = buyer.addresses.filter((addr) => addr._id.toString() !== id.toString());
+    if (buyer.addresses.length === beforeCount) {
+      return res.status(404).json({ success: false, message: "Address not found" });
+    }
     await buyer.save();
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, message: "Address deleted" });
   } catch (error) {
+    console.error("Error deleting address:", error);
     res.status(500).json({ success: false, message: "Error deleting address" });
   }
 };
