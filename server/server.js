@@ -36,6 +36,17 @@ app.use("/api/publisher", publisherRoutes);
 app.use("/api/manager", managerRoutes);
 app.use("/api/auth", authRoutes);
 
+app.get("/api/ready", async (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "READY",
+    data: {
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    }
+  });
+});
+
 app.get("/api/home/data", async (req, res) => {
   try {    
     const newlyBooks = await Book.find({ isDeleted: { $ne: true } })
