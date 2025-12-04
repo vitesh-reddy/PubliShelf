@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import userReducer from './slices/userSlice';
 import cartReducer from './slices/cartSlice';
 import wishlistReducer from './slices/wishlistSlice';
+import backendReducer from './slices/backendSlice';
 
 // --- Simple localStorage persistence (no external deps) ---
 const PERSIST_KEY = 'publishelf_state_v1';
@@ -83,6 +84,7 @@ export const store = configureStore({
     user: userReducer,
     cart: cartReducer,
     wishlist: wishlistReducer,
+    backend: backendReducer,
   },
   preloadedState,
 });
