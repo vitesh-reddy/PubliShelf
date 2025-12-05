@@ -110,10 +110,6 @@ const ProductDetail = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    if (book.quantity <= 0) {
-      toast.error("This book is out of stock!");
-      return;
-    }
     if (isInCart) {
       toast.info("Book is already in your cart!");
       return;
@@ -122,6 +118,23 @@ const ProductDetail = () => {
       .unwrap()
       .then(() => toast.success('Book added to cart successfully!'))
       .catch((e) => toast.error(typeof e === 'string' ? e : 'Error adding to cart'));
+  };
+
+  const handleBuyNow = async () => {
+    // If already in cart, redirect directly
+    if (isInCart) {
+      navigate('/buyer/cart');
+      return;
+    }
+
+    // Add to cart first, then redirect
+    try {
+      await dispatch(addToCartThunk({ bookId: id, quantity: 1, book })).unwrap();
+      toast.success('Book added to cart!');
+      navigate('/buyer/cart');
+    } catch (e) {
+      toast.error(typeof e === 'string' ? e : 'Error adding to cart');
+    }
   };
 
   const handleToggleWishlist = (targetBook) => {
@@ -261,12 +274,20 @@ const ProductDetail = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
                     {book.quantity > 0 ? (
-                      <Link
-                        to="/buyer/cart"
-                        className="flex flex-1 justify-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+                      <button
+                        onClick={handleBuyNow}
+                        disabled={isAddingToCart}
+                        className="flex flex-1 justify-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <p className="text-white"> Buy Now </p>
-                      </Link>
+                        {isAddingToCart ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                            <span>Processing...</span>
+                          </>
+                        ) : (
+                          <span>Buy Now</span>
+                        )}
+                      </button>
                     ) : (
                       <button
                         disabled
