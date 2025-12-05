@@ -61,10 +61,11 @@ app.get("/api/home/data", async (req, res) => {
 });
 
 app.post("/api/logout", (req, res) => {
+  const sameSite = process.env.NODE_ENV === 'production' ? 'none' : 'lax';
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite,
   });
   res.status(200).json({
     success: true,

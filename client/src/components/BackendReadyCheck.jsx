@@ -3,12 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkBackendHealth, incrementAttempt } from '../store/slices/backendSlice';
 
-// Colors aligned with EntryAnimation theme
 const brandBg = '#1f1633';
-const brandAccent = '#7c3aed'; // purple-600
-const brandSecondary = '#6366f1'; // indigo-500
-const brandGold = '#d97706'; // amber-600
-const brandPaper = '#faf5ff'; // purple-50
+const brandAccent = '#7c3aed';
+const brandSecondary = '#6366f1'; 
+const brandGold = '#d97706'; 
 
 const containerVariants = {
   initial: { opacity: 0 },
@@ -56,38 +54,38 @@ export default function BackendReadyCheck() {
   const dispatch = useDispatch();
   const { isReady, attempts } = useSelector((state) => state.backend);
   const [statusMessage, setStatusMessage] = useState('Waking up the bookshelf...');
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
-    const pollInterval = 3000; // 3 seconds between attempts
+    const timer = setTimeout(() => setShowLoader(true), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const pollInterval = 3000;
 
     const poll = async () => {
       if (isReady) return;
 
-      await dispatch(checkBackendHealth());
+      dispatch(checkBackendHealth());
       dispatch(incrementAttempt());
 
-      // Update status messages based on progress
-      if (attempts > 25) {
+      if (attempts > 25)
         setStatusMessage('Almost there... Dusting off the pages...');
-      } else if (attempts > 15) {
+      else if (attempts > 15)
         setStatusMessage('Still setting up... Arranging the books...');
-      } else if (attempts > 8) {
-        setStatusMessage('Taking a bit longer... Opening the shelves...');
-      }
+      else if (attempts > 8)
+        setStatusMessage('Taking a bit longer... Opening the shelves...');      
     };
 
-    // Initial check
     poll();
-
-    // Set up polling
     const intervalId = setInterval(poll, pollInterval);
 
     return () => clearInterval(intervalId);
   }, [dispatch, attempts, isReady]);
 
-  if (isReady) {
-    return null;
-  }
+  if (isReady || !showLoader)
+    return null; 
 
   return (
     <AnimatePresence>
