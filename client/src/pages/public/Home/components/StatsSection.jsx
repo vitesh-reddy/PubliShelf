@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 
-const SkeletonStat = () => (
+const SkeletonStat = ({stat}) => (
   <div className="stat-card skeleton-shimmer animate-fade-in">
     <div className="h-8 w-24 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mx-auto mb-2" />
-    <div className="h-4 w-32 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mx-auto" />
+    <div className="text-gray-600">{stat}</div>
   </div>
 );
 
@@ -44,10 +44,10 @@ const StatsSection = ({ data, loading }) => {
         <div className="grid grid-cols-4 gap-8 text-center">
           {loading ? (
             <>
-              <SkeletonStat />
-              <SkeletonStat />
-              <SkeletonStat />
-              <SkeletonStat />
+              <SkeletonStat stat="Books Available" />
+              <SkeletonStat stat="Active Readers" />
+              <SkeletonStat stat="Publishers" />
+              <SkeletonStat stat="Books Sold" />
             </>
           ) : (
             <>
