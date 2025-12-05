@@ -76,7 +76,7 @@ const SkeletonCard = () => (
 const ProductDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const { items: cartItems } = useCart();
+  const { items: cartItems, isAdding: isCartAdding } = useCart();
   const { items: wishlistItems, isAdding: isWishlistAdding, isRemoving: isWishlistRemoving } = useWishlist();
 
   const [book, setBook] = useState(null);
@@ -87,6 +87,7 @@ const ProductDetail = () => {
 
   const isInCart = cartItems.some(item => item.book?._id === id);
   const isInWishlist = wishlistItems.some(item => item._id === id);
+  const isAddingToCart = isCartAdding(id);
 
   useEffect(() => {
     const run = async () => {
@@ -298,10 +299,20 @@ const ProductDetail = () => {
                         <button
                           id="addToCartBtn"
                           onClick={handleAddToCart}
-                          className="absolute w-full flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors"
+                          disabled={isAddingToCart}
+                          className="absolute w-full flex items-center justify-center space-x-2 border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <i className="fas fa-shopping-cart" ></i>
-                          <span>Add to Cart</span>
+                          {isAddingToCart ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin"></i>
+                              <span>Adding...</span>
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-shopping-cart"></i>
+                              <span>Add to Cart</span>
+                            </>
+                          )}
                         </button>
                       )}
                     </div>
