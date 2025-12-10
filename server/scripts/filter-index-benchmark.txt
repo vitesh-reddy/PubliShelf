@@ -1,0 +1,136 @@
+
+
+===== BENCHMARK RUN (2025-12-10T10:58:16.563Z) =====
+Dynamic Test Genres: ["Fiction","Mystery","Non-Fiction","Other","Romance"]
+Dynamic Test Authors: ["By","By \"Better Homes and Gardens\"","By \"Better Homes and Gardens\" and Dahlstrom, Carol Field, Editor","By \"Better Homes and Gardens\" and Knox, Gerald M. (editor)","By \"Ladies' Home Journal\""]
+Dynamic Price Ranges: [{"min":4217,"max":82625},{"min":13785,"max":71422},{"min":2503,"max":66538},{"min":10737,"max":46076},{"min":33066,"max":61981}]
+Dynamic Keywords: ["bridge","fourth","dimension","yoga:","fitness","flexibility","modern","feline","friends","fancies:"]
+
+--- TEST 1: GENRE FILTER ---
+NO INDEX - GENRE "Fiction" → time=570ms | keys=0 | docs=618492
+NO INDEX - GENRE "Mystery" → time=635ms | keys=0 | docs=618492
+NO INDEX - GENRE "Non-Fiction" → time=589ms | keys=0 | docs=618492
+NO INDEX - GENRE "Other" → time=615ms | keys=0 | docs=618492
+NO INDEX - GENRE "Romance" → time=630ms | keys=0 | docs=618492
+INDEXED - GENRE "Fiction" → time=257ms | keys=88040 | docs=88040
+INDEXED - GENRE "Mystery" → time=266ms | keys=89331 | docs=89331
+INDEXED - GENRE "Non-Fiction" → time=237ms | keys=88345 | docs=88345
+INDEXED - GENRE "Other" → time=211ms | keys=87500 | docs=87500
+INDEXED - GENRE "Romance" → time=221ms | keys=88630 | docs=88630
+
+--- TEST 2: AUTHOR FILTER ---
+NO INDEX - AUTHOR "By" → time=633ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens"" → time=645ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens" and Dahlstrom, Carol Field, Editor" → time=566ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens" and Knox, Gerald M. (editor)" → time=620ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Ladies' Home Journal"" → time=594ms | keys=0 | docs=618492
+INDEXED - AUTHOR "By" → time=52ms | keys=6258 | docs=6258
+INDEXED - AUTHOR "By "Better Homes and Gardens"" → time=2ms | keys=726 | docs=726
+INDEXED - AUTHOR "By "Better Homes and Gardens" and Dahlstrom, Carol Field, Editor" → time=0ms | keys=6 | docs=6
+INDEXED - AUTHOR "By "Better Homes and Gardens" and Knox, Gerald M. (editor)" → time=0ms | keys=6 | docs=6
+INDEXED - AUTHOR "By "Ladies' Home Journal"" → time=0ms | keys=12 | docs=12
+
+--- TEST 3: PRICE RANGE FILTER ---
+NO INDEX - PRICE 4217-82625 → time=977ms | keys=0 | docs=618492
+NO INDEX - PRICE 13785-71422 → time=795ms | keys=0 | docs=618492
+NO INDEX - PRICE 2503-66538 → time=825ms | keys=0 | docs=618492
+NO INDEX - PRICE 10737-46076 → time=911ms | keys=0 | docs=618492
+NO INDEX - PRICE 33066-61981 → time=877ms | keys=0 | docs=618492
+INDEXED - PRICE 4217-82625 → time=32ms | keys=1902 | docs=1902
+INDEXED - PRICE 13785-71422 → time=0ms | keys=156 | docs=156
+INDEXED - PRICE 2503-66538 → time=18ms | keys=4206 | docs=4206
+INDEXED - PRICE 10737-46076 → time=3ms | keys=720 | docs=720
+INDEXED - PRICE 33066-61981 → time=0ms | keys=24 | docs=24
+
+--- TEST 4: FULL-TEXT SEARCH ($text) ---
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT INDEX - SEARCH "bridge" → time=301ms | keys=3150 | docs=3150
+TEXT INDEX - SEARCH "fourth" → time=187ms | keys=3438 | docs=3438
+TEXT INDEX - SEARCH "dimension" → time=103ms | keys=1734 | docs=1734
+TEXT INDEX - SEARCH "yoga:" → time=69ms | keys=1026 | docs=1026
+TEXT INDEX - SEARCH "fitness" → time=288ms | keys=7464 | docs=7464
+TEXT INDEX - SEARCH "flexibility" → time=45ms | keys=1488 | docs=1488
+TEXT INDEX - SEARCH "modern" → time=452ms | keys=18690 | docs=18690
+TEXT INDEX - SEARCH "feline" → time=14ms | keys=930 | docs=930
+TEXT INDEX - SEARCH "friends" → time=595ms | keys=44604 | docs=44604
+TEXT INDEX - SEARCH "fancies:" → time=22ms | keys=1554 | docs=1554
+
+Benchmark Completed.
+
+
+
+===== BENCHMARK RUN (2025-12-10T11:02:40.293Z) =====
+Dynamic Test Genres: ["Fiction","Mystery","Non-Fiction","Other","Romance"]
+Dynamic Test Authors: ["By","By \"Better Homes and Gardens\"","By \"Better Homes and Gardens\" and Dahlstrom, Carol Field, Editor","By \"Better Homes and Gardens\" and Knox, Gerald M. (editor)","By \"Ladies' Home Journal\""]
+Dynamic Price Ranges: [{"min":32831,"max":40065},{"min":26603,"max":66872},{"min":19913,"max":70725},{"min":6560,"max":63891},{"min":2232,"max":38569}]
+Dynamic Keywords: ["touched","angel","ancestors:","search","human","origins","designated","christmas","heart:","through"]
+
+--- TEST 1: GENRE FILTER ---
+NO INDEX - GENRE "Fiction" → time=1115ms | keys=0 | docs=618492
+NO INDEX - GENRE "Mystery" → time=1182ms | keys=0 | docs=618492
+NO INDEX - GENRE "Non-Fiction" → time=765ms | keys=0 | docs=618492
+NO INDEX - GENRE "Other" → time=982ms | keys=0 | docs=618492
+NO INDEX - GENRE "Romance" → time=1011ms | keys=0 | docs=618492
+INDEXED - GENRE "Fiction" → time=267ms | keys=88040 | docs=88040
+INDEXED - GENRE "Mystery" → time=248ms | keys=89331 | docs=89331
+INDEXED - GENRE "Non-Fiction" → time=238ms | keys=88345 | docs=88345
+INDEXED - GENRE "Other" → time=234ms | keys=87500 | docs=87500
+INDEXED - GENRE "Romance" → time=232ms | keys=88630 | docs=88630
+
+--- TEST 2: AUTHOR FILTER ---
+NO INDEX - AUTHOR "By" → time=634ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens"" → time=655ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens" and Dahlstrom, Carol Field, Editor" → time=831ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Better Homes and Gardens" and Knox, Gerald M. (editor)" → time=686ms | keys=0 | docs=618492
+NO INDEX - AUTHOR "By "Ladies' Home Journal"" → time=666ms | keys=0 | docs=618492
+INDEXED - AUTHOR "By" → time=37ms | keys=6258 | docs=6258
+INDEXED - AUTHOR "By "Better Homes and Gardens"" → time=2ms | keys=726 | docs=726
+INDEXED - AUTHOR "By "Better Homes and Gardens" and Dahlstrom, Carol Field, Editor" → time=0ms | keys=6 | docs=6
+INDEXED - AUTHOR "By "Better Homes and Gardens" and Knox, Gerald M. (editor)" → time=0ms | keys=6 | docs=6
+INDEXED - AUTHOR "By "Ladies' Home Journal"" → time=0ms | keys=12 | docs=12
+
+--- TEST 3: PRICE RANGE FILTER ---
+NO INDEX - PRICE 32831-40065 → time=853ms | keys=0 | docs=618492
+NO INDEX - PRICE 26603-66872 → time=843ms | keys=0 | docs=618492
+NO INDEX - PRICE 19913-70725 → time=892ms | keys=0 | docs=618492
+NO INDEX - PRICE 6560-63891 → time=916ms | keys=0 | docs=618492
+NO INDEX - PRICE 2232-38569 → time=955ms | keys=0 | docs=618492
+INDEXED - PRICE 32831-40065 → time=19ms | keys=6 | docs=6
+INDEXED - PRICE 26603-66872 → time=0ms | keys=42 | docs=42
+INDEXED - PRICE 19913-70725 → time=2ms | keys=78 | docs=78
+INDEXED - PRICE 6560-63891 → time=6ms | keys=1134 | docs=1134
+INDEXED - PRICE 2232-38569 → time=47ms | keys=5442 | docs=5442
+
+--- TEST 4: FULL-TEXT SEARCH ($text) ---
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT SEARCH FAILED (no index)
+TEXT INDEX - SEARCH "touched" → time=218ms | keys=10212 | docs=10212
+TEXT INDEX - SEARCH "angel" → time=201ms | keys=8652 | docs=8652
+TEXT INDEX - SEARCH "ancestors:" → time=27ms | keys=1314 | docs=1314
+TEXT INDEX - SEARCH "search" → time=214ms | keys=16464 | docs=16464
+TEXT INDEX - SEARCH "human" → time=300ms | keys=26208 | docs=26208
+TEXT INDEX - SEARCH "origins" → time=298ms | keys=32364 | docs=32364
+TEXT INDEX - SEARCH "designated" → time=314ms | keys=22674 | docs=22674
+TEXT INDEX - SEARCH "christmas" → time=79ms | keys=8934 | docs=8934
+TEXT INDEX - SEARCH "heart:" → time=320ms | keys=34764 | docs=34764
+TEXT INDEX - SEARCH "through" → time=0ms | keys=0 | docs=0
+
+Benchmark Completed.
+

@@ -1,0 +1,48 @@
+
+===== FINAL BENCHMARK RUN (2025-12-10T11:20:30.524Z) =====
+GENRES (top): ["Mystery","Romance","Thriller"]
+AUTHORS (top): ["By","By Roberts, Nora","By Time-Life Books"]
+PRICE RANGES: [{"min":415.65,"max":18947.520000000004},{"min":37479.39000000001,"max":56011.26},{"min":74543.13,"max":93075}]
+KEYWORDS: ["guide","novel","series","american","world"]
+
+--- TEST 1: GENRE FILTER (EXACT MATCH) ---
+NO INDEX - genre="Mystery" → time=630ms | keys=0 | docs=618492
+NO INDEX - genre="Romance" → time=632ms | keys=0 | docs=618492
+NO INDEX - genre="Thriller" → time=567ms | keys=0 | docs=618492
+Created index { genre: 1 }
+INDEXED - genre="Mystery" → time=275ms | keys=89331 | docs=89331
+INDEXED - genre="Romance" → time=228ms | keys=88630 | docs=88630
+INDEXED - genre="Thriller" → time=217ms | keys=88614 | docs=88614
+
+--- TEST 2: AUTHOR FILTER (EXACT MATCH) ---
+NO INDEX - author="By" → time=598ms | keys=0 | docs=618492
+NO INDEX - author="By Roberts, Nora" → time=569ms | keys=0 | docs=618492
+NO INDEX - author="By Time-Life Books" → time=579ms | keys=0 | docs=618492
+Created index { author: 1 }
+INDEXED - author="By" → time=50ms | keys=6258 | docs=6258
+INDEXED - author="By Roberts, Nora" → time=3ms | keys=1170 | docs=1170
+INDEXED - author="By Time-Life Books" → time=2ms | keys=1032 | docs=1032
+
+--- TEST 3: PRICE RANGE FILTER ---
+NO INDEX - price 415.65-18947.520000000004 → time=791ms | keys=0 | docs=618492
+NO INDEX - price 37479.39000000001-56011.26 → time=887ms | keys=0 | docs=618492
+NO INDEX - price 74543.13-93075 → time=831ms | keys=0 | docs=618492
+Created index { price: 1 }
+INDEXED - price 415.65-18947.520000000004 → time=1859ms | keys=618396 | docs=618396
+INDEXED - price 37479.39000000001-56011.26 → time=0ms | keys=18 | docs=18
+INDEXED - price 74543.13-93075 → time=0ms | keys=12 | docs=12
+
+--- TEST 4: FULL-TEXT SEARCH ($text) ---
+NO INDEX - $text "guide" FAILED: text index required for $text query
+NO INDEX - $text "novel" FAILED: text index required for $text query
+NO INDEX - $text "series" FAILED: text index required for $text query
+NO INDEX - $text "american" FAILED: text index required for $text query
+NO INDEX - $text "world" FAILED: text index required for $text query
+Created text index on { title, author, description }
+TEXT INDEX - $text "guide" → time=650ms | keys=66282 | docs=66282
+TEXT INDEX - $text "novel" → time=307ms | keys=48132 | docs=48132
+TEXT INDEX - $text "series" → time=279ms | keys=42342 | docs=42342
+TEXT INDEX - $text "american" → time=364ms | keys=54870 | docs=54870
+TEXT INDEX - $text "world" → time=655ms | keys=94536 | docs=94536
+
+Benchmark Completed.

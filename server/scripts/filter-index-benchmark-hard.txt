@@ -1,0 +1,21 @@
+===== SHOWCASE BENCHMARK (2025-12-10T11:31:59.546Z) =====
+
+--- TEST: GENRE FILTER (Thriller) ---
+    NO INDEX          → time=1191ms │ keys=0      │ docs=618492
+    WITH INDEX        → time= 289ms │ keys=88614  │ docs= 88614
+
+--- TEST: AUTHOR FILTER (Highly Selective) ---
+    NO INDEX          → time= 697ms │ keys=0      │ docs=618492
+    WITH INDEX        → time=  25ms │ keys=1032   │ docs=  1032
+
+--- TEST: COMPOUND FILTER (Mystery + Roberts) ---
+    NO INDEX          → time= 638ms │ keys=0      │ docs=618492
+    WITH INDEX        → time=  17ms │ keys=142    │ docs=  142
+
+--- TEST: PRICE RANGE (Very Narrow) ---
+    NO INDEX          → time= 848ms │ keys=0      │ docs=618492
+    WITH INDEX        → time=  19ms │ keys=0      │ docs=   0
+
+--- TEST: SEARCH (regex fallback vs text index) ---
+    NO INDEX (regex fallback) → time=5745ms │ keys=0      │ docs=618492
+    TEXT INDEX SEARCH         → time= 797ms │ keys=48132  │ docs=48132
