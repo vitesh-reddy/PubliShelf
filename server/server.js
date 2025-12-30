@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import 'dotenv/config'
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -14,7 +14,6 @@ import managerRoutes from "./routes/manager.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import systemRoutes from "./routes/system.routes.js";
 
-dotenv.config();
 connectDB(MONGODB_URI);
 
 const app = express();
