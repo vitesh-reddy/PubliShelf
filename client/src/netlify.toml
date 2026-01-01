@@ -1,11 +1,4 @@
 [[redirects]]
-  from = "/api/*"
-  to = "http://34.182.29.215:3000/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = { method = ["GET"] }
