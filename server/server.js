@@ -1,7 +1,8 @@
 import 'dotenv/config'
-import express from "express";
 import cors from "cors";
+import express from "express";
 import morgan from "morgan";
+import { UAParser } from 'ua-parser-js';
 import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
@@ -18,7 +19,13 @@ connectDB(MONGODB_URI);
 
 const app = express();
 
-app.use(morgan("tiny", {skip: (req) =>req.url.match(/\.(css|js|png|jpg|ico|svg|woff2?)$/)}));
+morgan.token('device', (req) => {
+  const ua = new UAParser(req.headers['user-agent']);
+  const device = ua.getDevice();
+  return device.model ? `${device.vendor || ''} ${device.model}`.trim() : 'Desktop';
+});
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :device'));
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
