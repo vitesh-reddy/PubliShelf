@@ -7,6 +7,7 @@ import PublicOnlyRoutes from './routes/PublicOnlyRoutes'
 import ToastProvider from './components/ToastProvider'
 import EntryAnimation from './components/EntryAnimation.jsx'
 import BackendReadyCheck from './components/BackendReadyCheck.jsx'
+import ThemeToggle from './components/ThemeToggle.jsx'
 
 const App = () => {
   const isBackendReady = useSelector((state) => state.backend.isReady);
@@ -18,6 +19,7 @@ const App = () => {
         <>
           <EntryAnimation />
           <ToastProvider />
+          <ThemeToggle />
           <Routes>
             {/* Can be accessed by any users */}
             {PublicRoutes()}
