@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkBackendHealth, incrementAttempt } from '../store/slices/backendSlice';
+import { checkBackendHealth } from '../store/slices/backendSlice';
+import { useTheme } from '../context/ThemeContext';
 
 const brandBg = '#1f1633';
-const brandAccent = '#7c3aed';
-const brandSecondary = '#6366f1'; 
 const brandGold = '#d97706'; 
 
 const containerVariants = {
@@ -52,9 +51,13 @@ const dotVariants = {
 
 export default function BackendReadyCheck() {
   const dispatch = useDispatch();
-  const { isReady, attempts } = useSelector((state) => state.backend);
+  const { isReady } = useSelector((state) => state.backend);
+  const { theme } = useTheme();
   const [statusMessage, setStatusMessage] = useState('Waking up the bookshelf...');
   const [showLoader, setShowLoader] = useState(false);
+
+  const brandAccent = theme === 'ocean' ? '#4f8ca8' : '#7c3aed';
+  const brandSecondary = theme === 'ocean' ? '#385460' : '#6366f1';
 
   useEffect(() => {
     const timer = setTimeout(() => setShowLoader(true), 1000);
@@ -62,27 +65,35 @@ export default function BackendReadyCheck() {
   }, []);
 
   useEffect(() => {
-    const pollInterval = 3000;
+    if (isReady) return;
+
+    let attempts = 0;
+    let timeoutId;
 
     const poll = async () => {
       if (isReady) return;
 
+      attempts += 1;
       dispatch(checkBackendHealth());
-      dispatch(incrementAttempt());
 
       if (attempts > 25)
         setStatusMessage('Almost there... Dusting off the pages...');
       else if (attempts > 15)
         setStatusMessage('Still setting up... Arranging the books...');
       else if (attempts > 8)
-        setStatusMessage('Taking a bit longer... Opening the shelves...');      
+        setStatusMessage('Taking a bit longer... Opening the shelves...');
+
+      const delay = Math.min(
+        5000 * Math.pow(2, Math.floor(attempts / 3)),
+        30000
+      );
+
+      timeoutId = setTimeout(poll, delay);
     };
 
-    poll();
-    const intervalId = setInterval(poll, pollInterval);
-
-    return () => clearInterval(intervalId);
-  }, [dispatch, attempts, isReady]);
+    timeoutId = setTimeout(poll, 5000);
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, isReady]);
 
   if (isReady || !showLoader)
     return null; 
@@ -106,7 +117,6 @@ export default function BackendReadyCheck() {
           overflow: 'hidden',
         }}
       >
-        {/* Animated floating particles */}
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={`particle-${i}`}
@@ -132,9 +142,7 @@ export default function BackendReadyCheck() {
           />
         ))}
 
-        {/* Main content area */}
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Animated bookshelf with books */}
           <motion.div
             variants={shelfVariants}
             animate="animate"
@@ -144,7 +152,6 @@ export default function BackendReadyCheck() {
               position: 'relative',
             }}
           >
-            {/* Books on shelf */}
             <div
               style={{
                 display: 'flex',
@@ -177,7 +184,6 @@ export default function BackendReadyCheck() {
                     position: 'relative',
                   }}
                 >
-                  {/* Book spine lines */}
                   <div
                     style={{
                       position: 'absolute',
@@ -204,7 +210,6 @@ export default function BackendReadyCheck() {
               ))}
             </div>
             
-            {/* Shelf */}
             <div
               style={{
                 width: '100%',
@@ -216,7 +221,6 @@ export default function BackendReadyCheck() {
             />
           </motion.div>
 
-          {/* Status text with typewriter reveal effect */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -261,7 +265,6 @@ export default function BackendReadyCheck() {
             ))}
           </motion.div>
 
-          {/* Animated dots */}
           <div
             style={{
               display: 'flex',
@@ -286,7 +289,6 @@ export default function BackendReadyCheck() {
             ))}
           </div>
 
-          {/* Progress indicator */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
@@ -303,7 +305,6 @@ export default function BackendReadyCheck() {
           </motion.p>
         </div>
 
-        {/* Decorative antique scroll elements */}
         <svg
           style={{
             position: 'absolute',

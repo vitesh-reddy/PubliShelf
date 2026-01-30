@@ -2,13 +2,11 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFirstVisit } from '../context/FirstVisitContext.jsx';
 import { useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext.jsx';
 
-// Colors aligned with project theme (purple + antique)
 const brandBg = '#1f1633';
-const brandAccent = '#7c3aed'; // purple-600
-const brandSecondary = '#6366f1'; // indigo-500
-const brandGold = '#d97706'; // amber-600
-const brandPaper = '#faf5ff'; // purple-50
+const brandGold = '#d97706';
+const brandPaper = '#faf5ff';
 
 const containerVariants = {
   initial: { opacity: 1 },
@@ -61,8 +59,12 @@ const particleVariants = {
 export default function EntryAnimation() {
   const { isFirstVisit, markVisited } = useFirstVisit();
   const location = useLocation();
+  const { theme } = useTheme();
 
   const isLanding = location.pathname === '/';
+
+  const brandAccent = theme === 'ocean' ? '#4f8ca8' : '#7c3aed';
+  const brandSecondary = theme === 'ocean' ? '#385460' : '#6366f1';
 
   useEffect(() => {
     if (!isFirstVisit || !isLanding) return;
@@ -71,13 +73,13 @@ export default function EntryAnimation() {
   }, [isFirstVisit, isLanding, markVisited]);
 
   const books = [
-    { color: '#dc2626', width: 16, height: 80 }, // red-600
-    { color: '#7c3aed', width: 22, height: 85 }, // purple-600
-    { color: '#059669', width: 18, height: 75 }, // emerald-600
-    { color: '#6366f1', width: 20, height: 82 }, // indigo-500
-    { color: '#ea580c', width: 24, height: 78 }, // orange-600
-    { color: '#0891b2', width: 17, height: 88 }, // cyan-600
-    { color: '#7c3aed', width: 21, height: 76 }, // purple-600
+    { color: '#dc2626', width: 16, height: 80 },
+    { color: brandAccent, width: 22, height: 85 },
+    { color: '#059669', width: 18, height: 75 },
+    { color: brandSecondary, width: 20, height: 82 },
+    { color: '#ea580c', width: 24, height: 78 },
+    { color: '#0891b2', width: 17, height: 88 },
+    { color: brandAccent, width: 21, height: 76 },
   ];
 
   return (
@@ -348,7 +350,7 @@ export default function EntryAnimation() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 3.2 + i * 0.03, duration: 0.12 }}
                     style={{
-                      color: '#7c3aed',
+                      color: brandAccent,
                       fontSize: 13,
                       letterSpacing: 2,
                       textTransform: 'uppercase',
