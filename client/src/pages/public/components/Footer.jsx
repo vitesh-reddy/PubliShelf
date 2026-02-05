@@ -27,23 +27,35 @@ const Footer = () => (
           </ul>
         </div>
         <div>
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 md:-translate-x-12">
+            <h4 className="text-lg font-semibold mb-4 text-white">Site Stats</h4>
+            <ul className="space-y-3">
+              <li className="flex justify-between items-center">
+                <span className="text-gray-300">Site Views</span>
+                <span className="text-white font-bold text-lg">847,403</span>
+              </li>
+              <li className="flex justify-between items-center">
+                <span className="text-gray-300">Users Today</span>
+                <span className="text-white font-bold text-lg">69</span>
+              </li>
+              <li className="flex justify-between items-center">
+                <span className="text-gray-300">Views Today</span>
+                <span className="text-white font-bold text-lg">130</span>
+              </li>
+              <li className="flex justify-between items-center">
+                <span className="text-gray-300">Server Time</span>
+                <span className="text-white font-semibold">2026-02-05</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div>
           <h4 className="text-lg font-semibold mb-4">Connect</h4>
           <div className="flex space-x-4">
             <Link to="#" className="text-gray-400 hover:text-white"><i className="fab fa-twitter"></i></Link>
             <Link to="#" className="text-gray-400 hover:text-white"><i className="fab fa-facebook"></i></Link>
             <Link to="#" className="text-gray-400 hover:text-white"><i className="fab fa-instagram"></i></Link>
             <Link to="#" className="text-gray-400 hover:text-white"><i className="fab fa-linkedin"></i></Link>
-          </div>
-        </div>
-        <div>
-          <h4 className="text-lg font-semibold mb-4">Newsletter</h4>
-          <div className="flex">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="bg-white text-gray-700 px-4 py-2 rounded-l-lg w-full focus:outline-none focus:outline-purple-500"
-            />
-            <button className="bg-purple-600 px-4 py-2 rounded-r-lg hover:bg-purple-700">Subscribe</button>
           </div>
         </div>
       </div>
