@@ -2,9 +2,11 @@ import Analytics from "../models/Analytics.model.js";
 import { safeRedisOperation } from "../config/redis.js";
 import logger from "../config/logger.js";
 
-const TOTAL_VIEWS_KEY = "analytics:total_views";
-const TODAY_VIEWS_KEY = "analytics:today_views";
-const TODAY_USERS_KEY = "analytics:today_users";
+const TOTAL_VIEWS_KEY = "analytics:views:total";
+const DAILY_VIEWS_KEY_PREFIX = "analytics:views";
+const DAILY_USERS_KEY_PREFIX = "analytics:users";
+
+const DAILY_KEY_TTL = 86400 * 3;
 
 const getTodayDate = () => {
   const now = new Date();
@@ -14,31 +16,70 @@ const getTodayDate = () => {
   return `${year}-${month}-${day}`;
 };
 
-export const incrementPageView = async (userId) => {
+export const recordVisit = async (userId) => {
   const today = getTodayDate();
   const userIdentifier = userId || "anonymous";
 
-  await safeRedisOperation(async (client) => {
+  const success = await safeRedisOperation(async (client) => {
     await client.incr(TOTAL_VIEWS_KEY);
-    await client.incr(`${TODAY_VIEWS_KEY}:${today}`);
-    await client.sAdd(`${TODAY_USERS_KEY}:${today}`, userIdentifier);
+    await client.incr(`${DAILY_VIEWS_KEY_PREFIX}:${today}`);
+    await client.sAdd(`${DAILY_USERS_KEY_PREFIX}:${today}`, userIdentifier);
+    await client.expire(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
+    await client.expire(`${DAILY_USERS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
+    return true;
   });
 
-  try {
-    await Analytics.findOneAndUpdate(
-      { date: today },
-      {
-        $inc: { totalViews: 1 },
-        $addToSet: { uniqueUsers: userIdentifier },
-      },
-      { upsert: true, new: true }
-    );
-  } catch (error) {
-    logger.error("Failed to persist analytics to MongoDB:", error);
+  if (!success) {
+    logger.warn("Redis unavailable for visit recording, falling back to MongoDB");
+    try {
+      await Analytics.findOneAndUpdate(
+        { date: today },
+        { $inc: { viewsToday: 1 } },
+        { upsert: true }
+      );
+    } catch (error) {
+      logger.error("Failed to record visit to MongoDB:", error);
+    }
   }
 };
 
-export const getFooterStats = async () => {
+const persistSnapshotToMongoDB = async () => {
+  const today = getTodayDate();
+
+  try {
+    const stats = await safeRedisOperation(async (client) => {
+      const [totalViews, todayViews, todayUsers] = await Promise.all([
+        client.get(TOTAL_VIEWS_KEY),
+        client.get(`${DAILY_VIEWS_KEY_PREFIX}:${today}`),
+        client.sCard(`${DAILY_USERS_KEY_PREFIX}:${today}`),
+      ]);
+      return {
+        totalViews: parseInt(totalViews) || 0,
+        viewsToday: parseInt(todayViews) || 0,
+        usersToday: todayUsers || 0,
+      };
+    });
+
+    if (!stats) {
+      return;
+    }
+
+    await Analytics.findOneAndUpdate(
+      { date: today },
+      {
+        viewsToday: stats.viewsToday,
+        usersToday: stats.usersToday,
+      },
+      { upsert: true }
+    );
+
+    logger.info(`Persisted analytics snapshot for ${today}`);
+  } catch (error) {
+    logger.error("Failed to persist snapshot to MongoDB:", error);
+  }
+};
+
+export const getStats = async () => {
   const today = getTodayDate();
 
   let totalViews = 0;
@@ -48,8 +89,8 @@ export const getFooterStats = async () => {
   const redisStats = await safeRedisOperation(async (client) => {
     const [total, todayViews, todayUsers] = await Promise.all([
       client.get(TOTAL_VIEWS_KEY),
-      client.get(`${TODAY_VIEWS_KEY}:${today}`),
-      client.sCard(`${TODAY_USERS_KEY}:${today}`),
+      client.get(`${DAILY_VIEWS_KEY_PREFIX}:${today}`),
+      client.sCard(`${DAILY_USERS_KEY_PREFIX}:${today}`),
     ]);
     return {
       totalViews: parseInt(total) || 0,
@@ -62,24 +103,25 @@ export const getFooterStats = async () => {
     totalViews = redisStats.totalViews;
     viewsToday = redisStats.viewsToday;
     usersToday = redisStats.usersToday;
+
+    persistSnapshotToMongoDB().catch((err) => {
+      logger.error("Background persistence failed:", err);
+    });
   } else {
     try {
       const todayDoc = await Analytics.findOne({ date: today });
-      const allDocs = await Analytics.find({});
 
-      totalViews = allDocs.reduce((sum, doc) => sum + doc.totalViews, 0);
-      viewsToday = todayDoc?.totalViews || 0;
-      usersToday = todayDoc?.uniqueUsers?.length || 0;
+      if (todayDoc) {
+        totalViews = todayDoc.viewsToday || 0;
+        viewsToday = todayDoc.viewsToday || 0;
+        usersToday = todayDoc.usersToday || 0;
 
-      await safeRedisOperation(async (client) => {
-        await client.set(TOTAL_VIEWS_KEY, totalViews.toString());
-        await client.set(`${TODAY_VIEWS_KEY}:${today}`, viewsToday.toString());
-        if (todayDoc?.uniqueUsers) {
-          for (const user of todayDoc.uniqueUsers) {
-            await client.sAdd(`${TODAY_USERS_KEY}:${today}`, user);
-          }
-        }
-      });
+        await safeRedisOperation(async (client) => {
+          await client.set(TOTAL_VIEWS_KEY, totalViews.toString());
+          await client.set(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, viewsToday.toString());
+          await client.expire(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
+        });
+      }
     } catch (error) {
       logger.error("Failed to fetch analytics from MongoDB:", error);
     }
@@ -89,7 +131,7 @@ export const getFooterStats = async () => {
     totalViews,
     viewsToday,
     usersToday,
-    serverTime: new Date().toISOString().split("T")[0],
+    serverTime: getTodayDate(),
   };
 };
 
@@ -97,28 +139,21 @@ export const initializeAnalytics = async () => {
   const today = getTodayDate();
 
   try {
-    const allDocs = await Analytics.find({});
-    const totalViews = allDocs.reduce((sum, doc) => sum + doc.totalViews, 0);
-
-    await safeRedisOperation(async (client) => {
-      const existing = await client.get(TOTAL_VIEWS_KEY);
-      if (!existing) {
-        await client.set(TOTAL_VIEWS_KEY, totalViews.toString());
-        logger.info(`Initialized total views from MongoDB: ${totalViews}`);
-      }
+    const existingTotal = await safeRedisOperation(async (client) => {
+      return await client.get(TOTAL_VIEWS_KEY);
     });
 
-    const todayDoc = await Analytics.findOne({ date: today });
-    if (todayDoc) {
-      await safeRedisOperation(async (client) => {
-        await client.set(`${TODAY_VIEWS_KEY}:${today}`, todayDoc.totalViews.toString());
-        if (todayDoc.uniqueUsers) {
-          for (const user of todayDoc.uniqueUsers) {
-            await client.sAdd(`${TODAY_USERS_KEY}:${today}`, user);
-          }
-        }
-      });
-      logger.info(`Initialized today's analytics from MongoDB`);
+    if (!existingTotal) {
+      const todayDoc = await Analytics.findOne({ date: today });
+
+      if (todayDoc) {
+        await safeRedisOperation(async (client) => {
+          await client.set(TOTAL_VIEWS_KEY, (todayDoc.viewsToday || 0).toString());
+          await client.set(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, (todayDoc.viewsToday || 0).toString());
+          await client.expire(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
+        });
+        logger.info(`Initialized analytics from MongoDB for ${today}`);
+      }
     }
   } catch (error) {
     logger.error("Failed to initialize analytics:", error);

@@ -6,13 +6,13 @@ const analyticsSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  totalViews: {
+  viewsToday: {
     type: Number,
     default: 0,
   },
-  uniqueUsers: {
-    type: [String],
-    default: [],
+  usersToday: {
+    type: Number,
+    default: 0,
   },
 }, {
   timestamps: true,

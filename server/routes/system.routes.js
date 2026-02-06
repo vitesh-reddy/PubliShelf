@@ -1,7 +1,7 @@
 import express from "express";
 import Book from "../models/Book.model.js";
 import { getMetrics, getTopSoldBooks, getTrendingBooks } from "../services/buyer.services.js";
-import { getFooterStats } from "../services/analytics.services.js";
+import { recordVisit, getStats } from "../services/analytics.services.js";
 
 const router = express.Router();
 
@@ -59,9 +59,28 @@ router.get(["/ready", "/health", "/api/ready"], (req, res) => {
   });
 });
 
+router.post("/api/analytics/visit", async (req, res) => {
+  try {
+    const userId = req.user?.id || req.ip;
+    await recordVisit(userId);
+    res.status(200).json({
+      success: true,
+      message: "Visit recorded",
+      data: null,
+    });
+  } catch (error) {
+    console.error("Error recording visit:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
+});
+
 router.get("/api/system/stats", async (req, res) => {
   try {
-    const stats = await getFooterStats();
+    const stats = await getStats();
     res.status(200).json({
       success: true,
       message: "Stats fetched successfully",

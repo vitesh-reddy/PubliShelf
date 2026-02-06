@@ -19,7 +19,6 @@ import publisherRoutes from "./routes/publisher.routes.js";
 import managerRoutes from "./routes/manager.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import systemRoutes from "./routes/system.routes.js";
-import { analyticsMiddleware } from "./middleware/analytics.middleware.js";
 import errorHandler from "./middleware/errorHandler.middleware.js";
 import notFoundHandler from "./middleware/notFoundHandler.middleware.js";
 
@@ -46,8 +45,6 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());
 
 app.use(cors({origin: CLIENT_URL, credentials: true}));
-
-app.use(analyticsMiddleware);
 
 app.use("/api/buyer", buyerRoutes);
 app.use("/api/admin", adminRoutes);
