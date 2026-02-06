@@ -1,6 +1,7 @@
 import express from "express";
 import Book from "../models/Book.model.js";
 import { getMetrics, getTopSoldBooks, getTrendingBooks } from "../services/buyer.services.js";
+import { getFooterStats } from "../services/analytics.services.js";
 
 const router = express.Router();
 
@@ -56,6 +57,24 @@ router.get(["/ready", "/health", "/api/ready"], (req, res) => {
       uptime: process.uptime(),
     },
   });
+});
+
+router.get("/api/system/stats", async (req, res) => {
+  try {
+    const stats = await getFooterStats();
+    res.status(200).json({
+      success: true,
+      message: "Stats fetched successfully",
+      data: stats,
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      data: null,
+    });
+  }
 });
 
 export default router;

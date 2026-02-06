@@ -6,10 +6,12 @@ import { UAParser } from 'ua-parser-js';
 import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
+import { connectRedis } from "./config/redis.js";
 import { PORT, MONGODB_URI, CLIENT_URL } from "./config/env.js";
 import logger from "./config/logger.js";
 import { securityConfig } from "./config/security.js";
 import { apiLimiter } from "./config/rateLimiter.js";
+import { initializeAnalytics } from "./services/analytics.services.js";
 
 import buyerRoutes from "./routes/buyer.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
@@ -17,10 +19,14 @@ import publisherRoutes from "./routes/publisher.routes.js";
 import managerRoutes from "./routes/manager.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import systemRoutes from "./routes/system.routes.js";
+import { analyticsMiddleware } from "./middleware/analytics.middleware.js";
 import errorHandler from "./middleware/errorHandler.middleware.js";
 import notFoundHandler from "./middleware/notFoundHandler.middleware.js";
 
 connectDB(MONGODB_URI);
+connectRedis().then(() => {
+  initializeAnalytics();
+});
 
 const app = express();
 
@@ -40,6 +46,8 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());
 
 app.use(cors({origin: CLIENT_URL, credentials: true}));
+
+app.use(analyticsMiddleware);
 
 app.use("/api/buyer", buyerRoutes);
 app.use("/api/admin", adminRoutes);
