@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 const FirstVisitContext = createContext({ isFirstVisit: false, markVisited: () => {} });
 
 export function FirstVisitProvider({ children }) {
-  const [isFirstVisit, setIsFirstVisit] = useState(true);
+  const [isFirstVisit, setIsFirstVisit] = useState(!import.meta.env.VITE_TEST);
 
   const markVisited = () => setIsFirstVisit(false);
 
