@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosInstance.util";
 
 const Footer = () => {
   const [stats, setStats] = useState(null);
@@ -8,7 +8,7 @@ const Footer = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/system/stats`);
+      const response = await axiosInstance.get(`/api/system/stats`);
       if (response.data.success) {
         setStats(response.data.data);
         setLoading(false);

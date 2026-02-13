@@ -1,22 +1,21 @@
 import { useEffect, useRef } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance.util.js';
 import { useFirstVisit } from '../context/FirstVisitContext';
 
 export default function AnalyticsTracker() {
-  const { isFirstVisit, markVisited } = useFirstVisit();
+  const { isFirstVisit } = useFirstVisit();
   const hasRecorded = useRef(false);
 
   useEffect(() => {
     if (isFirstVisit && !hasRecorded.current) {
       hasRecorded.current = true;
-      markVisited();
       
-      axios.post(`${import.meta.env.VITE_API_URL}/api/analytics/visit`, {}, { withCredentials: true })
+      axiosInstance.post('/analytics/visit', {})
         .catch((error) => {
           console.error('Failed to record analytics visit:', error);
         });
     }
-  }, [isFirstVisit, markVisited]);
+  }, [isFirstVisit]);
 
   return null;
 }

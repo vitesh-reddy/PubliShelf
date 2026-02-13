@@ -18,8 +18,8 @@ const App = () => {
       <BackendReadyCheck />
       {isBackendReady && (
         <>
-          <AnalyticsTracker />
           <EntryAnimation />
+          <AnalyticsTracker />
           <ToastProvider />
           <ThemeToggle />
           <Routes>
