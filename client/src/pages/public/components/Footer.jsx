@@ -8,7 +8,7 @@ const Footer = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axiosInstance.get(`/api/system/stats`);
+      const response = await axiosInstance.get(`/system/stats`);
       if (response.data.success) {
         setStats(response.data.data);
         setLoading(false);
