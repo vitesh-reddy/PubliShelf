@@ -43,6 +43,7 @@ const AdminNavbar = ({ adminName, isSuperAdmin }) => {
     { path: '/admin/publishers', label: 'Publishers' },
     { path: '/admin/buyers', label: 'Buyers' },
     { path: '/admin/managers', label: 'Managers' },
+    { path: '/admin/products', label: 'Products' },
     { path: '/admin/settings', label: 'Settings' },
   ];
 

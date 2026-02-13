@@ -20,6 +20,14 @@ import {
   getAllBuyersWithStats,
   getBuyerDetailedAnalytics
 } from "../services/buyer.services.js";
+import {
+  getAllBooksWithStats,
+  getBookDetailedAnalytics
+} from "../services/book.services.js";
+import {
+  getAllAntiqueBooksWithStats,
+  getAntiqueBookDetailedAnalytics
+} from "../services/antiqueBook.services.js";
 import Order from "../models/Order.model.js";
 import Book from "../models/Book.model.js";
 import Buyer from "../models/Buyer.model.js";
@@ -768,6 +776,82 @@ export const getBuyerAnalytics = async (req, res) => {
     return res.status(status).json({
       success: false,
       message: error.message || "Error fetching buyer analytics",
+      data: null,
+    });
+  }
+};
+
+export const getAllBooksWithAnalytics = async (req, res) => {
+  try {
+    const books = await getAllBooksWithStats();
+    return res.status(200).json({
+      success: true,
+      message: "Books analytics fetched successfully",
+      data: books,
+    });
+  } catch (error) {
+    console.error("Error fetching books analytics:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching books analytics",
+      data: null,
+    });
+  }
+};
+
+export const getBookAnalytics = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const analytics = await getBookDetailedAnalytics(id);
+    return res.status(200).json({
+      success: true,
+      message: "Book analytics fetched successfully",
+      data: analytics,
+    });
+  } catch (error) {
+    console.error("Error fetching book analytics:", error);
+    const status = error.message === "Book not found" ? 404 : 500;
+    return res.status(status).json({
+      success: false,
+      message: error.message || "Error fetching book analytics",
+      data: null,
+    });
+  }
+};
+
+export const getAllAntiqueBooksWithAnalytics = async (req, res) => {
+  try {
+    const antiqueBooks = await getAllAntiqueBooksWithStats();
+    return res.status(200).json({
+      success: true,
+      message: "Antique books analytics fetched successfully",
+      data: antiqueBooks,
+    });
+  } catch (error) {
+    console.error("Error fetching antique books analytics:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching antique books analytics",
+      data: null,
+    });
+  }
+};
+
+export const getAntiqueBookAnalytics = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const analytics = await getAntiqueBookDetailedAnalytics(id);
+    return res.status(200).json({
+      success: true,
+      message: "Antique book analytics fetched successfully",
+      data: analytics,
+    });
+  } catch (error) {
+    console.error("Error fetching antique book analytics:", error);
+    const status = error.message === "Antique book not found" ? 404 : 500;
+    return res.status(status).json({
+      success: false,
+      message: error.message || "Error fetching antique book analytics",
       data: null,
     });
   }

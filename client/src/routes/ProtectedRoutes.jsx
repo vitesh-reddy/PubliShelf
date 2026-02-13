@@ -43,6 +43,11 @@ import ManagersAnalytics from '../pages/admin/managers-analytics/ManagersAnalyti
 import ManagerAnalyticsOverview from '../pages/admin/managers-analytics/ManagerAnalyticsOverview';
 import Buyers from '../pages/admin/buyers/Buyers';
 import BuyerOverview from '../pages/admin/buyers/BuyerOverview';
+import ProductsLayout from '../pages/admin/products/ProductsLayout';
+import Books from '../pages/admin/products/Books';
+import BookOverview from '../pages/admin/products/BookOverview';
+import AntiqueBooks from '../pages/admin/products/AntiqueBooks';
+import AntiqueBookOverview from '../pages/admin/products/AntiqueBookOverview';
 import Settings from '../pages/admin/settings/Settings';
 import AdminLayout from '../pages/admin/components/AdminLayout';
 
@@ -113,6 +118,13 @@ const ProtectedRoutes = () => (
         <Route path="publishers/:id" element={<AdminPublisherOverview />} />
         <Route path="buyers" element={<Buyers />} />
         <Route path="buyers/:id" element={<BuyerOverview />} />
+        <Route path="products" element={<ProductsLayout />}>
+          <Route index element={<Navigate to="/admin/products/books" replace />} />
+          <Route path="books" element={<Books />} />
+          <Route path="antique-books" element={<AntiqueBooks />} />
+        </Route>
+        <Route path="products/books/:id" element={<BookOverview />} />
+        <Route path="products/antique-books/:id" element={<AntiqueBookOverview />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Route>

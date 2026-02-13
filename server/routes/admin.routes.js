@@ -22,7 +22,11 @@ import {
   getAllManagersWithAnalytics,
   getManagerAnalytics,
   getAllBuyersWithAnalytics,
-  getBuyerAnalytics
+  getBuyerAnalytics,
+  getAllBooksWithAnalytics,
+  getBookAnalytics,
+  getAllAntiqueBooksWithAnalytics,
+  getAntiqueBookAnalytics
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -65,5 +69,11 @@ router.get("/managers-analytics/:id", getManagerAnalytics);
 
 router.get("/buyers-analytics", getAllBuyersWithAnalytics);
 router.get("/buyers-analytics/:id", getBuyerAnalytics);
+
+router.get("/books-analytics", getAllBooksWithAnalytics);
+router.get("/books-analytics/:id", getBookAnalytics);
+
+router.get("/antique-books-analytics", getAllAntiqueBooksWithAnalytics);
+router.get("/antique-books-analytics/:id", getAntiqueBookAnalytics);
 
 export default router;

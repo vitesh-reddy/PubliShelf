@@ -108,3 +108,23 @@ export const getBuyerAnalytics = async (buyerId) => {
   const response = await axiosInstance.get(`/admin/buyers-analytics/${buyerId}`);
   return handle(response);
 };
+
+export const getAllBooksWithAnalytics = async () => {
+  const response = await axiosInstance.get('/admin/books-analytics');
+  return handle(response);
+};
+
+export const getBookAnalytics = async (bookId) => {
+  const response = await axiosInstance.get(`/admin/books-analytics/${bookId}`);
+  return handle(response);
+};
+
+export const getAllAntiqueBooksWithAnalytics = async () => {
+  const response = await axiosInstance.get('/admin/antique-books-analytics');
+  return handle(response);
+};
+
+export const getAntiqueBookAnalytics = async (antiqueBookId) => {
+  const response = await axiosInstance.get(`/admin/antique-books-analytics/${antiqueBookId}`);
+  return handle(response);
+};

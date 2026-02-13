@@ -1,5 +1,5 @@
-//services/antiqueBook.services.js
 import AntiqueBook from "../models/AntiqueBook.model.js";
+import mongoose from "mongoose";
 
 // In-memory cache for auction lastBidTime (auctionId -> lastBidTime)
 const auctionBidTimeCache = new Map();
@@ -198,10 +198,199 @@ export const getAuctionPollingData = async (bookId, lastBidTime) => {
   
   // Step 5: Return ONLY what changes during auction
   return {
-    currentPrice: book.currentPrice,    // Only field that changes
-    newBids: newBids,                   // Only new bids
-    hasNewBids: newBids.length > 0,     // Convenience flag
-    timestamp: new Date(),              // Server time for debugging
-    cached: false                       // Debug flag
+    currentPrice: book.currentPrice,
+    newBids: newBids,
+    hasNewBids: newBids.length > 0,
+    timestamp: new Date(),
+    cached: false
   };
+};
+
+export const getAllAntiqueBooksWithStats = async () => {
+  try {
+    const antiqueBooks = await AntiqueBook.find()
+      .populate("publisher", "firstname lastname publishingHouse")
+      .populate("reviewedBy", "firstname lastname")
+      .select("title author description genre image basePrice currentPrice auctionStart auctionEnd status biddingHistory publishedAt condition createdAt")
+      .lean();
+
+    const antiqueBooksWithStats = antiqueBooks.map((book) => {
+      const now = new Date();
+      const auctionStart = new Date(book.auctionStart);
+      const auctionEnd = new Date(book.auctionEnd);
+
+      let auctionStatus = "Pending";
+      if (book.status === "rejected") {
+        auctionStatus = "Rejected";
+      } else if (book.status === "approved") {
+        if (now < auctionStart) {
+          auctionStatus = "Scheduled";
+        } else if (now >= auctionStart && now <= auctionEnd) {
+          auctionStatus = "Ongoing";
+        } else if (now > auctionEnd) {
+          auctionStatus = "Ended";
+        }
+      }
+
+      const totalBids = book.biddingHistory?.length || 0;
+      const uniqueBidders = book.biddingHistory ? new Set(book.biddingHistory.map((b) => b.bidder.toString())).size : 0;
+
+      let winner = null;
+      if (auctionStatus === "Ended" && totalBids > 0) {
+        const winningBid = book.biddingHistory.reduce((highest, bid) =>
+          bid.bidAmount > highest.bidAmount ? bid : highest
+        );
+        winner = winningBid.bidder;
+      }
+
+      return {
+        ...book,
+        publisherName: book.publisher?.publishingHouse || `${book.publisher?.firstname || ""} ${book.publisher?.lastname || ""}`.trim() || "Unknown",
+        auction: {
+          status: auctionStatus.toLowerCase(),
+          auctionStatus,
+          basePrice: book.basePrice || 0,
+          currentPrice: book.currentPrice || book.basePrice || 0,
+          auctionStart: book.auctionStart,
+          auctionEnd: book.auctionEnd,
+        },
+        stats: {
+          auctionStatus,
+          totalBids,
+          uniqueBidders,
+          currentPrice: book.currentPrice || book.basePrice || 0,
+          basePrice: book.basePrice || 0,
+          winner,
+        },
+      };
+    });
+
+    return antiqueBooksWithStats;
+  } catch (error) {
+    console.error("Error in getAllAntiqueBooksWithStats:", error);
+    throw error;
+  }
+};
+
+export const getAntiqueBookDetailedAnalytics = async (antiqueBookId) => {
+  try {
+    const antiqueBook = await AntiqueBook.findById(antiqueBookId)
+      .populate("publisher", "firstname lastname publishingHouse email")
+      .populate("reviewedBy", "firstname lastname")
+      .populate("biddingHistory.bidder", "firstname lastname email")
+      .lean();
+
+    if (!antiqueBook) {
+      throw new Error("Antique book not found");
+    }
+
+    const now = new Date();
+    const auctionStart = new Date(antiqueBook.auctionStart);
+    const auctionEnd = new Date(antiqueBook.auctionEnd);
+
+    let auctionStatus = "Pending";
+    if (antiqueBook.status === "rejected") {
+      auctionStatus = "Rejected";
+    } else if (antiqueBook.status === "approved") {
+      if (now < auctionStart) {
+        auctionStatus = "Scheduled";
+      } else if (now >= auctionStart && now <= auctionEnd) {
+        auctionStatus = "Ongoing";
+      } else if (now > auctionEnd) {
+        auctionStatus = "Ended";
+      }
+    }
+
+    const biddingHistory = antiqueBook.biddingHistory || [];
+    const totalBids = biddingHistory.length;
+    const uniqueBidders = new Set(biddingHistory.map((b) => b.bidder._id.toString())).size;
+
+    let winner = null;
+    let winningBid = null;
+    if (auctionStatus === "Ended" && totalBids > 0) {
+      winningBid = biddingHistory.reduce((highest, bid) =>
+        bid.bidAmount > highest.bidAmount ? bid : highest
+      );
+      winner = winningBid.bidder;
+    }
+
+    const bidTrend = biddingHistory.map((bid, index) => ({
+      bidNumber: index + 1,
+      bidder: `${bid.bidder.firstname} ${bid.bidder.lastname}`,
+      bidderId: bid.bidder._id,
+      amount: bid.bidAmount,
+      timestamp: bid.bidTime,
+    }));
+
+    const bidderStats = {};
+    biddingHistory.forEach((bid) => {
+      const bidderId = bid.bidder._id.toString();
+      if (!bidderStats[bidderId]) {
+        bidderStats[bidderId] = {
+          bidder: bid.bidder,
+          bidCount: 0,
+          highestBid: 0,
+          totalBidAmount: 0,
+        };
+      }
+      bidderStats[bidderId].bidCount += 1;
+      bidderStats[bidderId].highestBid = Math.max(bidderStats[bidderId].highestBid, bid.bidAmount);
+      bidderStats[bidderId].totalBidAmount += bid.bidAmount;
+    });
+
+    const topBidders = Object.values(bidderStats)
+      .sort((a, b) => b.highestBid - a.highestBid)
+      .slice(0, 10)
+      .map((stat) => ({
+        bidderName: `${stat.bidder.firstname} ${stat.bidder.lastname}`,
+        email: stat.bidder.email,
+        bidCount: stat.bidCount,
+        highestBid: stat.highestBid,
+      }));
+
+    const biddingHistoryFormatted = biddingHistory.map((bid) => ({
+      bidderName: `${bid.bidder.firstname} ${bid.bidder.lastname}`,
+      bidderEmail: bid.bidder.email,
+      amount: bid.bidAmount,
+      bidAmount: bid.bidAmount,
+      timestamp: bid.bidTime,
+    }));
+
+    return {
+      antiqueBook: {
+        ...antiqueBook,
+        publisherName: antiqueBook.publisher?.publishingHouse || `${antiqueBook.publisher?.firstname || ""} ${antiqueBook.publisher?.lastname || ""}`.trim(),
+        reviewedByName: antiqueBook.reviewedBy ? `${antiqueBook.reviewedBy.firstname} ${antiqueBook.reviewedBy.lastname}` : null,
+      },
+      auction: {
+        status: auctionStatus.toLowerCase(),
+        auctionStatus,
+        basePrice: antiqueBook.basePrice || 0,
+        currentPrice: antiqueBook.currentPrice || antiqueBook.basePrice || 0,
+        auctionStart: antiqueBook.auctionStart,
+        auctionEnd: antiqueBook.auctionEnd,
+      },
+      stats: {
+        auctionStatus,
+        totalBids,
+        uniqueBidders,
+        currentPrice: antiqueBook.currentPrice || antiqueBook.basePrice || 0,
+        basePrice: antiqueBook.basePrice || 0,
+        priceIncrease: ((antiqueBook.currentPrice || antiqueBook.basePrice || 0) - (antiqueBook.basePrice || 0)),
+        priceIncreasePercentage: antiqueBook.basePrice > 0 ? (((antiqueBook.currentPrice || antiqueBook.basePrice) - antiqueBook.basePrice) / antiqueBook.basePrice * 100).toFixed(2) : 0,
+        auctionStart: antiqueBook.auctionStart,
+        auctionEnd: antiqueBook.auctionEnd,
+        winner: winner ? `${winner.firstname} ${winner.lastname}` : null,
+        winnerEmail: winner?.email || null,
+        winningAmount: winningBid?.bidAmount || null,
+      },
+      bidTrend,
+      topBidders,
+      biddingHistory: biddingHistoryFormatted,
+      bidHistory: biddingHistoryFormatted,
+    };
+  } catch (error) {
+    console.error("Error in getAntiqueBookDetailedAnalytics:", error);
+    throw error;
+  }
 };
