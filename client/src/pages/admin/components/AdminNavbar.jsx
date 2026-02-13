@@ -40,6 +40,8 @@ const AdminNavbar = ({ adminName, isSuperAdmin }) => {
 
   const navLinks = [
     { path: '/admin/dashboard', label: 'Dashboard' },
+    { path: '/admin/publishers', label: 'Publishers' },
+    { path: '/admin/buyers', label: 'Buyers' },
     { path: '/admin/managers', label: 'Managers' },
     { path: '/admin/settings', label: 'Settings' },
   ];
