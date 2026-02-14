@@ -1,9 +1,10 @@
 //client/src/pages/buyer/auction/AuctionOngoing.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getAuctionOngoing, getAuctionPollData, placeBidApi } from "../../../services/antiqueBook.services.js";
+import { getAuctionOngoing, placeBidApi } from "../../../services/antiqueBook.services.js";
 import { useUser } from '../../../store/hooks';
 import { toast } from 'sonner';
+import { createAuctionSocket } from "../../../utils/socket.util.js";
 
 import AuctionOngoingSkeleton from "./components/skeletons/AuctionOngoingSkeleton";
 
@@ -93,97 +94,89 @@ const AuctionOngoing = () => {
   const [modalBidAmount, setModalBidAmount] = useState(0);
   const [formError, setFormError] = useState("");
 
-  const [nextSyncIn, setNextSyncIn] = useState(0);
-  const [currentPollInterval, setCurrentPollInterval] = useState(30);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastBidTime, setLastBidTime] = useState(null);
-  const [fullDataLoaded, setFullDataLoaded] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
+  const [audienceCount, setAudienceCount] = useState(0);
 
   const [visibleBidsCount, setVisibleBidsCount] = useState(5);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const lastBidTimeRef = useRef(null);
-
-  const getPollingInterval = (auctionEnd) => {
-    const now = new Date();
-    const end = new Date(auctionEnd);
-    const timeLeftMs = end - now;
-    const timeLeftMin = timeLeftMs / (1000 * 60);
-
-    if (timeLeftMin <= 0) return null;
-    if (timeLeftMin > 30) return 30000;
-    if (timeLeftMin > 10) return 10000;
-    if (timeLeftMin > 1) return 1000;
-    return 500;
-  };
+  const socketRef = useRef(null);
+  const isPlacingBidRef = useRef(false);
 
   useEffect(() => {
     fetchFullAuction();
   }, [id]);
 
   useEffect(() => {
-    let pollIntervalId;
-    let reevaluateIntervalId;
-    let countdownId;
+    if (!book) return;
 
-    if (!book?.auctionEnd || !fullDataLoaded) return;
+    // Initialize Socket.IO connection
+    const socket = createAuctionSocket();
 
-    const pollIntervalMs = getPollingInterval(book.auctionEnd);
-    if (!pollIntervalMs) {
-      setCurrentPollInterval(0);
-      return;
-    }
+    socketRef.current = socket;
 
-    const pollIntervalSec = Math.floor(pollIntervalMs / 1000);
+    // Socket event listeners
+    socket.on("connect", () => {
+      console.log("Socket connected");
+      socket.emit("joinAuction", { auctionId: id });
+    });
 
-    setCurrentPollInterval((prev) => (prev !== pollIntervalSec ? pollIntervalSec : prev));
-    setNextSyncIn(pollIntervalSec);
+    socket.on("joinedAuction", (data) => {
+      console.log("Joined auction room:", data);
+    });
 
-    pollIntervalId = setInterval(() => {
-      if (!isBidding) {
-        fetchIncrementalUpdate();
-        setNextSyncIn(pollIntervalSec);
+    socket.on("newBid", (data) => {
+      console.log("New bid received:", data);
+      setBook((prev) => ({
+        ...prev,
+        currentPrice: data.currentPrice,
+        biddingHistory: [data.bid, ...(prev.biddingHistory || [])],
+      }));
+      
+      // If this was our bid, show success message and reset bidding state
+      if (isPlacingBidRef.current && data.bid.bidder._id === user._id) {
+        toast.success("Bid placed successfully!");
+        setShowBidModal(false);
+        setBidAmount("");
+        setIsBidding(false);
+        isPlacingBidRef.current = false;
       }
-    }, pollIntervalMs);
+    });
 
-    countdownId = setInterval(() => {
-      if (isBidding) return;
+    socket.on("audienceUpdate", (data) => {
+      console.log("Audience update:", data);
+      setAudienceCount(data.audienceCount);
+    });
 
-      setNextSyncIn((prev) => {
-        if (prev <= 1) {
-          fetchIncrementalUpdate();
-          return pollIntervalSec;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    reevaluateIntervalId = setInterval(() => {
-      const newMs = getPollingInterval(book.auctionEnd);
-      if (!newMs) return;
-      const newSec = Math.floor(newMs / 1000);
-
-      if (newSec !== pollIntervalSec) {
-        clearInterval(pollIntervalId);
-        pollIntervalId = setInterval(() => {
-          if (!isBidding) {
-            fetchIncrementalUpdate();
-            setNextSyncIn(newSec);
-          }
-        }, newMs);
-
-        setCurrentPollInterval(newSec);
-        setNextSyncIn(newSec);
+    socket.on("auctionError", (data) => {
+      console.error("Auction error:", data);
+      toast.error(data.message || "An error occurred");
+      
+      // If we were placing a bid, reset the state
+      if (isPlacingBidRef.current) {
+        setIsBidding(false);
+        isPlacingBidRef.current = false;
       }
-    }, 60000);
+    });
 
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      toast.error("Connection error. Please refresh the page.");
+    });
+
+    // Cleanup on unmount
     return () => {
-      clearInterval(pollIntervalId);
-      clearInterval(reevaluateIntervalId);
-      clearInterval(countdownId);
+      if (socket) {
+        socket.emit("leaveAuction", { auctionId: id });
+        socket.disconnect();
+      }
+      socketRef.current = null;
     };
-  }, [book?.auctionEnd, fullDataLoaded, isBidding]);
+  }, [id, book?._id]);
 
   const fetchFullAuction = async () => {
     try {
@@ -192,18 +185,6 @@ const AuctionOngoing = () => {
 
       if (response.success) {
         setBook(response.data.book);
-
-        const bids = response.data.book.biddingHistory || [];
-        if (bids.length > 0) {
-          const latest = bids.reduce((max, bid) =>
-            new Date(bid.bidTime) > new Date(max.bidTime) ? bid : max
-          );
-
-          lastBidTimeRef.current = latest.bidTime;
-          setLastBidTime(latest.bidTime);
-        }
-
-        setFullDataLoaded(true);
       } else {
         setError(response.message);
       }
@@ -217,51 +198,6 @@ const AuctionOngoing = () => {
       setMountLoading(false);
     }
   };
-
-  const syncAuctionData = async (isManual = false) => {
-    if (isBidding) return;
-
-    if (isManual) setIsSyncing(true);
-
-    try {
-      const response = await getAuctionPollData(id, lastBidTimeRef.current || lastBidTime);
-
-      if (response.success) {
-        const pollData = response.data;
-
-        if (pollData.hasNewBids && pollData.newBids.length > 0) {
-          const latestBid = pollData.newBids.reduce((max, bid) =>
-            new Date(bid.bidTime) > new Date(max.bidTime) ? bid : max
-          );
-
-          setBook((prev) => ({
-            ...prev,
-            currentPrice: pollData.currentPrice,
-            biddingHistory: [...pollData.newBids, ...(prev.biddingHistory || [])],
-          }));
-
-          lastBidTimeRef.current = latestBid.bidTime;
-          setLastBidTime(latestBid.bidTime);
-        } else if (!pollData.cached && pollData.currentPrice !== undefined) {
-          setBook((prev) => ({
-            ...prev,
-            currentPrice: pollData.currentPrice,
-          }));
-        }
-
-        if (isManual) toast.success("Auction Data Synced..!");
-      } else {
-        if (isManual) toast.error(response.message || "Failed to sync auction data");
-      }
-    } catch (err) {
-      if (isManual) toast.error("Failed to sync auction data");
-    } finally {
-      if (isManual) setIsSyncing(false);
-    }
-  };
-
-  const fetchIncrementalUpdate = () => syncAuctionData(false);
-  const handleManualSync = () => syncAuctionData(true);
 
   const handlePlaceBid = () => {
     const current = book.currentPrice || book.basePrice;
@@ -278,34 +214,27 @@ const AuctionOngoing = () => {
     setShowBidModal(true);
   };
 
-  const confirmBid = async () => {
+  const confirmBid = () => {
     setIsBidding(true);
+    isPlacingBidRef.current = true;
+    
+    if (!socketRef.current || !socketRef.current.connected) {
+      toast.error("Not connected to auction. Please refresh the page.");
+      setIsBidding(false);
+      isPlacingBidRef.current = false;
+      return;
+    }
+
     try {
-      const response = await placeBidApi({ auctionId: id, bidAmount: modalBidAmount });
-
-      if (response.success) {
-        toast.success("Bid placed successfully!");
-
-        setShowBidModal(false);
-        setBidAmount("");
-
-        const { currentPrice, newBid } = response.data;
-
-        setBook((prev) => ({
-          ...prev,
-          currentPrice,
-          biddingHistory: [newBid, ...(prev.biddingHistory || [])],
-        }));
-
-        lastBidTimeRef.current = newBid.bidTime;
-        setLastBidTime(newBid.bidTime);
-      } else {
-        toast.error(response.message || "Failed to place bid");
-      }
+      // Emit bid via socket - success/error will be handled by socket listeners
+      socketRef.current.emit("placeBid", { 
+        auctionId: id, 
+        bidAmount: modalBidAmount 
+      });
     } catch (err) {
       toast.error("Error placing bid");
-    } finally {
       setIsBidding(false);
+      isPlacingBidRef.current = false;
     }
   };
 
@@ -507,30 +436,19 @@ const AuctionOngoing = () => {
                       isActive={isActive}
                     />
 
-                    {/* Sync Box */}
-                    {isActive && currentPollInterval > 0 && (
-                      <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+                    {/* Live Audience Counter */}
+                    {isActive && audienceCount > 0 && (
+                      <div className="flex items-center justify-between bg-purple-50 rounded-lg px-4 py-3 border border-purple-200">
                         <div className="flex items-center space-x-2">
-                          <i className={`fas fa-sync-alt text-purple-600 ${isSyncing || isBidding ? "animate-spin" : ""}`}></i>
-                          <span className="text-[15px] text-gray-600">
-                            {isBidding ? (
-                              <span className="font-semibold text-orange-600">Placing bid...</span>
-                            ) : (
-                              <>Next sync in: <span className="font-semibold text-purple-700">{Math.ceil(nextSyncIn)}s</span></>
-                            )}
+                          <i className="fas fa-users text-purple-600"></i>
+                          <span className="text-[15px] text-gray-700">
+                            <span className="font-semibold text-purple-700">{audienceCount}</span> {audienceCount === 1 ? 'person' : 'people'} watching
                           </span>
                         </div>
-
-                        <button
-                          onClick={handleManualSync}
-                          disabled={isSyncing || isBidding}
-                          className={`bg-purple-600 text-white px-4 py-2 rounded-md text-[15px] hover:bg-purple-700 transition-colors flex items-center space-x-1 ${
-                            (isSyncing || isBidding) ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        >
-                          <i className={`fas fa-sync text-xs ${isSyncing ? "animate-spin" : ""}`}></i>
-                          <span>{isSyncing ? "Syncing..." : "Sync Now"}</span>
-                        </button>
+                        <span className="flex items-center space-x-1">
+                          <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
+                          <span className="text-xs text-gray-600">Live</span>
+                        </span>
                       </div>
                     )}
 

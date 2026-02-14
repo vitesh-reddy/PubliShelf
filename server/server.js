@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import http from "http";
 import cors from "cors";
 import express from "express";
 import morgan from "morgan";
@@ -12,6 +13,7 @@ import logger from "./config/logger.js";
 import { securityConfig } from "./config/security.js";
 import { apiLimiter } from "./config/rateLimiter.js";
 import { initializeAnalytics } from "./services/analytics.services.js";
+import { initializeSocket } from "./sockets/index.js";
 
 import buyerRoutes from "./routes/buyer.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
@@ -56,4 +58,13 @@ app.use(systemRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, '0.0.0.0', () => { logger.info(`Server running on port ${PORT}`) });
+// Create HTTP server
+const httpServer = http.createServer(app);
+
+// Initialize Socket.IO
+initializeSocket(httpServer);
+
+httpServer.listen(PORT, '0.0.0.0', () => { 
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Socket.IO enabled on port ${PORT}`);
+});
