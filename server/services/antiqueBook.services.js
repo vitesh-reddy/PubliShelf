@@ -1,9 +1,6 @@
 import AntiqueBook from "../models/AntiqueBook.model.js";
 import mongoose from "mongoose";
 
-// In-memory cache for auction lastBidTime (auctionId -> lastBidTime)
-const auctionBidTimeCache = new Map();
-
 export const addBid = async (bookId, bidderId, bidAmount) => {
   const book = await AntiqueBook.findById(bookId);
 
@@ -37,11 +34,6 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
   
   // Populate the new bidder info for response
   await book.populate('biddingHistory.bidder', 'firstname lastname email');
-  
-  // Update cache with new lastBidTime
-  const lastBid = book.biddingHistory[book.biddingHistory.length - 1];
-  if (lastBid && lastBid.bidTime)
-    auctionBidTimeCache.set(bookId.toString(), lastBid.bidTime.toISOString());
   
   return book;
 };
@@ -122,88 +114,6 @@ export const getAuctionItemById = async (bookId) => {
   if (book.status !== 'approved')
     throw new Error("Auction not available");
   return book;
-};
-
-export const getAuctionPollingData = async (bookId, lastBidTime) => {
-  const cachedLastBidTime = auctionBidTimeCache.get(bookId.toString());
-  
-  // Step 1: Check cache for early return (NO DB query)
-  if (lastBidTime && cachedLastBidTime && lastBidTime === cachedLastBidTime) {
-    return {
-      hasNewBids: false,
-      newBids: [],
-      timestamp: new Date(),
-      cached: true
-    };
-  }
-  
-  // Step 2: Cache miss - validate auction exists and is approved
-  const book = await AntiqueBook.findById(bookId)
-    .select('status currentPrice')
-    .lean();
-  
-  if (!book) 
-    throw new Error("Auction not found");
-  
-  if (book.status !== 'approved')
-    throw new Error("Auction not available");
-  
-  if (!book) 
-    throw new Error("Auction not found");
-  
-  if (book.status !== 'approved')
-    throw new Error("Auction not available");
-
-  
-  let newBids = [];
-  
-  if (lastBidTime) {
-    // Query for bids after lastBidTime
-    const bookWithBids = await AntiqueBook.findOne({
-      _id: bookId,
-      'biddingHistory.bidTime': { $gt: new Date(lastBidTime) }
-    })
-    .select('biddingHistory')
-    .populate('biddingHistory.bidder', 'firstname lastname email')
-    .lean();
-    
-    if (bookWithBids && bookWithBids.biddingHistory) {
-      // Filter to only get bids after lastBidTime
-      newBids = bookWithBids.biddingHistory.filter(
-        bid => new Date(bid.bidTime) > new Date(lastBidTime)
-      );
-    }
-  } else {
-    // First poll without timestamp - return last 5 bids
-    const bookWithBids = await AntiqueBook.findById(bookId)
-      .select('biddingHistory')
-      .populate('biddingHistory.bidder', 'firstname lastname email')
-      .lean();
-    
-    if (bookWithBids && bookWithBids.biddingHistory) {
-      newBids = bookWithBids.biddingHistory
-        .sort((a, b) => new Date(b.bidTime) - new Date(a.bidTime))
-        .slice(0, 5);
-    }
-  }
-  
-  // Step 4: Update cache with latest bidTime
-  if (newBids.length > 0) {
-    const latestBid = newBids.reduce((latest, bid) => 
-      new Date(bid.bidTime) > new Date(latest.bidTime) ? bid : latest
-    );
-    auctionBidTimeCache.set(bookId.toString(), latestBid.bidTime.toISOString());
-  } else if (lastBidTime && !cachedLastBidTime)
-    auctionBidTimeCache.set(bookId.toString(), lastBidTime);
-  
-  // Step 5: Return ONLY what changes during auction
-  return {
-    currentPrice: book.currentPrice,
-    newBids: newBids,
-    hasNewBids: newBids.length > 0,
-    timestamp: new Date(),
-    cached: false
-  };
 };
 
 export const getAllAntiqueBooksWithStats = async () => {
