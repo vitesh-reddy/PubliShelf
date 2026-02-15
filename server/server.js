@@ -58,10 +58,7 @@ app.use(systemRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Create HTTP server
 const httpServer = http.createServer(app);
-
-// Initialize Socket.IO
 initializeSocket(httpServer);
 
 httpServer.listen(PORT, '0.0.0.0', () => { 

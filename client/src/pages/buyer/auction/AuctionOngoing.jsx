@@ -1,10 +1,10 @@
 //client/src/pages/buyer/auction/AuctionOngoing.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getAuctionOngoing, placeBidApi } from "../../../services/antiqueBook.services.js";
+import { getAuctionOngoing } from "../../../services/antiqueBook.services.js";
 import { useUser } from '../../../store/hooks';
 import { toast } from 'sonner';
-import { createAuctionSocket } from "../../../utils/socket.util.js";
+import { useAuctionSocket } from "../../../hooks/useAuctionSocket.js";
 
 import AuctionOngoingSkeleton from "./components/skeletons/AuctionOngoingSkeleton";
 
@@ -94,89 +94,41 @@ const AuctionOngoing = () => {
   const [modalBidAmount, setModalBidAmount] = useState(0);
   const [formError, setFormError] = useState("");
 
-  const [isBidding, setIsBidding] = useState(false);
-  const [audienceCount, setAudienceCount] = useState(0);
-
   const [visibleBidsCount, setVisibleBidsCount] = useState(5);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const socketRef = useRef(null);
-  const isPlacingBidRef = useRef(false);
+  // Socket.IO connection and real-time updates
+  const { placeBid: socketPlaceBid, audienceCount, isBidding, isConnected } = useAuctionSocket({
+    auctionId: id,
+    user,
+    enabled: !!book,
+    onNewBid: (data) => {
+      // Update book state with new bid
+      if (data.fullState) {
+        // Full state recovery after reconnection
+        setBook(data.fullState);
+      } else {
+        // Incremental update for new bid
+        setBook((prev) => ({
+          ...prev,
+          currentPrice: data.currentPrice,
+          biddingHistory: [data.bid, ...(prev.biddingHistory || [])],
+        }));
+      }
+      
+      // Close modal and reset form after successful bid
+      if (data.bid.bidder._id === user._id) {
+        setShowBidModal(false);
+        setBidAmount("");
+      }
+    },
+  });
 
   useEffect(() => {
     fetchFullAuction();
   }, [id]);
 
-  useEffect(() => {
-    if (!book) return;
 
-    // Initialize Socket.IO connection
-    const socket = createAuctionSocket();
-
-    socketRef.current = socket;
-
-    // Socket event listeners
-    socket.on("connect", () => {
-      console.log("Socket connected");
-      socket.emit("joinAuction", { auctionId: id });
-    });
-
-    socket.on("joinedAuction", (data) => {
-      console.log("Joined auction room:", data);
-    });
-
-    socket.on("newBid", (data) => {
-      console.log("New bid received:", data);
-      setBook((prev) => ({
-        ...prev,
-        currentPrice: data.currentPrice,
-        biddingHistory: [data.bid, ...(prev.biddingHistory || [])],
-      }));
-      
-      // If this was our bid, show success message and reset bidding state
-      if (isPlacingBidRef.current && data.bid.bidder._id === user._id) {
-        toast.success("Bid placed successfully!");
-        setShowBidModal(false);
-        setBidAmount("");
-        setIsBidding(false);
-        isPlacingBidRef.current = false;
-      }
-    });
-
-    socket.on("audienceUpdate", (data) => {
-      console.log("Audience update:", data);
-      setAudienceCount(data.audienceCount);
-    });
-
-    socket.on("auctionError", (data) => {
-      console.error("Auction error:", data);
-      toast.error(data.message || "An error occurred");
-      
-      // If we were placing a bid, reset the state
-      if (isPlacingBidRef.current) {
-        setIsBidding(false);
-        isPlacingBidRef.current = false;
-      }
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      toast.error("Connection error. Please refresh the page.");
-    });
-
-    // Cleanup on unmount
-    return () => {
-      if (socket) {
-        socket.emit("leaveAuction", { auctionId: id });
-        socket.disconnect();
-      }
-      socketRef.current = null;
-    };
-  }, [id, book?._id]);
 
   const fetchFullAuction = async () => {
     try {
@@ -199,6 +151,8 @@ const AuctionOngoing = () => {
     }
   };
 
+
+
   const handlePlaceBid = () => {
     const current = book.currentPrice || book.basePrice;
     const minBid = current + 100;
@@ -215,27 +169,7 @@ const AuctionOngoing = () => {
   };
 
   const confirmBid = () => {
-    setIsBidding(true);
-    isPlacingBidRef.current = true;
-    
-    if (!socketRef.current || !socketRef.current.connected) {
-      toast.error("Not connected to auction. Please refresh the page.");
-      setIsBidding(false);
-      isPlacingBidRef.current = false;
-      return;
-    }
-
-    try {
-      // Emit bid via socket - success/error will be handled by socket listeners
-      socketRef.current.emit("placeBid", { 
-        auctionId: id, 
-        bidAmount: modalBidAmount 
-      });
-    } catch (err) {
-      toast.error("Error placing bid");
-      setIsBidding(false);
-      isPlacingBidRef.current = false;
-    }
+    socketPlaceBid(modalBidAmount);
   };
 
   const handleLoadMore = async () => {
