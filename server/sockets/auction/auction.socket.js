@@ -57,6 +57,7 @@ export const initializeAuctionSocket = (io) => {
           return;
         }
 
+        const room = await leaveAuctionRoom(socket, auctionId);
         socket.currentAuctionId = null; // Clear tracked auction
         logger.info(`User ${socket.user.id} left auction room: ${room}`);
 

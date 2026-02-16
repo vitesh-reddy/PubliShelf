@@ -18,6 +18,16 @@ export const useAuctionSocket = ({
   const socketRef = useRef(null);
   const isPlacingBidRef = useRef(false);
   const hasConnectedRef = useRef(false);
+  
+  // Use refs for callbacks to avoid dependency issues
+  const onNewBidRef = useRef(onNewBid);
+  const onAudienceUpdateRef = useRef(onAudienceUpdate);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onNewBidRef.current = onNewBid;
+    onAudienceUpdateRef.current = onAudienceUpdate;
+  }, [onNewBid, onAudienceUpdate]);
 
   useEffect(() => {
     if (!enabled || !auctionId) return;
@@ -51,8 +61,8 @@ export const useAuctionSocket = ({
       console.log("New bid received:", data);
       
       // Call the provided callback with bid data
-      if (onNewBid) {
-        onNewBid({
+      if (onNewBidRef.current) {
+        onNewBidRef.current({
           currentPrice: data.currentPrice,
           bid: data.bid,
         });
@@ -71,8 +81,8 @@ export const useAuctionSocket = ({
       setAudienceCount(data.audienceCount);
       
       // Call the provided callback
-      if (onAudienceUpdate) {
-        onAudienceUpdate(data.audienceCount);
+      if (onAudienceUpdateRef.current) {
+        onAudienceUpdateRef.current(data.audienceCount);
       }
     });
 
@@ -108,16 +118,16 @@ export const useAuctionSocket = ({
       hasConnectedRef.current = false;
       setIsConnected(false);
     };
-  }, [auctionId, enabled, user?._id, onNewBid, onAudienceUpdate]);
+  }, [auctionId, enabled, user?._id]);
 
   const refetchAuctionState = async () => {
     try {
       const response = await getAuctionOngoing(auctionId);
-      if (response.success && onNewBid) {
+      if (response.success && onNewBidRef.current) {
         // Update with the latest bid from server
         const latestBid = response.data.book.biddingHistory?.[0];
         if (latestBid) {
-          onNewBid({
+          onNewBidRef.current({
             currentPrice: response.data.book.currentPrice,
             bid: latestBid,
             fullState: response.data.book, // Pass full state for complete recovery
