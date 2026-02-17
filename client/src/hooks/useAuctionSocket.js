@@ -2,13 +2,14 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createAuctionSocket } from "../utils/socket.util.js";
-import { getAuctionOngoing } from "../services/antiqueBook.services.js";
 
 export const useAuctionSocket = ({ 
   auctionId, 
   user, 
   onNewBid, 
   onAudienceUpdate,
+  onConnect,
+  onJoinedAuction,
   enabled = true 
 }) => {
   const [audienceCount, setAudienceCount] = useState(0);
@@ -22,12 +23,16 @@ export const useAuctionSocket = ({
   // Use refs for callbacks to avoid dependency issues
   const onNewBidRef = useRef(onNewBid);
   const onAudienceUpdateRef = useRef(onAudienceUpdate);
+  const onConnectRef = useRef(onConnect);
+  const onJoinedAuctionRef = useRef(onJoinedAuction);
 
   // Update refs when callbacks change
   useEffect(() => {
     onNewBidRef.current = onNewBid;
     onAudienceUpdateRef.current = onAudienceUpdate;
-  }, [onNewBid, onAudienceUpdate]);
+    onConnectRef.current = onConnect;
+    onJoinedAuctionRef.current = onJoinedAuction;
+  }, [onNewBid, onAudienceUpdate, onConnect, onJoinedAuction]);
 
   useEffect(() => {
     if (!enabled || !auctionId) return;
@@ -47,14 +52,19 @@ export const useAuctionSocket = ({
       // Join the auction room
       socket.emit("joinAuction", { auctionId });
       
-      // If this is a reconnection, refetch state to recover missed updates
-      if (isReconnection) {
-        refetchAuctionState();
+      // Notify parent component of connection (for reconnect recovery)
+      if (onConnectRef.current) {
+        onConnectRef.current({ isReconnection });
       }
     });
 
     socket.on("joinedAuction", (data) => {
       console.log("Joined auction room:", data);
+      
+      // Notify parent component of successful room join (for reconnect recovery)
+      if (onJoinedAuctionRef.current) {
+        onJoinedAuctionRef.current(data);
+      }
     });
 
     socket.on("newBid", (data) => {
@@ -119,27 +129,6 @@ export const useAuctionSocket = ({
       setIsConnected(false);
     };
   }, [auctionId, enabled, user?._id]);
-
-  const refetchAuctionState = async () => {
-    try {
-      const response = await getAuctionOngoing(auctionId);
-      if (response.success && onNewBidRef.current) {
-        // Update with the latest bid from server
-        const latestBid = response.data.book.biddingHistory?.[0];
-        if (latestBid) {
-          onNewBidRef.current({
-            currentPrice: response.data.book.currentPrice,
-            bid: latestBid,
-            fullState: response.data.book, // Pass full state for complete recovery
-          });
-        }
-        console.log("Auction state recovered after reconnection");
-      }
-    } catch (err) {
-      console.error("Failed to refetch auction state:", err);
-    }
-  };
-
 
   const placeBid = (bidAmount) => {
     if (!socketRef.current || !socketRef.current.connected) {

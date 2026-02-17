@@ -32,6 +32,7 @@ connectRedis().then(() => {
 const app = express();
 
 app.use(securityConfig);
+app.set('trust proxy', 1);
 app.use('/api/', apiLimiter);
 
 morgan.token('device', (req) => {

@@ -14,12 +14,10 @@ const parseCookies = (cookieString) => {
 
 export const socketAuthMiddleware = async (socket, next) => {
   try {
-    // Try to get token from cookies first (httpOnly cookie from REST API)
     const cookieString = socket.handshake.headers.cookie;
     const cookies = parseCookies(cookieString);
     let token = cookies.token;
 
-    // Fallback to auth header for backwards compatibility
     if (!token) {
       token = socket.handshake.auth.token;
     }

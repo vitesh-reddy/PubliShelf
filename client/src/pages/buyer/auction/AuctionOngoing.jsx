@@ -97,6 +97,34 @@ const AuctionOngoing = () => {
   const [visibleBidsCount, setVisibleBidsCount] = useState(5);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Ref to prevent duplicate refetches during reconnection
+  const isRefetchingRef = useRef(false);
+  // Track if we've connected at least once (for onJoinedAuction logic)
+  const hasConnectedRef = useRef(false);
+
+  // Reconnect recovery: refetch auction state to sync missed updates
+  const refetchAuctionState = async () => {
+    // Prevent concurrent refetches
+    if (isRefetchingRef.current) return;
+    
+    isRefetchingRef.current = true;
+    
+    try {
+      const response = await getAuctionOngoing(id);
+      if (response.success) {
+        setBook(response.data.book);
+        console.log("Auction state synced after reconnection");
+      }
+    } catch (err) {
+      console.error("Failed to refetch auction state:", err);
+    } finally {
+      // Reset flag after a brief delay to allow state to settle
+      setTimeout(() => {
+        isRefetchingRef.current = false;
+      }, 1000);
+    }
+  };
+
   // Socket.IO connection and real-time updates
   const { placeBid: socketPlaceBid, audienceCount, isBidding, isConnected } = useAuctionSocket({
     auctionId: id,
@@ -122,7 +150,27 @@ const AuctionOngoing = () => {
         setBidAmount("");
       }
     },
+    onConnect: ({ isReconnection }) => {
+      // On reconnection, refetch latest auction state
+      if (isReconnection) {
+        refetchAuctionState();
+      }
+    },
+    onJoinedAuction: (data) => {
+      // Additional safety: refetch after successfully joining auction room
+      // This ensures we have the latest state even if connect event missed updates
+      if (hasConnectedRef.current) {
+        refetchAuctionState();
+      }
+    },
   });
+  
+  // Update connection tracking
+  useEffect(() => {
+    if (isConnected) {
+      hasConnectedRef.current = true;
+    }
+  }, [isConnected]);
 
   useEffect(() => {
     fetchFullAuction();
