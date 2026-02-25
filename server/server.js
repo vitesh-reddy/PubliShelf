@@ -32,6 +32,7 @@ connectRedis().then(() => {
 const app = express();
 
 app.use(securityConfig);
+app.set('trust proxy', 1);
 app.use('/api/', apiLimiter);
 
 morgan.token('device', (req) => {
@@ -58,13 +59,14 @@ app.use(systemRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Create HTTP server
 const httpServer = http.createServer(app);
 
-// Initialize Socket.IO
-initializeSocket(httpServer);
-
-httpServer.listen(PORT, '0.0.0.0', () => { 
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Socket.IO enabled on port ${PORT}`);
+initializeSocket(httpServer).then(() => {
+  httpServer.listen(PORT, '0.0.0.0', () => { 
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Socket.IO enabled on port ${PORT}`);
+  });
+}).catch((error) => {
+  logger.error(`Failed to start server: ${error.message}`);
+  process.exit(1);
 });

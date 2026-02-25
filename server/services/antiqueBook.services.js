@@ -1,41 +1,52 @@
 import AntiqueBook from "../models/AntiqueBook.model.js";
 import mongoose from "mongoose";
+import logger from "../config/logger.js";
 
 export const addBid = async (bookId, bidderId, bidAmount) => {
-  const book = await AntiqueBook.findById(bookId);
+  try {
+    const now = new Date();
 
-  if (!book) {
-    throw new Error("Antique book not found");
+    // Atomic update with all validation conditions in query
+    const updatedBook = await AntiqueBook.findOneAndUpdate(
+      {
+        _id: bookId,
+        status: "approved",
+        auctionStart: { $lte: now },
+        auctionEnd: { $gte: now },
+        $expr: {
+          $lt: [
+            { $ifNull: ["$currentPrice", "$basePrice"] },
+            bidAmount
+          ]
+        }
+      },
+      {
+        $set: { currentPrice: bidAmount },
+        $push: {
+          biddingHistory: {
+            bidder: bidderId,
+            bidAmount,
+            bidTime: now
+          }
+        }
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).populate('biddingHistory.bidder', 'firstname lastname email');
+
+    if (!updatedBook) {
+      logger.warn(`Bid rejected for book ${bookId}: bidAmount=${bidAmount}, bidderId=${bidderId}`);
+      throw new Error("Bid no longer valid. Price may have changed.");
+    }
+
+    logger.info(`Bid accepted for book ${bookId}: bidAmount=${bidAmount}, bidderId=${bidderId}`);
+    return updatedBook;
+  } catch (error) {
+    logger.error(`Error in addBid: ${error.message}`);
+    throw error;
   }
-
-  // Enforce only approved and active auctions accept bids
-  const now = new Date();
-  if (book.status !== 'approved')
-    throw new Error("Bidding not allowed: auction not approved");
-  if (now < new Date(book.auctionStart))
-    throw new Error("Bidding not allowed: auction hasn't started");
-  if (now > new Date(book.auctionEnd))
-    throw new Error("Bidding not allowed: auction has ended");
-
-  // Enforce bid increment rules (at least basePrice, and greater than currentPrice)
-  const minAllowed = Math.max(book.basePrice || 0, book.currentPrice || 0);
-  if (bidAmount <= minAllowed) {
-    throw new Error(`Bid must be greater than ₹${minAllowed}`);
-  }
-
-  book.biddingHistory.push({
-    bidder: bidderId,
-    bidAmount,
-  });
-
-  book.currentPrice = bidAmount;
-
-  await book.save();
-  
-  // Populate the new bidder info for response
-  await book.populate('biddingHistory.bidder', 'firstname lastname email');
-  
-  return book;
 };
 
 export const createAntiqueBook = async (bookData) => {
