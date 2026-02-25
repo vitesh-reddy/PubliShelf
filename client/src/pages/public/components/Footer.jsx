@@ -21,8 +21,6 @@ const Footer = () => {
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 60000);
-    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -60,16 +58,16 @@ const Footer = () => {
                     <span className="h-5 w-20 bg-gray-700 rounded animate-pulse"></span>
                   </li>
                   <li className="flex justify-between items-center">
-                    <span className="text-gray-300">Users Today</span>
-                    <span className="h-5 w-12 bg-gray-700 rounded animate-pulse"></span>
+                    <span className="text-gray-300">Site Users</span>
+                    <span className="h-5 w-20 bg-gray-700 rounded animate-pulse"></span>
                   </li>
                   <li className="flex justify-between items-center">
                     <span className="text-gray-300">Views Today</span>
                     <span className="h-5 w-12 bg-gray-700 rounded animate-pulse"></span>
                   </li>
                   <li className="flex justify-between items-center">
-                    <span className="text-gray-300">Server Time</span>
-                    <span className="h-5 w-24 bg-gray-700 rounded animate-pulse"></span>
+                    <span className="text-gray-300">Users Today</span>
+                    <span className="h-5 w-12 bg-gray-700 rounded animate-pulse"></span>
                   </li>
                 </ul>
               ) : (
@@ -79,16 +77,16 @@ const Footer = () => {
                     <span className="text-white font-bold text-lg">{stats?.totalViews?.toLocaleString() || 0}</span>
                   </li>
                   <li className="flex justify-between items-center">
-                    <span className="text-gray-300">Users Today</span>
-                    <span className="text-white font-bold text-lg">{stats?.usersToday || 0}</span>
+                    <span className="text-gray-300">Site Users</span>
+                    <span className="text-white font-bold text-lg">{stats?.totalUsers?.toLocaleString() || 0}</span>
                   </li>
                   <li className="flex justify-between items-center">
                     <span className="text-gray-300">Views Today</span>
                     <span className="text-white font-bold text-lg">{stats?.viewsToday || 0}</span>
                   </li>
                   <li className="flex justify-between items-center">
-                    <span className="text-gray-300">Server Time</span>
-                    <span className="text-white font-semibold">{stats?.serverTime || "N/A"}</span>
+                    <span className="text-gray-300">Users Today</span>
+                    <span className="text-white font-bold text-lg">{stats?.usersToday || 0}</span>
                   </li>
                 </ul>
               )}

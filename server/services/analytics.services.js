@@ -3,6 +3,7 @@ import { safeRedisOperation } from "../config/redis.js";
 import logger from "../config/logger.js";
 
 const TOTAL_VIEWS_KEY = "analytics:views:total";
+const TOTAL_USERS_KEY = "analytics:users:total";
 const DAILY_VIEWS_KEY_PREFIX = "analytics:views";
 const DAILY_USERS_KEY_PREFIX = "analytics:users";
 
@@ -24,6 +25,7 @@ export const recordVisit = async (userId) => {
     await client.incr(TOTAL_VIEWS_KEY);
     await client.incr(`${DAILY_VIEWS_KEY_PREFIX}:${today}`);
     await client.sAdd(`${DAILY_USERS_KEY_PREFIX}:${today}`, userIdentifier);
+    await client.sAdd(TOTAL_USERS_KEY, userIdentifier);
     await client.expire(`${DAILY_VIEWS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
     await client.expire(`${DAILY_USERS_KEY_PREFIX}:${today}`, DAILY_KEY_TTL);
     return true;
@@ -83,17 +85,20 @@ export const getStats = async () => {
   const today = getTodayDate();
 
   let totalViews = 0;
+  let totalUsers = 0;
   let viewsToday = 0;
   let usersToday = 0;
 
   const redisStats = await safeRedisOperation(async (client) => {
-    const [total, todayViews, todayUsers] = await Promise.all([
+    const [total, totalUsersCount, todayViews, todayUsers] = await Promise.all([
       client.get(TOTAL_VIEWS_KEY),
+      client.sCard(TOTAL_USERS_KEY),
       client.get(`${DAILY_VIEWS_KEY_PREFIX}:${today}`),
       client.sCard(`${DAILY_USERS_KEY_PREFIX}:${today}`),
     ]);
     return {
       totalViews: parseInt(total) || 0,
+      totalUsers: totalUsersCount || 0,
       viewsToday: parseInt(todayViews) || 0,
       usersToday: todayUsers || 0,
     };
@@ -101,6 +106,7 @@ export const getStats = async () => {
 
   if (redisStats) {
     totalViews = redisStats.totalViews;
+    totalUsers = redisStats.totalUsers;
     viewsToday = redisStats.viewsToday;
     usersToday = redisStats.usersToday;
 
@@ -129,9 +135,9 @@ export const getStats = async () => {
 
   return {
     totalViews,
+    totalUsers,
     viewsToday,
     usersToday,
-    serverTime: getTodayDate(),
   };
 };
 
