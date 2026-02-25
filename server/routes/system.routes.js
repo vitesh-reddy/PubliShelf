@@ -61,7 +61,7 @@ router.get(["/ready", "/health", "/api/ready"], (req, res) => {
 
 router.post("/api/analytics/visit", async (req, res) => {
   try {
-    const userId = req.user?.id || req.ip;
+    const userId = req.body.deviceId || req.user?.id || req.ip;
     await recordVisit(userId);
     res.status(200).json({
       success: true,
