@@ -21,12 +21,14 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
         }
       },
       {
-        $set: { currentPrice: bidAmount },
+        $max: { currentPrice: bidAmount },
         $push: {
           biddingHistory: {
-            bidder: bidderId,
-            bidAmount,
-            bidTime: now
+            $each: [{
+              bidder: bidderId,
+              bidAmount,
+              bidTime: now
+            }]
           }
         }
       },
@@ -39,6 +41,15 @@ export const addBid = async (bookId, bidderId, bidAmount) => {
     if (!updatedBook) {
       logger.warn(`Bid rejected for book ${bookId}: bidAmount=${bidAmount}, bidderId=${bidderId}`);
       throw new Error("Bid no longer valid. Price may have changed.");
+    }
+
+    if (updatedBook.currentPrice !== bidAmount) {
+      await AntiqueBook.updateOne(
+        { _id: bookId },
+        { $pull: { biddingHistory: { bidder: bidderId, bidAmount, bidTime: now } } }
+      );
+      logger.warn(`Bid race lost for book ${bookId}: bidAmount=${bidAmount}, currentPrice=${updatedBook.currentPrice}`);
+      throw new Error("Bid no longer valid. A higher bid was placed.");
     }
 
     logger.info(`Bid accepted for book ${bookId}: bidAmount=${bidAmount}, bidderId=${bidderId}`);

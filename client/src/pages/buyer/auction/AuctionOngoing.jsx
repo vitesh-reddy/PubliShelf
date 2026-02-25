@@ -419,19 +419,25 @@ const AuctionOngoing = () => {
                     />
 
                     {/* Live Audience Counter */}
-                    {isActive && audienceCount > 0 && (
-                      <div className="flex items-center justify-between bg-purple-50 rounded-lg px-4 py-3 border border-purple-200">
-                        <div className="flex items-center space-x-2">
-                          <i className="fas fa-users text-purple-600"></i>
-                          <span className="text-[15px] text-gray-700">
-                            <span className="font-semibold text-purple-700">{audienceCount}</span> {audienceCount === 1 ? 'person' : 'people'} watching
-                          </span>
-                        </div>
-                        <span className="flex items-center space-x-1">
-                          <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                          <span className="text-xs text-gray-600">Live</span>
-                        </span>
-                      </div>
+                    {isActive && (
+                      <>
+                        {!isConnected || audienceCount === 0 ? (
+                          <div className="h-[52px] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded-lg skeleton-shimmer" />
+                        ) : (
+                          <div className="flex items-center justify-between bg-purple-50 rounded-lg px-4 py-3 border border-purple-200">
+                            <div className="flex items-center space-x-2">
+                              <i className="fas fa-users text-purple-600"></i>
+                              <span className="text-[15px] text-gray-700">
+                                <span className="font-semibold text-purple-700">{audienceCount}</span> {audienceCount === 1 ? 'person' : 'people'} watching
+                              </span>
+                            </div>
+                            <span className="flex items-center space-x-1">
+                              <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
+                              <span className="text-xs text-gray-600">Live</span>
+                            </span>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {/* Price Block */}
