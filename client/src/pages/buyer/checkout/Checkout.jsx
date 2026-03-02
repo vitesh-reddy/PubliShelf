@@ -232,7 +232,7 @@ const Checkout = () => {
   if (cartItems.length === 0) {
     return (
       <div className="flex flex-col min-h-screen checkout-page">
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
           <div className="text-center">
             <i className="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
             <h2 className="text-2xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
@@ -252,7 +252,7 @@ const Checkout = () => {
   return (
     <div className="flex flex-col min-h-screen checkout-page">
 
-      <div className="bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
+      <div className="bg-gradient-to-b from-[#eef7fb] to-white pt-20">
         <div className="max-w-[800px] mx-auto p-5 md:p-5">
           <h1 className="text-3xl font-bold text-gray-800 mb-5">Checkout</h1>
 

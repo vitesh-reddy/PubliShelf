@@ -42,7 +42,7 @@ const PaymentSuccess = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-700 text-lg">Verifying your payment...</p>
@@ -53,7 +53,7 @@ const PaymentSuccess = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-red-500 text-6xl mb-4">
             <i className="fas fa-times-circle"></i>
@@ -72,7 +72,7 @@ const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f3e8ff] to-white pt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-6">
           <div className="text-green-500 text-6xl mb-4">
