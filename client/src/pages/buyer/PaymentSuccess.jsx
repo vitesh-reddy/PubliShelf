@@ -4,6 +4,64 @@ import axiosInstance from "../../utils/axiosInstance.util.js";
 import { useDispatch } from "react-redux";
 import { clearCart } from "../../store/slices/cartSlice.js";
 
+const SkeletonOrderDetails = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
+    <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8 skeleton-shimmer animate-fade-in">
+      <div className="text-center mb-6">
+        <div className="w-16 h-16 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded-full mx-auto mb-4" />
+        <div className="h-8 w-64 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mx-auto mb-2" />
+        <div className="h-4 w-48 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mx-auto" />
+      </div>
+
+      <div className="border-t border-gray-200 pt-6">
+        <div className="h-6 w-32 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mb-4" />
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <div className="h-4 w-24 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            <div className="h-4 w-32 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+          </div>
+          <div className="flex justify-between">
+            <div className="h-4 w-28 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            <div className="h-4 w-20 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+          </div>
+          <div className="flex justify-between">
+            <div className="h-4 w-24 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            <div className="h-4 w-24 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="h-5 w-32 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mb-2" />
+          <div className="space-y-2">
+            <div className="h-3 w-full bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            <div className="h-3 w-3/4 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            <div className="h-3 w-1/2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="h-5 w-24 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded mb-2" />
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <div className="h-3 w-40 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+              <div className="h-3 w-16 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            </div>
+            <div className="flex justify-between">
+              <div className="h-3 w-36 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+              <div className="h-3 w-16 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 flex gap-4">
+        <div className="flex-1 h-12 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded-lg" />
+        <div className="flex-1 h-12 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 rounded-lg" />
+      </div>
+    </div>
+  </div>
+);
+
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -41,14 +99,7 @@ const PaymentSuccess = () => {
   }, [sessionId, dispatch]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#eef7fb] to-white pt-20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-700 text-lg">Verifying your payment...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonOrderDetails />;
   }
 
   if (error) {
