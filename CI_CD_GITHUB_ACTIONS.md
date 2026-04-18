@@ -22,6 +22,11 @@ On every commit and PR:
    - Publishes report in workflow summary
    - Uploads report as workflow artifact
 
+Note:
+
+- CI uses direct `npx jest` execution for test reporting.
+- CI report is always generated and uploaded as an artifact.
+
 ## Required GitHub Secrets for CD
 
 In your repository settings, add these secrets:
