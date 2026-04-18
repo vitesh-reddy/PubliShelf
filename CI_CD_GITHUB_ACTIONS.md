@@ -6,7 +6,7 @@ This project uses two workflows:
 - `.github/workflows/cd.yml`: triggers deployment hooks for Render and Vercel after successful CI on `main`.
 
 ## What runs in CI
-
+ 
 On every commit and PR:
 
 1. Client checks
