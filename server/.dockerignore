@@ -5,8 +5,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Environment and secrets
-.env
-.env.*
 
 # VCS and editor cruft
 .git

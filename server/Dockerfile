@@ -1,6 +1,6 @@
 # cd server
 # docker build -t publishelf-backend . 
-# docker run --env-file .env -p 3000:3000 publishelf-backend
+# docker run -p 3000:3000 publishelf-backend
 
 FROM node:20-alpine
 
@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["nodemon", "server.js"]
