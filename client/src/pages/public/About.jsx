@@ -23,11 +23,6 @@ const teamMembers = [
     role: "Backend Developer",
     desc: "Manages server-side logic and database integration.",
   },
-  {
-    name: "Vishnu Vardhan",
-    role: "Frontend Manager",
-    desc: "Oversees the creation and management of website content.",
-  },
 ];
 
 const About = () => {
