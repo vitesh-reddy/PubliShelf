@@ -15,14 +15,19 @@ const teamMembers = [
   },
   {
     name: "KL Vitesh Reddy",
+    role: "Backend Developer",
+    desc: "Manages server-side logic and database integration.",
+  },
+  {
+    name: "Rithish Reddy",
     role: "Frontend Developer",
     desc: "Focuses on creating intuitive and visually appealing pages.",
   },
   {
-    name: "Rithish Reddy",
-    role: "Backend Developer",
-    desc: "Manages server-side logic and database integration.",
-  },
+    name: "Vishnu Vardhan",
+    role: "Frontend Manager",
+    desc: "Oversees the creation and management of website content.",
+  }
 ];
 
 const About = () => {
