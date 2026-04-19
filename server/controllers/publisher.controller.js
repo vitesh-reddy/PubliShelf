@@ -8,172 +8,179 @@ import AntiqueBook from "../models/AntiqueBook.model.js";
 import Publisher from "../models/Publisher.model.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import { buildCacheKey, getOrSetCache } from "../services/cache.services.js";
 
 export const getPublisherProfile = async (req, res) => {
   try {
-    const publisher = await getPublisherById(req.user.id);
-    if (!publisher) {
-      return res.status(404).json({ success: false, message: "Publisher not found" });
-    }
-
-    const allBooks = await Book.find({ publisher: req.user.id }).sort({ publishedAt: -1 });
-    const books = allBooks.filter(book => !book.isDeleted);
-    
-    // Fetch all orders with items for this publisher
-    const ordersDocs = await Order.find({ publishers: req.user.id })
-      .select("items createdAt status buyer grandTotal")
-      .populate({ path: "items.book", select: "title price genre" })
-      .populate({ path: "buyer", select: "firstname lastname email" })
-      .lean();
-
-    // Flatten order items for this publisher
-    const orders = ordersDocs.flatMap((o) =>
-      (o.items || [])
-        .filter((it) => it.publisher?.toString() === req.user.id)
-        .map((it) => ({
-          book: it.book?._id || it.book,
-          title: it.book?.title || it.title,
-          genre: it.book?.genre,
-          price: it.unitPrice,
-          quantity: it.quantity,
-          lineTotal: it.lineTotal || (it.unitPrice * it.quantity),
-          orderDate: o.createdAt,
-          status: o.status,
-          buyer: o.buyer,
-        }))
-    );
-
-    // Basic analytics
-    const totalBooksSold = orders.reduce((sum, order) => sum + order.quantity, 0);
-    const totalRevenue = orders.reduce((sum, order) => sum + order.lineTotal, 0);
-
-    // Monthly revenue for last 6 months
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const publisherObjectId = new mongoose.Types.ObjectId(req.user.id);
-    
-    const monthlyRevenue = await Order.aggregate([
-      { $match: { publishers: publisherObjectId, createdAt: { $gte: sixMonthsAgo } } },
-      { $unwind: "$items" },
-      { $match: { "items.publisher": publisherObjectId } },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" }
-          },
-          revenue: { $sum: "$items.lineTotal" }
+    const controllerStartTimeMs = Date.now();
+    const cacheKey = buildCacheKey("publisher:profile", { publisherId: req.user.id });
+    const profileData = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 180,
+      label: "Publisher Profile",
+      controllerStartTimeMs,
+      getter: async () => {
+        const publisher = await getPublisherById(req.user.id);
+        if (!publisher) {
+          return null;
         }
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
-    ]);
 
-    // Create a map of months with data
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const revenueMap = new Map();
-    
-    monthlyRevenue.forEach(item => {
-      const key = `${item._id.year}-${String(item._id.month).padStart(2, '0')}`;
-      revenueMap.set(key, item.revenue);
+        const allBooks = await Book.find({ publisher: req.user.id }).sort({ publishedAt: -1 });
+        const books = allBooks.filter(book => !book.isDeleted);
+
+        const ordersDocs = await Order.find({ publishers: req.user.id })
+          .select("items createdAt status buyer grandTotal")
+          .populate({ path: "items.book", select: "title price genre" })
+          .populate({ path: "buyer", select: "firstname lastname email" })
+          .lean();
+
+        const orders = ordersDocs.flatMap((o) =>
+          (o.items || [])
+            .filter((it) => it.publisher?.toString() === req.user.id)
+            .map((it) => ({
+              book: it.book?._id || it.book,
+              title: it.book?.title || it.title,
+              genre: it.book?.genre,
+              price: it.unitPrice,
+              quantity: it.quantity,
+              lineTotal: it.lineTotal || (it.unitPrice * it.quantity),
+              orderDate: o.createdAt,
+              status: o.status,
+              buyer: o.buyer,
+            }))
+        );
+
+        const totalBooksSold = orders.reduce((sum, order) => sum + order.quantity, 0);
+        const totalRevenue = orders.reduce((sum, order) => sum + order.lineTotal, 0);
+
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const publisherObjectId = new mongoose.Types.ObjectId(req.user.id);
+
+        const monthlyRevenue = await Order.aggregate([
+          { $match: { publishers: publisherObjectId, createdAt: { $gte: sixMonthsAgo } } },
+          { $unwind: "$items" },
+          { $match: { "items.publisher": publisherObjectId } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              revenue: { $sum: "$items.lineTotal" }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const revenueMap = new Map();
+
+        monthlyRevenue.forEach(item => {
+          const key = `${item._id.year}-${String(item._id.month).padStart(2, '0')}`;
+          revenueMap.set(key, item.revenue);
+        });
+
+        const revenueData = [];
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          const year = date.getFullYear();
+          const month = date.getMonth() + 1;
+          const key = `${year}-${String(month).padStart(2, '0')}`;
+          const monthLabel = `${monthNames[month - 1]} ${year}`;
+
+          revenueData.push({
+            month: monthLabel,
+            revenue: revenueMap.get(key) || 0
+          });
+        }
+
+        const genreData = orders.reduce((acc, order) => {
+          const genre = order.genre || 'Unknown';
+          if (!acc[genre]) {
+            acc[genre] = { genre, quantity: 0, revenue: 0 };
+          }
+          acc[genre].quantity += order.quantity;
+          acc[genre].revenue += order.lineTotal;
+          return acc;
+        }, {});
+
+        const genreBreakdown = Object.values(genreData)
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5);
+
+        const bookSalesMap = orders.reduce((acc, order) => {
+          const bookId = order.book.toString();
+          if (!acc[bookId]) {
+            acc[bookId] = { title: order.title, quantity: 0, revenue: 0 };
+          }
+          acc[bookId].quantity += order.quantity;
+          acc[bookId].revenue += order.lineTotal;
+          return acc;
+        }, {});
+
+        const topSellingBooks = Object.values(bookSalesMap)
+          .sort((a, b) => b.quantity - a.quantity)
+          .slice(0, 5);
+
+        const buyerInteractions = ordersDocs
+          .filter(o => o.buyer)
+          .map(o => ({
+            buyer: {
+              name: `${o.buyer.firstname} ${o.buyer.lastname}`,
+              email: o.buyer.email,
+            },
+            books: o.items
+              .filter(it => it.publisher?.toString() === req.user.id)
+              .map(it => it.book?.title || it.title),
+            totalAmount: o.items
+              .filter(it => it.publisher?.toString() === req.user.id)
+              .reduce((sum, it) => sum + (it.lineTotal || 0), 0),
+            orderDate: o.createdAt,
+            status: o.status,
+          }))
+          .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+          .slice(0, 10);
+
+        const lowStockBooks = books
+          .filter(book => book.quantity > 0 && book.quantity <= 5)
+          .map(book => ({
+            title: book.title,
+            quantity: book.quantity,
+            _id: book._id,
+          }));
+
+        return {
+          user: {
+            firstname: publisher.firstname,
+            lastname: publisher.lastname,
+            email: publisher.email,
+            publishingHouse: publisher.publishingHouse,
+          },
+          analytics: {
+            totalBooksSold,
+            totalRevenue,
+            activeBooks: books.length,
+            totalBooks: allBooks.length,
+            revenueData,
+            genreBreakdown,
+            topSellingBooks,
+            buyerInteractions,
+            lowStockBooks,
+          },
+        };
+      }
     });
 
-    // Generate all 6 months including empty ones
-    const revenueData = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const key = `${year}-${String(month).padStart(2, '0')}`;
-      const monthLabel = `${monthNames[month - 1]} ${year}`;
-      
-      revenueData.push({
-        month: monthLabel,
-        revenue: revenueMap.get(key) || 0
-      });
+    if (!profileData) {
+      return res.status(404).json({ success: false, message: "Publisher not found" });
     }
-
-    // Genre breakdown with revenue
-    const genreData = orders.reduce((acc, order) => {
-      const genre = order.genre || 'Unknown';
-      if (!acc[genre]) {
-        acc[genre] = { genre, quantity: 0, revenue: 0 };
-      }
-      acc[genre].quantity += order.quantity;
-      acc[genre].revenue += order.lineTotal;
-      return acc;
-    }, {});
-
-    const genreBreakdown = Object.values(genreData)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-
-    // Top selling books
-    const bookSalesMap = orders.reduce((acc, order) => {
-      const bookId = order.book.toString();
-      if (!acc[bookId]) {
-        acc[bookId] = { title: order.title, quantity: 0, revenue: 0 };
-      }
-      acc[bookId].quantity += order.quantity;
-      acc[bookId].revenue += order.lineTotal;
-      return acc;
-    }, {});
-
-    const topSellingBooks = Object.values(bookSalesMap)
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
-
-    // Recent buyer interactions - unique buyers with their orders
-    const buyerInteractions = ordersDocs
-      .filter(o => o.buyer)
-      .map(o => ({
-        buyer: {
-          name: `${o.buyer.firstname} ${o.buyer.lastname}`,
-          email: o.buyer.email,
-        },
-        books: o.items
-          .filter(it => it.publisher?.toString() === req.user.id)
-          .map(it => it.book?.title || it.title),
-        totalAmount: o.items
-          .filter(it => it.publisher?.toString() === req.user.id)
-          .reduce((sum, it) => sum + (it.lineTotal || 0), 0),
-        orderDate: o.createdAt,
-        status: o.status,
-      }))
-      .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
-      .slice(0, 10);
-
-    // Stock alerts - low stock books
-    const lowStockBooks = books
-      .filter(book => book.quantity > 0 && book.quantity <= 5)
-      .map(book => ({
-        title: book.title,
-        quantity: book.quantity,
-        _id: book._id,
-      }));
 
     res.status(200).json({
       success: true,
       message: "Publisher profile fetched successfully",
-      data: {
-        user: {
-          firstname: publisher.firstname,
-          lastname: publisher.lastname,
-          email: publisher.email,
-          publishingHouse: publisher.publishingHouse,
-        },
-        analytics: {
-          totalBooksSold,
-          totalRevenue,
-          activeBooks: books.length,
-          totalBooks: allBooks.length,
-          revenueData,
-          genreBreakdown,
-          topSellingBooks,
-          buyerInteractions,
-          lowStockBooks,
-        },
-      },
+      data: profileData,
     });
   } catch (error) {
     console.error("Error fetching publisher profile:", error);

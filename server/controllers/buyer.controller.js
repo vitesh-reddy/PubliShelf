@@ -4,19 +4,21 @@ import { getBuyerById, createBuyer, updateBuyerDetails, getTopSoldBooks, getTren
 import { getAllBooks, getBookById, searchBooks, filterBooks} from "../services/book.services.js";
 import { getOngoingAuctions, getFutureAuctions, getEndedAuctions, getAuctionItemById, addBid } from "../services/antiqueBook.services.js";
 import { createStripeCheckoutSession } from "../services/stripe.services.js";
+import { buildCacheKey, getOrSetCache } from "../services/cache.services.js";
 import Buyer from "../models/Buyer.model.js";
 import Book from "../models/Book.model.js";
 import Order from "../models/Order.model.js";
 
 export const getBuyerDashboard = async (req, res) => {
   try {
+    const controllerStartTimeMs = Date.now();
     // Only select needed fields for books
     const newlyBooks = await Book.find({isDeleted: { $ne: true }})
       .sort({ publishedAt: -1 })
       .limit(8)
       .select('_id title author image price totalSold');
 
-    const mostSoldBooksRaw = await getTopSoldBooks();
+    const mostSoldBooksRaw = await getTopSoldBooks({ controllerStartTimeMs });
     const mostSoldBooks = mostSoldBooksRaw.map(book => ({
       _id: book._id,
       title: book.title,
@@ -26,7 +28,7 @@ export const getBuyerDashboard = async (req, res) => {
       totalSold: book.totalSold
     }));
 
-    const trendingBooksRaw = await getTrendingBooks();
+    const trendingBooksRaw = await getTrendingBooks({ controllerStartTimeMs });
     const trendingBooks = trendingBooksRaw.map(book => ({
       _id: book._id,
       title: book.title,
@@ -110,7 +112,16 @@ export const getBuyerDashboard = async (req, res) => {
 
 export const getBuyerSearchPage = async (req, res) => {
   try {
-    const books = await getAllBooks({isDeleted: false});
+    const controllerStartTimeMs = Date.now();
+    const cacheKey = buildCacheKey("buyer:search-page", { endpoint: "search-page" });
+    const books = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 180,
+      label: "Book Search",
+      controllerStartTimeMs,
+      getter: async () => await getAllBooks({ isDeleted: false })
+    });
+
     res.status(200).json({
       success: true,
       message: "Search page data fetched successfully",
@@ -129,7 +140,16 @@ export const getBuyerSearchPage = async (req, res) => {
 export const searchBooksHandler = async (req, res) => {
   const { q: searchQuery } = req.query;
   try {
-    const books = await searchBooks(searchQuery);
+    const controllerStartTimeMs = Date.now();
+    const cacheKey = buildCacheKey("buyer:search", { q: searchQuery || "" });
+    const books = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 120,
+      label: "Buyer Book Search",
+      controllerStartTimeMs,
+      getter: async () => await searchBooks(searchQuery)
+    });
+
     res.status(200).json({
       success: true,
       message: "Search results fetched successfully",
@@ -148,8 +168,17 @@ export const searchBooksHandler = async (req, res) => {
 export const filterBooksHandler = async (req, res) => {
   const { category, sort, condition, priceRange } = req.query;
   try {
+    const controllerStartTimeMs = Date.now();
     const filters = { category, sort, condition, priceRange };
-    const books = await filterBooks(filters);
+    const cacheKey = buildCacheKey("buyer:filter", filters);
+    const books = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 120,
+      label: "Buyer Book Filter",
+      controllerStartTimeMs,
+      getter: async () => await filterBooks(filters)
+    });
+
     res.status(200).json({
       success: true,
       message: "Filtered books fetched successfully",

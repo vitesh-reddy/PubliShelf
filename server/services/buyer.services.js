@@ -4,6 +4,7 @@ import Buyer from "../models/Buyer.model.js";
 import Publisher from "../models/Publisher.model.js";
 import Book from "../models/Book.model.js";
 import Order from "../models/Order.model.js";
+import { buildCacheKey, getOrSetCache } from "./cache.services.js";
 
 export const createBuyer = async (buyerData) => {
   const newBuyer = new Buyer(buyerData);
@@ -257,98 +258,129 @@ export const updateBuyerDetails = async (buyerId, currentPassword, updatedData) 
   return await buyer.save();
 };
 
-export const getTopSoldBooks = async () => {
+export const getTopSoldBooks = async (options = {}) => {
+  const { controllerStartTimeMs = null } = options;
+  const cacheKey = buildCacheKey("home:top-sold-books", { limit: 8 });
+
   try {
-    const topBooks = await Order.aggregate([
-      { $unwind: "$items" },
-      { $group: { _id: "$items.book", totalSold: { $sum: "$items.quantity" } } },
-      { $sort: { totalSold: -1 } },
-      { $limit: 8 },
-      {
-        $lookup: {
-          from: "books",
-          let: { bookId: "$_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
-            { $project: { title: 1, author: 1, price: 1, image: 1 } },
-          ],
-          as: "bookDetails",
-        },
-      },
-      { $unwind: "$bookDetails" },
-      {
-        $project: {
-          _id: "$bookDetails._id",
-          title: "$bookDetails.title",
-          author: "$bookDetails.author",
-          price: "$bookDetails.price",
-          image: "$bookDetails.image",
-          totalSold: 1,
-        },
-      },
-    ]);
-    return topBooks;
+    return await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 180,
+      label: "Home Top Sold Books",
+      controllerStartTimeMs,
+      getter: async () => {
+        return await Order.aggregate([
+          { $unwind: "$items" },
+          { $group: { _id: "$items.book", totalSold: { $sum: "$items.quantity" } } },
+          { $sort: { totalSold: -1 } },
+          { $limit: 8 },
+          {
+            $lookup: {
+              from: "books",
+              let: { bookId: "$_id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
+                { $project: { title: 1, author: 1, price: 1, image: 1 } },
+              ],
+              as: "bookDetails",
+            },
+          },
+          { $unwind: "$bookDetails" },
+          {
+            $project: {
+              _id: "$bookDetails._id",
+              title: "$bookDetails.title",
+              author: "$bookDetails.author",
+              price: "$bookDetails.price",
+              image: "$bookDetails.image",
+              totalSold: 1,
+            },
+          },
+        ]);
+      }
+    });
   } catch (error) {
     throw new Error("Failed to fetch top sold books: " + error.message);
   }
 };
 
-export const getTrendingBooks = async () => {
-  try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+export const getTrendingBooks = async (options = {}) => {
+  const { controllerStartTimeMs = null } = options;
+  const cacheKey = buildCacheKey("home:trending-books", { days: 30, limit: 8 });
 
-    const trendingBooks = await Order.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
-      { $unwind: "$items" },
-      { $group: { _id: "$items.book", totalOrdered: { $sum: "$items.quantity" } } },
-      { $sort: { totalOrdered: -1 } },
-      { $limit: 8 },
-      {
-        $lookup: {
-          from: "books",
-          let: { bookId: "$_id" },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
-            { $project: { title: 1, author: 1, price: 1, image: 1 } },
-          ],
-          as: "bookDetails",
-        },
-      },
-      { $unwind: "$bookDetails" },
-      {
-        $project: {
-          _id: "$bookDetails._id",
-          title: "$bookDetails.title",
-          author: "$bookDetails.author",
-          price: "$bookDetails.price",
-          image: "$bookDetails.image",
-        },
-      },
-    ]);
-    return trendingBooks;
+  try {
+    return await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 120,
+      label: "Home Trending Books",
+      controllerStartTimeMs,
+      getter: async () => {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        return await Order.aggregate([
+          { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+          { $unwind: "$items" },
+          { $group: { _id: "$items.book", totalOrdered: { $sum: "$items.quantity" } } },
+          { $sort: { totalOrdered: -1 } },
+          { $limit: 8 },
+          {
+            $lookup: {
+              from: "books",
+              let: { bookId: "$_id" },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$bookId"] }, isDeleted: { $ne: true } } },
+                { $project: { title: 1, author: 1, price: 1, image: 1 } },
+              ],
+              as: "bookDetails",
+            },
+          },
+          { $unwind: "$bookDetails" },
+          {
+            $project: {
+              _id: "$bookDetails._id",
+              title: "$bookDetails.title",
+              author: "$bookDetails.author",
+              price: "$bookDetails.price",
+              image: "$bookDetails.image",
+            },
+          },
+        ]);
+      }
+    });
   } catch (error) {
     throw new Error("Failed to fetch trending books: " + error.message);
   }
 };
 
-export const getMetrics = async () => {
-  try {
-    const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 }, isDeleted: { $ne: true } });
-    const activeReaders = await Order.distinct("buyer").then((arr) => arr.length);
-    const publishers = await Publisher.countDocuments();
-    const booksSold = await Order.aggregate([
-      { $unwind: "$items" },
-      { $group: { _id: null, totalSold: { $sum: "$items.quantity" } } },
-      { $project: { _id: 0, totalSold: 1 } },
-    ]).then((r) => (r.length > 0 ? r[0].totalSold : 0));
+export const getMetrics = async (options = {}) => {
+  const { controllerStartTimeMs = null } = options;
+  const cacheKey = buildCacheKey("home:metrics", { scope: "public" });
 
-    return {
-      booksAvailable,
-      activeReaders,
-      publishers,
-      booksSold,
-    };
+  try {
+    return await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 120,
+      label: "Home Metrics",
+      controllerStartTimeMs,
+      getter: async () => {
+        const booksAvailable = await Book.countDocuments({ quantity: { $gt: 0 }, isDeleted: { $ne: true } });
+        const activeReaders = await Order.distinct("buyer").then((arr) => arr.length);
+        const publishers = await Publisher.countDocuments();
+        const booksSold = await Order.aggregate([
+          { $unwind: "$items" },
+          { $group: { _id: null, totalSold: { $sum: "$items.quantity" } } },
+          { $project: { _id: 0, totalSold: 1 } },
+        ]).then((r) => (r.length > 0 ? r[0].totalSold : 0));
+
+        return {
+          booksAvailable,
+          activeReaders,
+          publishers,
+          booksSold,
+        };
+      }
+    });
   } catch (error) {
     throw new Error("Failed to fetch book metrics: " + error.message);
   }

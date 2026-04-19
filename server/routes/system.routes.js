@@ -2,25 +2,40 @@ import express from "express";
 import Book from "../models/Book.model.js";
 import { getMetrics, getTopSoldBooks, getTrendingBooks } from "../services/buyer.services.js";
 import { recordVisit, getStats } from "../services/analytics.services.js";
+import { buildCacheKey, getOrSetCache } from "../services/cache.services.js";
 
 const router = express.Router();
 
 router.get("/api/home/data", async (req, res) => {
   try {
-    const newlyBooks = await Book.find({ isDeleted: { $ne: true } })
-      .sort({ publishedAt: -1 })
-      .limit(8);
+    const controllerStartTimeMs = Date.now();
+    const cacheKey = buildCacheKey("home:payload", { endpoint: "/api/home/data" });
+    const homeData = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 90,
+      label: "Home Data Payload",
+      controllerStartTimeMs,
+      getter: async () => {
+        const newlyBooks = await Book.find({ isDeleted: { $ne: true } })
+          .sort({ publishedAt: -1 })
+          .limit(8)
+          .select("_id title author image price totalSold genre publishedAt")
+          .lean();
 
-    const [mostSoldBooks, trendingBooks, metrics] = await Promise.all([
-      getTopSoldBooks(),
-      getTrendingBooks(),
-      getMetrics(),
-    ]);
+        const [mostSoldBooks, trendingBooks, metrics] = await Promise.all([
+          getTopSoldBooks({ controllerStartTimeMs }),
+          getTrendingBooks({ controllerStartTimeMs }),
+          getMetrics({ controllerStartTimeMs }),
+        ]);
+
+        return { newlyBooks, mostSoldBooks, trendingBooks, metrics };
+      }
+    });
 
     res.status(200).json({
       success: true,
       message: "Home data fetched successfully",
-      data: { newlyBooks, mostSoldBooks, trendingBooks, metrics },
+      data: homeData,
     });
   } catch (error) {
     console.error("Error fetching home data:", error);
@@ -80,7 +95,16 @@ router.post("/api/analytics/visit", async (req, res) => {
 
 router.get("/api/system/stats", async (req, res) => {
   try {
-    const stats = await getStats();
+    const controllerStartTimeMs = Date.now();
+    const cacheKey = buildCacheKey("home:system-stats", { endpoint: "/api/system/stats" });
+    const stats = await getOrSetCache({
+      key: cacheKey,
+      ttlSeconds: 30,
+      label: "Homepage System Stats",
+      controllerStartTimeMs,
+      getter: async () => await getStats()
+    });
+
     res.status(200).json({
       success: true,
       message: "Stats fetched successfully",
