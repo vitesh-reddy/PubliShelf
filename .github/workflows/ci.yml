@@ -24,6 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Load CI/CD config
+        run: |
+          STRICT_MODE=$(node -e "const fs=require('fs'); try { const cfg=JSON.parse(fs.readFileSync('.github/ci-cd-config.json','utf8')); process.stdout.write(String(Boolean(cfg.strictMode))); } catch { process.stdout.write('false'); }")
+          echo "CI_CD_STRICT_MODE=$STRICT_MODE" >> "$GITHUB_ENV"
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -36,16 +41,28 @@ jobs:
 
       - name: Code Quality
         run: |
-          npm run lint --if-present > /tmp/client-lint.log 2>&1 || true
+          if [ "$CI_CD_STRICT_MODE" = "true" ]; then
+            npm run lint --if-present
+          else
+            npm run lint --if-present > /tmp/client-lint.log 2>&1 || true
+          fi
 
       - name: Test
         run: |
           mkdir -p ../artifacts
-          NODE_OPTIONS=--experimental-vm-modules npx jest --ci --runInBand --json --outputFile=../artifacts/client-test-report.json > /tmp/client-test.log 2>&1 || true
+          if [ "$CI_CD_STRICT_MODE" = "true" ]; then
+            NODE_OPTIONS=--experimental-vm-modules npx jest --ci --runInBand --json --outputFile=../artifacts/client-test-report.json
+          else
+            NODE_OPTIONS=--experimental-vm-modules npx jest --ci --runInBand --json --outputFile=../artifacts/client-test-report.json > /tmp/client-test.log 2>&1 || true
+          fi
 
       - name: Build
         run: |
-          npm run build > /tmp/client-build.log 2>&1 || true
+          if [ "$CI_CD_STRICT_MODE" = "true" ]; then
+            npm run build
+          else
+            npm run build > /tmp/client-build.log 2>&1 || true
+          fi
 
       - name: Upload client test artifact
         if: always()
@@ -66,6 +83,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Load CI/CD config
+        run: |
+          STRICT_MODE=$(node -e "const fs=require('fs'); try { const cfg=JSON.parse(fs.readFileSync('.github/ci-cd-config.json','utf8')); process.stdout.write(String(Boolean(cfg.strictMode))); } catch { process.stdout.write('false'); }")
+          echo "CI_CD_STRICT_MODE=$STRICT_MODE" >> "$GITHUB_ENV"
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -83,7 +105,11 @@ jobs:
           JWT_EXPIRES_IN: 1h
         run: |
           mkdir -p ../artifacts
-          NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand --json --outputFile=../artifacts/server-test-report.json > /tmp/server-test.log 2>&1 || true
+          if [ "$CI_CD_STRICT_MODE" = "true" ]; then
+            NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand --json --outputFile=../artifacts/server-test-report.json
+          else
+            NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand --json --outputFile=../artifacts/server-test-report.json > /tmp/server-test.log 2>&1 || true
+          fi
 
       - name: Upload server test artifact
         if: always()
