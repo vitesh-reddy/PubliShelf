@@ -10,6 +10,7 @@ const updateBuyerDetailsMock = jest.fn();
 const getTopSoldBooksMock = jest.fn();
 const getTrendingBooksMock = jest.fn();
 const placeOrderMock = jest.fn();
+const prepareCheckoutDataMock = jest.fn();
 const getOngoingAuctionsMock = jest.fn();
 const getFutureAuctionsMock = jest.fn();
 const getEndedAuctionsMock = jest.fn();
@@ -30,7 +31,8 @@ jest.unstable_mockModule("../../services/buyer.services.js", () => ({
   updateBuyerDetails: updateBuyerDetailsMock,
   getTopSoldBooks: getTopSoldBooksMock,
   getTrendingBooks: getTrendingBooksMock,
-  placeOrder: placeOrderMock
+  placeOrder: placeOrderMock,
+  prepareCheckoutData: prepareCheckoutDataMock
 }));
 
 jest.unstable_mockModule("../../services/antiqueBook.services.js", () => ({
