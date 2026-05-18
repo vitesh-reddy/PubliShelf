@@ -62,6 +62,7 @@ export default function BackendReadyCheck() {
   const brandSecondary = theme === 'ocean' ? '#385460' : '#6366f1';
 
   const routesNeedingBackend = [
+    '/',
     '/login',
     '/register',
     '/buyer/dashboard',
