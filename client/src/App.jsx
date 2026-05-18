@@ -9,13 +9,16 @@ import EntryAnimation from './components/EntryAnimation.jsx'
 import BackendReadyCheck from './components/BackendReadyCheck.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import AnalyticsTracker from './components/AnalyticsTracker.jsx'
+import { useState } from 'react'
 
 const App = () => {
-  const isBackendReady = useSelector((state) => state.backend.isReady);
+  let isBackendReady = useSelector((state) => state.backend.isReady);
+
+  if(!isBackendReady)
+    return <BackendReadyCheck />
 
   return (
     <div>
-      {!isBackendReady && <BackendReadyCheck />}
       <EntryAnimation />
       <AnalyticsTracker />
       <ToastProvider />
